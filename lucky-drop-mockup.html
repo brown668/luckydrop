@@ -914,7 +914,7 @@ function drawBoard(glows = {}) {
   const W      = wrap.offsetWidth;
 
   const ROWS       = selectedRows;
-  const SLOTS      = selectedRows + 2;         // 第一行3钉 → 底行(ROWS+2)钉 → ROWS+2槽
+  const SLOTS      = selectedRows + 1;         // 第一行2钉 → 底行(ROWS+1)钉 → ROWS+1槽
   const PEG_AREA_H = 292.5;                    // 钉板区高度固定，行数多则钉子小
   const padT       = 10 + mwH;
   const padB       = 7;
@@ -933,8 +933,8 @@ function drawBoard(glows = {}) {
   const d    = W / SLOTS;
   const pegR = Math.min(rowH, d) * 0.17;   // 钉子半径随行高/槽宽等比缩放
 
-  // 第一行始终3颗钉子：numPegs = row + 3
-  const pegX = (row, col) => cx - ((row + 2) * d) / 2 + col * d;
+  // 第一行始终2颗钉子：numPegs = row + 2
+  const pegX = (row, col) => cx - ((row + 1) * d) / 2 + col * d;
   const pegY = (row)      => padT + row * rowH + rowH / 2;
 
   const splits = getSplits();
@@ -1048,7 +1048,7 @@ function drawBoard(glows = {}) {
 
   // ── Pegs ─────────────────────────────────────────────────────────────
   for (let row = 0; row < ROWS; row++) {
-    const numPegs = row + 3;   // 第一行固定 3 钉
+    const numPegs = row + 2;   // 第一行固定 2 钉
     for (let col = 0; col < numPegs; col++) {
       const x       = pegX(row, col);
       const y       = pegY(row);
@@ -1276,7 +1276,7 @@ const SLOT_REF = [
 // 根据行数生成基础倍率配置（对称展开）
 function buildBaseConfigs(rows) {
   return SLOT_REF.map(ref => {
-    const slots = rows + 2;            // 第一行3钉 → ROWS+2槽
+    const slots = rows + 1;            // 第一行2钉 → ROWS+1槽
     const half  = Math.floor(slots / 2);
     const left  = ref.slice(0, half);
     return slots % 2 === 1
@@ -1287,11 +1287,11 @@ function buildBaseConfigs(rows) {
 
 // RTP 校准：蒙特卡洛模拟 → 等比缩放使期望 RTP ≈ 97.5%
 function calibrateConfigs(rows, base) {
-  const SLOTS  = rows + 2;                                // 第一行3钉 → ROWS+2槽
+  const SLOTS  = rows + 1;                                // 第一行2钉 → ROWS+1槽
   const W = 390, d = W / SLOTS, CX = W / 2;
   const TRIALS = 50000;
   const curSplits = getSplits();
-  const pX = (r, c) => CX - ((r + 2) * d) / 2 + c * d; // 第一行3钉公式
+  const pX = (r, c) => CX - ((r + 1) * d) / 2 + c * d; // 第一行2钉公式
 
   const weighted = new Float64Array(SLOTS);
   for (let t = 0; t < TRIALS; t++) {
@@ -1301,7 +1301,7 @@ function calibrateConfigs(rows, base) {
       const {x: bx, w: bw, row: brow, used: bu} = queue.pop();
       let x = bx, didSplit = false;
       for (let r = brow; r < rows; r++) {
-        const nPegs = r + 3;   // 第一行3钉
+        const nPegs = r + 2;   // 第一行2钉
         let bc = 0, bd = Infinity;
         for (let c = 0; c < nPegs; c++) {
           const dist = Math.abs(x - pX(r, c));
@@ -1359,7 +1359,7 @@ let slotEls = [];
 // 根据当前 selectedRows 重建槽位 DOM
 function rebuildSlotDom() {
   const container = document.querySelector('.slots');
-  const slots = selectedRows + 2;  // 第一行3钉 → ROWS+2槽
+  const slots = selectedRows + 1;  // 第一行2钉 → ROWS+1槽
   const cfg   = slotConfigs[modeIdx] || [];
   // 槽宽 ≈ 390/slots，字体随槽数缩放（最小 8px）
   const slotW  = 390 / slots;
@@ -1468,7 +1468,7 @@ function initGame() {
 
   // ── 常量（与 drawBoard 保持一致）──
   const ROWS       = selectedRows;
-  const SLOTS      = selectedRows + 2;  // 第一行3钉 → ROWS+2槽
+  const SLOTS      = selectedRows + 1;  // 第一行2钉 → ROWS+1槽
   const mwH        = (document.querySelector('.machine-wrap')?.offsetHeight) || 0;
   const padT       = 10 + mwH;
   const padB       = 7;
@@ -1482,8 +1482,8 @@ function initGame() {
   const ballR      = Math.max(4, Math.min(9, pegR * 1.75));
   const splits = getSplits();
 
-  // 钉子坐标（第一行3钉公式）
-  const pegX = (row, col) => cx - ((row + 2) * d) / 2 + col * d;
+  // 钉子坐标（第一行2钉公式）
+  const pegX = (row, col) => cx - ((row + 1) * d) / 2 + col * d;
   const pegY = (row)      => padT + row * rowH + rowH / 2;
 
   // ── 状态（balance/autoMode/balls 等为模块级，跨 initGame 调用持久）──
@@ -1589,7 +1589,7 @@ function initGame() {
     }
 
     for (let row = 0; row < ROWS; row++) {
-      const numPegs = row + 3;   // 第一行固定 3 钉
+      const numPegs = row + 2;   // 第一行固定 2 钉
       for (let col = 0; col < numPegs; col++) {
         const pegKey = row * 20 + col;
         const px = pegX(row, col);

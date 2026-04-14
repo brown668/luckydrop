@@ -871,6 +871,14 @@ body {
         </div>
         <button class="sel-arrow">›</button>
       </div>
+      <div class="ctrl-sel">
+        <button class="sel-arrow">‹</button>
+        <div class="sel-info">
+          <span class="sel-label">行数</span>
+          <span class="sel-value sel-rows">13</span>
+        </div>
+        <button class="sel-arrow">›</button>
+      </div>
     </div>
     <!-- 开始 -->
     <button class="start-btn">开始</button>
@@ -886,11 +894,13 @@ body {
 </div><!-- /device -->
 
 <script>
-// 分裂钉位置（模块级，drawBoard 和 initGame 共享）
-const splits = [
-  [2, 2],           // row2 中间钉（第3行，共5颗，col 0-4）
-  [6, 2], [6, 6],   // row6 左右对称（距中心col4各2格）
-];
+// ── 当前行数（8-16），X 行对应 X+1 个倍率槽 ──
+let selectedRows = 13;
+
+// 分裂钉：仅 13 行时启用
+function getSplits() {
+  return selectedRows === 13 ? [[2,2],[6,2],[6,6]] : [];
+}
 
 function drawBoard(glows = {}) {
   const canvas = document.getElementById('board');
@@ -903,8 +913,8 @@ function drawBoard(glows = {}) {
 
   const W      = wrap.offsetWidth;
 
-  const ROWS  = 13;
-  const SLOTS = 15;
+  const ROWS  = selectedRows;
+  const SLOTS = selectedRows + 1;
   const pegR  = 4.0;
   const padT  = 10 + mwH;  // 钉板从 machine-wrap 底部下方 10px 开始
   const padB  = 7;
@@ -922,10 +932,10 @@ function drawBoard(glows = {}) {
   const cx  = W / 2;
   const d   = W / SLOTS;
 
-  const pegX = (row, col) => cx - ((row + 2) * d) / 2 + col * d;
+  const pegX = (row, col) => cx - ((row + 1) * d) / 2 + col * d;
   const pegY = (row)      => padT + row * rowH + rowH / 2;
 
-  // splits 定义在模块级
+  const splits = getSplits();
 
   const topY      = padT + rowH / 2;
   const botY      = H - padB;
@@ -1033,7 +1043,7 @@ function drawBoard(glows = {}) {
 
   // ── Pegs ─────────────────────────────────────────────────────────────
   for (let row = 0; row < ROWS; row++) {
-    const numPegs = row + 3;
+    const numPegs = row + 2;
     for (let col = 0; col < numPegs; col++) {
       const x       = pegX(row, col);
       const y       = pegY(row);
@@ -1244,86 +1254,84 @@ function drawBoard(glows = {}) {
 })();
 
 window.addEventListener('load', () => {
+  slotConfigs = calibrateConfigs(selectedRows, buildBaseConfigs(selectedRows));
+  rebuildSlotDom();
   drawBoard();
   initGame();
-  updateSlots(modeIdx);
 });
 
-// ── 倍率配置（null = 宝箱，随机 1-100×）──
-// 以下基础倍率会在页面加载后由 RTP 校准 IIFE 自动缩放，目标 RTP = 97.5%
-let slotConfigs = [
-  [25,  3,  null, 1.6, 1.2, 1.1, 1,   0.4, 1,   1.1, 1.2, 1.6, null,  3,  25],
-  [50,  5,  null, 2,   1.5, 1.2, 0.8, 0.2, 0.8, 1.2, 1.5, 2,   null,  5,  50],
-  [100, 10, null, 3,   2,   1.5, 0.5, 0.1, 0.5, 1.5, 2,   3,   null, 10, 100],
+// ── 倍率参考表（从边缘到中心，d=0..8，覆盖 8-16 行/9-17 槽）──
+const SLOT_REF = [
+  [25,  3,  null, 1.6, 1.2, 1.1, 1.0, 0.8, 0.4],   // 稳健
+  [50,  5,  null, 2.0, 1.5, 1.2, 0.8, 0.5, 0.2],   // 激进
+  [100, 10, null, 3.0, 2.0, 1.5, 0.8, 0.4, 0.1],   // 暴富
 ];
 
-// ── RTP 校准（蒙特卡洛模拟，含分裂钉权重，目标 97.5%）────────────────────
-(function calibrateSlotConfigs() {
-  const TRIALS = 50000, ROWS = 13, SLOTS = 15;
+// 根据行数生成基础倍率配置（对称展开）
+function buildBaseConfigs(rows) {
+  return SLOT_REF.map(ref => {
+    const slots = rows + 1;
+    const half  = Math.floor(slots / 2);
+    const left  = ref.slice(0, half);
+    return slots % 2 === 1
+      ? [...left, ref[half], ...left.slice().reverse()]
+      : [...left,             ...left.slice().reverse()];
+  });
+}
+
+// RTP 校准：蒙特卡洛模拟 → 等比缩放使期望 RTP ≈ 97.5%
+function calibrateConfigs(rows, base) {
+  const SLOTS  = rows + 1;
   const W = 390, d = W / SLOTS, CX = W / 2;
-  const pX = (r, c) => CX - ((r + 2) * d) / 2 + c * d;
-  // 分裂钉 [row, col, bitIndex]
-  const SPLIT_DEFS = [[2,2,0],[6,2,1],[6,6,2]];
+  const TRIALS = 50000;
+  const curSplits = getSplits();
+  const pX = (r, c) => CX - ((r + 1) * d) / 2 + c * d;
 
   const weighted = new Float64Array(SLOTS);
-
   for (let t = 0; t < TRIALS; t++) {
     const startX = CX + (Math.random() - 0.5) * d * 0.25;
-    // 队列每项：{x, w, row, used}，used = 3-bit 掩码标记已触发的分裂钉
-    const queue = [{x: startX, w: 1, row: 0, used: 0}];
-
+    const queue  = [{x: startX, w: 1, row: 0, used: 0}];
     while (queue.length) {
       const {x: bx, w: bw, row: brow, used: bu} = queue.pop();
       let x = bx, didSplit = false;
-
-      for (let r = brow; r < ROWS; r++) {
-        // 找最近的钉子
-        const nPegs = r + 3;
+      for (let r = brow; r < rows; r++) {
+        const nPegs = r + 2;
         let bc = 0, bd = Infinity;
         for (let c = 0; c < nPegs; c++) {
           const dist = Math.abs(x - pX(r, c));
           if (dist < bd) { bd = dist; bc = c; }
         }
-        // 判断是否命中未用的分裂钉
         let si = -1;
-        for (const [sr, sc, idx] of SPLIT_DEFS) {
-          if (sr === r && sc === bc && !(bu & (1 << idx))) { si = idx; break; }
+        for (let k = 0; k < curSplits.length; k++) {
+          if (curSplits[k][0] === r && curSplits[k][1] === bc && !(bu & (1 << k))) { si = k; break; }
         }
         if (si >= 0) {
-          const nu = bu | (1 << si), px = pX(r, bc), sw = bw * 0.55;
-          queue.push({x: Math.max(1, px - d * 0.5), w: sw, row: r + 1, used: nu});
-          queue.push({x: Math.min(W - 1, px + d * 0.5), w: sw, row: r + 1, used: nu});
+          const nu = bu | (1 << si), px2 = pX(r, bc), sw = bw * 0.55;
+          queue.push({x: Math.max(1, px2 - d * 0.5), w: sw, row: r + 1, used: nu});
+          queue.push({x: Math.min(W - 1, px2 + d * 0.5), w: sw, row: r + 1, used: nu});
           didSplit = true; break;
         }
-        // 普通钉：随机向左或向右偏转
-        const px = pX(r, bc);
-        x = Math.max(1, Math.min(W - 1, px + (Math.random() < 0.5 ? -1 : 1) * d * 0.5));
+        const px2 = pX(r, bc);
+        x = Math.max(1, Math.min(W - 1, px2 + (Math.random() < 0.5 ? -1 : 1) * d * 0.5));
       }
-
-      if (!didSplit) {
-        weighted[Math.max(0, Math.min(SLOTS - 1, Math.floor(x / d)))] += bw;
-      }
+      if (!didSplit) weighted[Math.max(0, Math.min(SLOTS - 1, Math.floor(x / d)))] += bw;
     }
   }
-
   const total = weighted.reduce((a, b) => a + b, 0);
-  const B = total / TRIALS; // 每局期望球数（分裂后权重=1，B > 1）
+  const B     = total / TRIALS;
   const probs = Array.from(weighted, c => c / total);
-  const MYSTERY_EV = 10.5; // 宝箱随机 1~20 的期望值
+  const MYSTERY_EV = 10.5;
 
-  slotConfigs = slotConfigs.map(cfg => {
-    // 分别计算宝箱和非宝箱的「单球」RTP 贡献
-    const mysteryRTP    = cfg.reduce((s, v, i) => v === null ? s + probs[i] * MYSTERY_EV : s, 0);
-    const nonMysteryRTP = cfg.reduce((s, v, i) => v !== null ? s + probs[i] * v         : s, 0);
-    // 每局期望总收益 = B × (mysteryRTP + nonMysteryRTP × scale) = 0.975
-    // → scale = (0.975/B - mysteryRTP) / nonMysteryRTP
-    const scale = Math.max(0.10, Math.min(1.20, (0.975 / B - mysteryRTP) / nonMysteryRTP));
-    console.log(`[RTP Calib] B=${B.toFixed(3)}  mystRTP=${(mysteryRTP*100).toFixed(2)}%  scale=${scale.toFixed(4)}`);
+  return base.map(cfg => {
+    const mystRTP    = cfg.reduce((s, v, i) => v === null ? s + probs[i] * MYSTERY_EV : s, 0);
+    const nonMystRTP = cfg.reduce((s, v, i) => v !== null ? s + probs[i] * v : s, 0);
+    const scale = Math.max(0.10, Math.min(1.20, (0.975 / B - mystRTP) / nonMystRTP));
+    console.log(`[RTP rows=${rows}] B=${B.toFixed(3)} scale=${scale.toFixed(4)}`);
     return cfg.map(v => v === null ? null : parseFloat((v * scale).toFixed(2)));
   });
+}
 
-  console.log('[RTP Calib] 校准完成，新 slotConfigs:', JSON.stringify(slotConfigs));
-})();
+let slotConfigs = [];  // 由 onRowsChanged() 动态填充
 
 // 倍率 → 颜色 class 映射
 function valToClass(v) {
@@ -1337,17 +1345,39 @@ function valToClass(v) {
   return 's-low';
 }
 
-// 保存宝箱槽的原始 HTML（含 SVG）
-const slotEls = document.querySelectorAll('.slot');
-const mysteryHTML = slotEls[2].innerHTML;
+// 一次性提取宝箱 SVG HTML
+const MYSTERY_HTML = document.querySelector('.slot.s-mystery')?.innerHTML || '';
+
+let slotEls = [];
+
+// 根据当前 selectedRows 重建槽位 DOM
+function rebuildSlotDom() {
+  const container = document.querySelector('.slots');
+  const slots = selectedRows + 1;
+  const cfg   = slotConfigs[modeIdx] || [];
+  container.innerHTML = '';
+  for (let i = 0; i < slots; i++) {
+    const div = document.createElement('div');
+    const val = cfg[i];
+    div.className = 'slot ' + valToClass(val);
+    if (val === null) {
+      div.innerHTML = MYSTERY_HTML;
+    } else {
+      const disp = val >= 10 ? Math.round(val) : +val.toFixed(1);
+      div.innerHTML = `<span>${disp}</span><span class="slot-x">×</span>`;
+    }
+    container.appendChild(div);
+  }
+  slotEls = Array.from(container.querySelectorAll('.slot'));
+}
 
 function updateSlots(idx) {
-  const cfg = slotConfigs[idx];
+  const cfg = slotConfigs[idx] || [];
   slotEls.forEach((slot, i) => {
     const val = cfg[i];
     slot.className = 'slot ' + valToClass(val);
     if (val === null) {
-      slot.innerHTML = mysteryHTML;
+      slot.innerHTML = MYSTERY_HTML;
     } else {
       const disp = val >= 10 ? Math.round(val) : +val.toFixed(1);
       slot.innerHTML = `<span>${disp}</span><span class="slot-x">×</span>`;
@@ -1380,13 +1410,53 @@ document.querySelectorAll('.ctrl-sel')[0].querySelectorAll('.sel-arrow').forEach
   });
 });
 
+// 行数切换
+const rowValues = [8, 9, 10, 11, 12, 13, 14, 15, 16];
+let rowIdx = rowValues.indexOf(13); // 默认 13
+const rowEl = document.querySelector('.sel-rows');
+document.querySelectorAll('.ctrl-sel')[2].querySelectorAll('.sel-arrow').forEach((btn, dir) => {
+  btn.addEventListener('click', () => {
+    rowIdx = Math.max(0, Math.min(rowValues.length - 1, rowIdx + (dir === 1 ? 1 : -1)));
+    selectedRows = rowValues[rowIdx];
+    rowEl.textContent = selectedRows;
+    onRowsChanged();
+  });
+});
+
+// 跨轮次持久状态（行数切换时保留余额）
+let balance        = 1730.50;
+let autoMode       = false;
+let balls          = [];
+let pegGlows       = {};
+let pendingSettles = 0;
+let pendingWin     = 0;
+let _gameCtrl      = null;  // AbortController，控制当前 initGame 实例的事件监听
+
+function onRowsChanged() {
+  // 中断当前游戏实例（清理监听器 + 呼吸动画）
+  if (_gameCtrl) _gameCtrl.abort();
+  balls.length  = 0;
+  pendingSettles = 0;
+  pendingWin     = 0;
+  // 重算倍率 + 重建槽位 + 重绘钉板 + 重启游戏循环
+  slotConfigs = calibrateConfigs(selectedRows, buildBaseConfigs(selectedRows));
+  rebuildSlotDom();
+  drawBoard();
+  initGame();
+}
+
 // ══════════════════════════════════════════════
 //  游戏主逻辑
 // ══════════════════════════════════════════════
 function initGame() {
+  // ── 建立 AbortController（行数切换时中止旧实例的监听器和呼吸循环）──
+  const ctrl = new AbortController();
+  _gameCtrl  = ctrl;
+  const { signal } = ctrl;
+
   // ── 常量（与 drawBoard 保持一致）──
-  const ROWS  = 13;
-  const SLOTS = 15;
+  const ROWS  = selectedRows;
+  const SLOTS = selectedRows + 1;
   const pegR  = 4.0;
   const ballR = 7;
   const mwH   = (document.querySelector('.machine-wrap')?.offsetHeight) || 0;
@@ -1397,19 +1467,14 @@ function initGame() {
   const H     = padT + ROWS * rowH + padB;
   const cx    = W / 2;
   const d     = W / SLOTS;
+  const splits = getSplits();
 
-  // 钉子坐标
-  const pegX = (row, col) => cx - ((row + 2) * d) / 2 + col * d;
+  // 钉子坐标（X 行 → X+1 槽，使用 row+1 公式）
+  const pegX = (row, col) => cx - ((row + 1) * d) / 2 + col * d;
   const pegY = (row)      => padT + row * rowH + rowH / 2;
 
-  // ── 状态 ──
-  let balance        = 1730.50;
-  let autoMode       = false;
-  let balls          = [];      // 多球支持
-  let pegGlows       = {};      // pegKey -> 0~1 亮度
-  let pendingSettles = 0;       // 等待结算的球数
-  let pendingWin     = 0;       // 本轮累计盈利（所有球结算完后一次性加入余额）
-  let rafId          = null;
+  // ── 状态（balance/autoMode/balls 等为模块级，跨 initGame 调用持久）──
+  let rafId = null;
 
   // ── DOM 引用 ──
   const canvas   = document.getElementById('board');
@@ -1511,7 +1576,7 @@ function initGame() {
     }
 
     for (let row = 0; row < ROWS; row++) {
-      const numPegs = row + 3;
+      const numPegs = row + 2;
       for (let col = 0; col < numPegs; col++) {
         const pegKey = row * 20 + col;
         const px = pegX(row, col);
@@ -1822,7 +1887,7 @@ function initGame() {
   // ── 开始按钮 ──
   startBtn.addEventListener('click', () => {
     launchBall();
-  });
+  }, { signal });
 
   // ── 自动按钮 ──
   const autoTextEl = autoBtn.querySelector('span:last-child');
@@ -1836,10 +1901,11 @@ function initGame() {
       autoBtn.classList.remove('active');
       autoTextEl.textContent = '自动';
     }
-  });
+  }, { signal });
 
-  // ── 常驻呼吸动画（idle 时持续刷新钉板）──
+  // ── 常驻呼吸动画（行数切换时 abort 自动停止）──
   (function breathingLoop() {
+    if (signal.aborted) return;
     if (balls.length === 0 && pendingSettles === 0) {
       drawBoard(pegGlows);
     }

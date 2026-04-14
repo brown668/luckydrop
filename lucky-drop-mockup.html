@@ -29,6 +29,9 @@ body {
 /* ─── Device ─── */
 .device {
   width: 390px;
+  height: 844px;              /* iPhone 14 逻辑高度，固定不变 */
+  display: flex;
+  flex-direction: column;
   background: linear-gradient(180deg, #3848cc 0%, #5230b8 35%, #6838c0 70%, #5028a8 100%);
   border-radius: 44px;
   border: 6px solid #2838a0;
@@ -397,6 +400,7 @@ body {
 
 /* ─── Controls ─── */
 .controls {
+  flex: 1;                    /* 吸收 canvas 高度变化，保持 device 总高 844px */
   background: linear-gradient(180deg, #2a1460, #1a0c48);
   display: flex;
   align-items: stretch;
@@ -916,11 +920,13 @@ function drawBoard(glows = {}) {
 
   const ROWS       = selectedRows;
   const SLOTS      = selectedRows + 1;         // 第一行3钉 → 底行(ROWS+2)钉 → ROWS+1槽
-  const PEG_AREA_H = 292.5;                    // 钉板区高度固定，行数多则钉子小
   const padT       = 10 + mwH;
   const padB       = 7;
-  const rowH       = PEG_AREA_H / ROWS;        // 行高随行数缩放
-  const H          = padT + PEG_AREA_H + padB; // 总高固定
+  // 等边三角形网格：行高 = 横向间距 × √3/2
+  const d_full     = (W - 2 * PAD_SIDE) / SLOTS;
+  const rowH       = d_full * Math.sqrt(3) / 2;
+  const PEG_AREA_H = rowH * ROWS;              // 总高随行数自适应
+  const H          = padT + PEG_AREA_H + padB;
 
   const dpr = window.devicePixelRatio || 1;
   canvas.width  = W * dpr;
@@ -933,8 +939,7 @@ function drawBoard(glows = {}) {
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
   const cx   = W / 2;
-  // 钉子有效宽度收窄 PAD_SIDE，底行钉子不顶边
-  const d    = (W - 2 * PAD_SIDE) / SLOTS;
+  const d    = d_full;   // 已在上方计算（等边三角形）
   const pegR = Math.min(rowH, d) * 0.17;   // 钉子半径随行高/槽宽等比缩放
 
   // 第一行始终3颗钉子，底行钉数=槽数+1，左右压住槽边界
@@ -946,9 +951,9 @@ function drawBoard(glows = {}) {
   const topY = padT + rowH / 2;
   const botY = H - padB;
 
-  // 外侧发光壁固定不随行数变化（以 15槽/13行 为基准参考）
+  // 外侧发光壁固定不随行数变化（以 14槽/13行 为基准参考，等边三角形）
   const WALL_d    = W / 15;
-  const WALL_rowH = PEG_AREA_H / 13;
+  const WALL_rowH = WALL_d * Math.sqrt(3) / 2;
   const domeR     = Math.round(7 * WALL_d / 4);    // ≈ 45px，固定
   const slope     = WALL_d / (2 * WALL_rowH);       // ≈ 0.578，固定
   const domeBaseY = padT;
@@ -1477,12 +1482,12 @@ function initGame() {
   const mwH        = (document.querySelector('.machine-wrap')?.offsetHeight) || 0;
   const padT       = 10 + mwH;
   const padB       = 7;
-  const PEG_AREA_H = 292.5;
-  const rowH       = PEG_AREA_H / ROWS;
   const W          = 390;
-  const H          = padT + PEG_AREA_H + padB;
   const cx         = W / 2;
   const d          = (W - 2 * PAD_SIDE) / SLOTS;  // 钉子收窄，留边距
+  const rowH       = d * Math.sqrt(3) / 2;         // 等边三角形行高
+  const PEG_AREA_H = rowH * ROWS;
+  const H          = padT + PEG_AREA_H + padB;
   const pegR       = Math.min(rowH, d) * 0.17;
   const ballR      = Math.max(4, Math.min(9, pegR * 1.75));
   const splits = getSplits();

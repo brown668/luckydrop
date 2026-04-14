@@ -913,13 +913,13 @@ function drawBoard(glows = {}) {
 
   const W      = wrap.offsetWidth;
 
-  const ROWS  = selectedRows;
-  const SLOTS = selectedRows + 1;
-  const pegR  = 4.0;
-  const padT  = 10 + mwH;  // 钉板从 machine-wrap 底部下方 10px 开始
-  const padB  = 7;
-  const rowH  = 22.5;
-  const H     = padT + ROWS * rowH + padB;
+  const ROWS       = selectedRows;
+  const SLOTS      = selectedRows + 1;
+  const PEG_AREA_H = 292.5;                    // 钉板区高度固定，行数多则钉子小
+  const padT       = 10 + mwH;
+  const padB       = 7;
+  const rowH       = PEG_AREA_H / ROWS;        // 行高随行数缩放
+  const H          = padT + PEG_AREA_H + padB; // 总高固定
 
   const dpr = window.devicePixelRatio || 1;
   canvas.width  = W * dpr;
@@ -929,8 +929,9 @@ function drawBoard(glows = {}) {
 
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
-  const cx  = W / 2;
-  const d   = W / SLOTS;
+  const cx   = W / 2;
+  const d    = W / SLOTS;
+  const pegR = Math.min(rowH, d) * 0.17;   // 钉子半径随行高/槽宽等比缩放
 
   const pegX = (row, col) => cx - ((row + 1) * d) / 2 + col * d;
   const pegY = (row)      => padT + row * rowH + rowH / 2;
@@ -1455,18 +1456,19 @@ function initGame() {
   const { signal } = ctrl;
 
   // ── 常量（与 drawBoard 保持一致）──
-  const ROWS  = selectedRows;
-  const SLOTS = selectedRows + 1;
-  const pegR  = 4.0;
-  const ballR = 7;
-  const mwH   = (document.querySelector('.machine-wrap')?.offsetHeight) || 0;
-  const padT  = 10 + mwH;
-  const padB  = 7;
-  const rowH  = 22.5;
-  const W     = 390;
-  const H     = padT + ROWS * rowH + padB;
-  const cx    = W / 2;
-  const d     = W / SLOTS;
+  const ROWS       = selectedRows;
+  const SLOTS      = selectedRows + 1;
+  const mwH        = (document.querySelector('.machine-wrap')?.offsetHeight) || 0;
+  const padT       = 10 + mwH;
+  const padB       = 7;
+  const PEG_AREA_H = 292.5;
+  const rowH       = PEG_AREA_H / ROWS;
+  const W          = 390;
+  const H          = padT + PEG_AREA_H + padB;
+  const cx         = W / 2;
+  const d          = W / SLOTS;
+  const pegR       = Math.min(rowH, d) * 0.17;
+  const ballR      = Math.max(4, Math.min(9, pegR * 1.75));
   const splits = getSplits();
 
   // 钉子坐标（X 行 → X+1 槽，使用 row+1 公式）

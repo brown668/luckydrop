@@ -1,0 +1,2101 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUCKY DROP — UI Mockup v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #06060f;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 16px 48px;
+  font-family: 'Chakra Petch', sans-serif;
+}
+
+.page-label {
+  color: rgba(0,220,255,0.4);
+  font-size: 10px;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+/* ─── Device ─── */
+.device {
+  width: 390px;
+  background: linear-gradient(180deg, #3848cc 0%, #5230b8 35%, #6838c0 70%, #5028a8 100%);
+  border-radius: 44px;
+  border: 6px solid #2838a0;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(80,120,255,0.3),
+    0 32px 120px rgba(60,80,200,0.3),
+    0 0 60px rgba(80,40,200,0.2);
+}
+
+/* Status bar */
+.status {
+  height: 38px;
+  background: rgba(20,8,50,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px;
+  font-size: 11px;
+  color: rgba(180,200,255,0.5);
+  font-family: 'Space Mono', monospace;
+}
+
+
+
+/* ─── Header ─── */
+.header {
+  height: 62px;
+  background: rgba(16,6,44,0.97);
+  border-bottom: 1px solid rgba(100,60,220,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+}
+.logo-wrap { display: flex; flex-direction: column; gap: 2px; }
+.sub-chest { width: 16px; height: 19px; vertical-align: middle; margin: 0 3px 2px; filter: drop-shadow(0 0 4px rgba(255,200,60,0.9)); }
+.logo-sub {
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  color: rgba(230,210,255,0.85);
+  font-weight: 600;
+  line-height: 1;
+}
+.logo-sub em {
+  font-style: normal;
+  color: #ffdd44;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(255,220,60,0.9), 0 0 20px rgba(255,180,0,0.5);
+}
+.logo {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: #ffdd44;
+  text-shadow: 0 0 12px rgba(255,220,60,0.7), 0 0 28px rgba(255,180,0,0.4);
+}
+.logo span { color: #ee44aa; text-shadow: 0 0 12px rgba(238,68,170,0.7); }
+.balance-wrap { text-align: right; }
+.bal-label { font-size: 8px; letter-spacing: 2px; color: #5544aa; display: block; margin-bottom: 1px; }
+.bal-value { font-family: 'Space Mono', monospace; font-size: 15px; color: #ffcc33; text-shadow: 0 0 10px rgba(255,200,50,0.7); }
+.balance-wrap { position: relative; }
+@keyframes balFloat {
+  0%   { opacity: 1; transform: translateY(0)    scale(1); }
+  15%  { opacity: 1; transform: translateY(-4px)  scale(1.1); }
+  100% { opacity: 0; transform: translateY(-28px) scale(0.9); }
+}
+.bal-float {
+  position: absolute;
+  right: 0;
+  top: -4px;
+  font-family: 'Space Mono', monospace;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffe855;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: balFloat 2s ease-out forwards;
+  text-shadow: 0 0 8px rgba(255,220,50,0.95), 0 0 20px rgba(255,180,0,0.6), 0 1px 3px rgba(0,0,0,0.8);
+  z-index: 30;
+}
+
+/* ─── History Bar ─── */
+.history-bar {
+  display: flex;
+  align-items: center;
+  background: rgba(10,4,30,0.85);
+  border-bottom: 1px solid rgba(100,60,220,0.2);
+  padding: 5px 8px;
+  gap: 5px;
+  overflow: hidden;
+}
+.hist-list {
+  display: flex;
+  gap: 5px;
+  flex: 1;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.hist-list::-webkit-scrollbar { display: none; }
+.hist-badge {
+  flex-shrink: 0;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 7px;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #2eaa44, #1a7a2e);
+  color: #fff;
+  border: 1px solid rgba(80,220,100,0.4);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.hist-badge.h-low {
+  background: linear-gradient(180deg, #1e8a32, #145a20);
+  border-color: rgba(60,180,80,0.4);
+  color: rgba(255,255,255,0.75);
+}
+.hist-badge.h-mid {
+  background: linear-gradient(180deg, #28b840, #1a8230);
+}
+.hist-badge.h-high {
+  background: linear-gradient(180deg, #e07020, #a84808);
+  border-color: rgba(255,140,40,0.5);
+  box-shadow: 0 1px 6px rgba(220,100,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.hist-badge.h-jackpot {
+  background: linear-gradient(180deg, #e03060, #aa1040);
+  border-color: rgba(255,80,120,0.5);
+  box-shadow: 0 1px 8px rgba(220,40,80,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+/* ─── Lottery Dome ─── */
+.machine-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: transparent;
+  padding: 6px 0 0;
+  margin-bottom: 0;
+  position: relative;
+  z-index: 4;
+  width: 100%;
+  pointer-events: none;  /* 视觉层，不拦截下层点击事件 */
+}
+
+/* 全圆穹顶 */
+.dome-shell {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 3px rgba(0,220,255,0.90),
+    0 0 20px rgba(0,200,255,0.70),
+    0 0 50px rgba(160,0,255,0.35),
+    inset 0 0 30px rgba(0,30,100,0.5);
+}
+.dome-shell canvas {
+  display: block;
+  width: 90px;
+  height: 90px;
+}
+/* Top glass shine */
+.dome-shell::before {
+  content: '';
+  position: absolute;
+  top: 7px; left: 20px;
+  width: 50%; height: 32%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.05) 55%, transparent 100%);
+  transform: rotate(-12deg);
+  pointer-events: none;
+  z-index: 2;
+}
+.dome-shell::after { content: none; }
+
+/* 衔接条：透明让 canvas 瓦片透出 */
+.dome-base {
+  width: 100%;
+  height: 12px;
+  background: transparent;
+  margin-top: -3px;
+}
+.dome-crossbar { display: none; }
+
+
+
+/* ─── 飘字动画 ─── */
+@keyframes floatUp {
+  0%   { opacity: 1;   transform: translateY(0)    scale(1); }
+  20%  { opacity: 1;   transform: translateY(-12px) scale(1.1); }
+  100% { opacity: 0;   transform: translateY(-64px) scale(0.85); }
+}
+.float-win {
+  position: relative;
+  pointer-events: none;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  z-index: 20;
+  animation: floatUp 1.4s ease-out forwards;
+  text-shadow:
+    0 0 8px rgba(255,220,50,0.9),
+    0 0 16px rgba(255,160,0,0.6),
+    0 2px 4px rgba(0,0,0,0.8);
+}
+.float-win.jackpot {
+  font-size: 18px;
+  color: #ffe855;
+  text-shadow:
+    0 0 10px rgba(255,220,50,1),
+    0 0 22px rgba(255,180,0,0.8),
+    0 2px 4px rgba(0,0,0,0.9);
+}
+
+/* ─── Peg Board ─── */
+.row-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: #8030c0;
+  color: #fff;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 8px;
+  z-index: 10;
+  letter-spacing: 2px;
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  pointer-events: none;
+}
+.board-wrap {
+  position: relative;
+  z-index: 1;
+  overflow: visible;
+  background: linear-gradient(180deg, #4030b8 0%, #5535c0 40%, #4828b0 85%, #2820a0 100%);
+}
+.board-canvas {
+  display: block;
+  width: 100%;
+}
+
+/* ─── Bottom Slots ─── */
+.slots {
+  display: flex;
+  background: linear-gradient(180deg, #2820a0, #1e1888);
+  padding: 0 2px 4px;
+  gap: 1px;
+  margin-top: 0;
+}
+.slot {
+  flex: 1;
+  height: 28px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid transparent;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.slot::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent);
+  border-radius: 4px 4px 0 0;
+}
+.slot-x  { font-size: 9px; color: rgba(255,255,255,0.85); margin-left: 1px; }
+
+/* 色阶：高倍红 → 橙 → 黄 → 中性 → 低倍绿 */
+
+/* 25× — 深红，脉冲 */
+.s-jackpot {
+  background: linear-gradient(180deg, #f03060, #aa1040);
+  border: 1px solid rgba(255,120,150,0.6);
+  color: #fff;
+  box-shadow: 0 0 12px rgba(240,50,90,0.7), inset 0 1px 0 rgba(255,200,210,0.25);
+  animation: pulseRed 2s ease-in-out infinite;
+}
+@keyframes pulseRed {
+  0%,100% { box-shadow: 0 0 10px rgba(240,50,90,0.6); }
+  50%      { box-shadow: 0 0 22px rgba(255,80,110,1.0); }
+}
+
+/* 3× — 橙红 */
+.s-high {
+  background: linear-gradient(180deg, #e06020, #aa3008);
+  border: 1px solid rgba(255,150,80,0.5);
+  color: #fff;
+  box-shadow: 0 0 8px rgba(220,80,20,0.4), inset 0 1px 0 rgba(255,190,150,0.18);
+}
+
+/* 1.6× — 橙 */
+.s-orange {
+  background: linear-gradient(180deg, #c07010, #8a4a00);
+  border: 1px solid rgba(255,180,60,0.4);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255,210,140,0.15);
+}
+
+/* 1.2× — 黄绿 */
+.s-yellow {
+  background: linear-gradient(180deg, #888010, #525000);
+  border: 1px solid rgba(220,210,60,0.4);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(240,240,140,0.12);
+}
+
+/* 1.1× — 暗黄绿 */
+.s-warm {
+  background: linear-gradient(180deg, #4a7020, #2a4a10);
+  border: 1px solid rgba(160,220,80,0.35);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(180,255,120,0.1);
+}
+
+/* 1× — 中性绿 */
+.s-neutral {
+  background: linear-gradient(180deg, #289048, #166030);
+  border: 1px solid rgba(80,210,110,0.4);
+  color: #eeffee;
+  box-shadow: inset 0 1px 0 rgba(150,255,170,0.12);
+}
+
+/* 0.4× — 低倍绿 */
+.s-low {
+  background: linear-gradient(180deg, #20b850, #0e7830);
+  border: 1px solid rgba(60,220,100,0.45);
+  color: #ccffdd;
+  box-shadow: 0 0 8px rgba(30,200,80,0.35), inset 0 1px 0 rgba(140,255,170,0.15);
+}
+
+/* Mystery 宝箱 — 金色，脉冲 */
+.s-mystery {
+  background: linear-gradient(180deg, #c88020, #8a5008);
+  border: 1px solid rgba(255,200,80,0.6);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(210,150,30,0.5);
+  animation: mystPulseGold 2.5s ease-in-out infinite;
+}
+@keyframes mystPulseGold {
+  0%,100% { box-shadow: 0 0 8px rgba(210,150,30,0.4); }
+  50%      { box-shadow: 0 0 16px rgba(255,200,60,0.8); border-color: rgba(255,220,100,0.8); }
+}
+.s-mystery .slot-icon { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; position: absolute; inset: 0; }
+.s-mystery .slot-icon svg { width: 16px; height: 20px; filter: drop-shadow(0 0 6px rgba(255,200,60,1)); }
+
+/* ─── Controls ─── */
+.controls {
+  background: linear-gradient(180deg, #2a1460, #1a0c48);
+  display: flex;
+  align-items: stretch;
+  padding: 10px 10px 12px;
+  gap: 8px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+/* 左侧双排选择器 */
+.ctrl-selectors {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  flex-shrink: 0;
+  flex: 0 0 180px;
+}
+.ctrl-sel {
+  display: flex;
+  align-items: center;
+  background: rgba(15,5,45,0.85);
+  border-radius: 10px;
+  padding: 0 5px;
+  height: 44px;
+  gap: 4px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.sel-arrow {
+  width: 36px; height: 34px;
+  background: linear-gradient(180deg, #6633bb, #441899);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-family: 'Chakra Petch', sans-serif;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.sel-arrow:hover { background: linear-gradient(180deg, #8855dd, #6622bb); }
+.sel-info {
+  flex: 1;
+  text-align: center;
+  line-height: 1.15;
+}
+.sel-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 2px;
+}
+.sel-value {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffcc22;
+  font-family: 'Space Mono', monospace;
+  line-height: 1.1;
+}
+
+/* 开始按钮 */
+.start-btn {
+  flex: 1;
+  background: linear-gradient(180deg, #5588ff, #2244dd);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(60,100,255,0.45), inset 0 1px 0 rgba(255,255,255,0.2);
+  position: relative;
+  overflow: hidden;
+}
+.start-btn::after {
+  content: '';
+  position: absolute;
+  top: -50%; left: -60%;
+  width: 35%; height: 200%;
+  background: rgba(255,255,255,0.12);
+  transform: skewX(-22deg);
+  animation: shine 3.5s ease-in-out infinite 1s;
+}
+@keyframes shine {
+  0%    { left: -60%; }
+  40%,100% { left: 130%; }
+}
+
+/* 自动按钮 */
+.auto-btn {
+  flex: 0 0 68px;
+  background: linear-gradient(180deg, #ffcc33, #cc8800);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  cursor: pointer;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 4px;
+  box-shadow: 0 4px 16px rgba(220,120,0,0.4);
+}
+.auto-icon { font-size: 24px; line-height: 1; }
+
+/* ─── Footer ─── */
+.footer {
+  height: 34px;
+  background: #04040e;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-top: 1px solid rgba(255,255,255,0.03);
+}
+.f-user { font-size: 9px; color: #223344; letter-spacing: 1px; }
+.f-demo { font-size: 9px; color: #1a2a36; letter-spacing: 1px; }
+
+/* ─── 槽位高亮 ─── */
+.slot.winning {
+  transform: scaleY(1.15);
+  filter: brightness(1.8);
+  z-index: 10;
+  transition: transform 0.15s, filter 0.15s;
+}
+
+/* ─── 开始按钮禁用态 ─── */
+.start-btn:disabled {
+  background: linear-gradient(180deg, #334488, #223366);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ─── 自动按钮激活态 ─── */
+.auto-btn.active {
+  background: linear-gradient(180deg, #ffaa00, #cc6600);
+  box-shadow: 0 4px 20px rgba(255,140,0,0.6);
+}
+
+/* ─── 宝箱揭示数字 ─── */
+.mystery-reveal {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff4a0;
+  text-shadow: 0 0 8px rgba(255,220,60,1), 0 0 16px rgba(255,160,0,0.8);
+  line-height: 1;
+}
+/* ─── SPLIT! 飘字 ─── */
+.float-split {
+  position: absolute;
+  pointer-events: none;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+  color: #fff;
+  white-space: nowrap;
+  z-index: 30;
+  letter-spacing: 2px;
+  animation: splitFloat 1.2s ease-out forwards;
+  text-shadow:
+    0 0 10px rgba(120,255,220,1),
+    0 0 22px rgba(0,220,255,0.9),
+    0 0 40px rgba(0,180,255,0.5);
+}
+@keyframes splitFloat {
+  0%   { opacity: 1; transform: translateX(-50%) scale(0.6); }
+  20%  { opacity: 1; transform: translateX(-50%) scale(1.25); }
+  60%  { opacity: 1; transform: translateX(-50%) translateY(-28px) scale(1); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-60px) scale(0.85); }
+}
+
+/* ─── 设置按钮 & 面板 ─── */
+.settings-btn {
+  position: absolute;
+  top: 8px; right: 12px;
+  width: 28px; height: 28px;
+  border: none; background: transparent;
+  cursor: pointer; z-index: 50;
+  font-size: 17px; line-height: 28px;
+  opacity: 0.55; transition: opacity .2s;
+}
+.settings-btn:hover { opacity: 1; }
+
+.settings-panel {
+  display: none;
+  position: absolute;
+  top: 38px; right: 8px;
+  background: rgba(18, 12, 60, 0.97);
+  border: 1px solid rgba(120, 80, 255, 0.45);
+  border-radius: 14px;
+  padding: 8px 12px;
+  z-index: 60;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  min-width: 0;
+}
+.settings-panel.open { display: block; }
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0;
+}
+.settings-row:not(:last-child) {
+  border-bottom: 1px solid rgba(120,80,255,0.18);
+  padding-bottom: 9px; margin-bottom: 2px;
+}
+.settings-label {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 12px; font-weight: 600;
+  color: rgba(210,190,255,0.9);
+  letter-spacing: 0.04em;
+}
+
+/* 胶囊开关 */
+.toggle-switch {
+  position: relative;
+  width: 38px; height: 20px;
+  flex-shrink: 0;
+}
+.toggle-switch input { display: none; }
+.toggle-track {
+  display: block;
+  width: 38px; height: 20px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.15);
+  cursor: pointer;
+  transition: background .22s;
+  position: relative;
+}
+.toggle-switch input:checked + .toggle-track { background: #7c3aed; }
+.toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  transition: transform .22s;
+}
+.toggle-switch input:checked + .toggle-track::after { transform: translateX(18px); }
+</style>
+</head>
+<body>
+
+<p class="page-label">LUCKY DROP — UI Design v2.0</p>
+
+<div class="device">
+
+  <!-- Status -->
+  <div class="status">
+    <span>9:41</span>
+    <span>●●●● 5G</span>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo-wrap">
+      <div class="logo">LUCKY<span>DROP</span></div>
+      <div class="logo-sub">击中幸运宝箱<svg class="sub-chest" viewBox="0 0 22 26" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="11" cy="18" rx="9" ry="7" fill="rgba(255,180,0,0.12)"/><rect x="2.5" y="14" width="17" height="10" rx="2" fill="#2e0e00"/><rect x="1.5" y="13" width="17" height="10" rx="2" fill="#7c3200"/><rect x="1.5" y="13" width="17" height="4" rx="2" fill="rgba(255,140,40,0.18)"/><rect x="15.5" y="13" width="3" height="10" rx="2" fill="rgba(0,0,0,0.18)"/><rect x="1.5" y="19.5" width="17" height="2" fill="#4a1c00"/><rect x="1.5" y="13" width="17" height="10" rx="2" fill="none" stroke="#e8a000" stroke-width="1"/><rect x="1" y="12.5" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/><rect x="18.5" y="12.5" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/><rect x="1" y="20" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/><rect x="18.5" y="20" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/><path d="M2.5,13.5 L2.5,10 Q2.5,5.5 11,5.5 Q19.5,5.5 19.5,10 L19.5,13.5 Z" fill="#2e0e00"/><path d="M1.5,13 L1.5,9.5 Q1.5,5 11,5 Q20.5,5 20.5,9.5 L20.5,13 Z" fill="#a04000"/><ellipse cx="11" cy="8.5" rx="5.5" ry="2" fill="rgba(255,240,180,0.28)"/><path d="M1.5,13 L1.5,9.5 Q1.5,5 11,5 Q20.5,5 20.5,9.5 L20.5,13" fill="none" stroke="#e8a000" stroke-width="1"/><rect x="1" y="12.2" width="20" height="1.8" fill="#4a1c00" stroke="#e8a000" stroke-width="0.6"/><rect x="8.2" y="10.5" width="5.6" height="4.5" rx="1.2" fill="#ffb800" stroke="#ffe060" stroke-width="0.7"/><path d="M9.5,10.5 L9.5,9 Q9.5,7.5 11,7.5 Q12.5,7.5 12.5,9 L12.5,10.5" stroke="#ffdd50" stroke-width="1.2" fill="none" stroke-linecap="round"/><circle cx="11" cy="12.2" r="1.2" fill="#7c3200"/><rect x="10.4" y="12.2" width="1.2" height="1.8" rx="0.4" fill="#7c3200"/></svg> 最高赢取 <em>100倍</em></div>
+    </div>
+    <div class="balance-wrap">
+      <span class="bal-label">余额</span>
+      <span class="bal-value">$1,730.50</span>
+    </div>
+  </div>
+
+
+  <!-- History Bar -->
+  <div class="history-bar">
+    <div class="hist-list">
+      <div class="hist-badge h-high">3×</div>
+      <div class="hist-badge h-mid">1.2×</div>
+      <div class="hist-badge h-low">0.4×</div>
+      <div class="hist-badge h-mid">1.1×</div>
+      <div class="hist-badge h-mid">1×</div>
+      <div class="hist-badge h-mid">1.1×</div>
+      <div class="hist-badge h-jackpot">25×</div>
+      <div class="hist-badge h-mid">1.6×</div>
+    </div>
+  </div>
+
+  <!-- Launcher dome — sits above board, no overlap -->
+  <div class="machine-wrap">
+    <div class="dome-shell">
+      <canvas id="dome-canvas" width="180" height="180" style="width:90px;height:90px;"></canvas>
+    </div>
+    <div class="dome-base">
+      <div class="dome-crossbar"></div>
+    </div>
+  </div>
+
+  <!-- Peg Board -->
+  <div class="board-wrap" style="position:relative;">
+    <button class="settings-btn" id="settingsBtn" title="设置">⚙️</button>
+    <div class="settings-panel" id="settingsPanel">
+      <div class="settings-row">
+        <span class="settings-label">音乐</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggleMusic" checked>
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">音效</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggleSfx" checked>
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+    </div>
+    <canvas class="board-canvas" id="board"></canvas>
+  </div>
+
+  <!-- Slots (15 — 色阶：红高倍 → 绿低倍) -->
+  <div class="slots">
+    <div class="slot s-jackpot"><span>25</span><span class="slot-x">×</span></div>
+    <div class="slot s-high"><span>3</span><span class="slot-x">×</span></div>
+    <div class="slot s-mystery"><span class="slot-icon"><svg viewBox="0 0 22 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- ★ glow corona behind chest -->
+  <ellipse cx="11" cy="18" rx="9" ry="7" fill="rgba(255,180,0,0.12)"/>
+  <!-- ── BODY ── -->
+  <!-- body shadow layer (3D depth) -->
+  <rect x="2.5" y="14" width="17" height="10" rx="2" fill="#2e0e00"/>
+  <!-- body main -->
+  <rect x="1.5" y="13" width="17" height="10" rx="2" fill="#7c3200"/>
+  <!-- body face highlight (top-left lit) -->
+  <rect x="1.5" y="13" width="17" height="4" rx="2" fill="rgba(255,140,40,0.18)"/>
+  <!-- body left shadow -->
+  <rect x="1.5" y="13" width="3" height="10" rx="2" fill="rgba(0,0,0,0.22)"/>
+  <!-- body right shadow -->
+  <rect x="15.5" y="13" width="3" height="10" rx="2" fill="rgba(0,0,0,0.18)"/>
+  <!-- bottom decorative band -->
+  <rect x="1.5" y="19.5" width="17" height="2" fill="#4a1c00"/>
+  <!-- body gold border -->
+  <rect x="1.5" y="13" width="17" height="10" rx="2" fill="none" stroke="#e8a000" stroke-width="1"/>
+  <!-- ── CORNER CLASPS ── -->
+  <rect x="1" y="12.5" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/>
+  <rect x="18.5" y="12.5" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/>
+  <rect x="1" y="20" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/>
+  <rect x="18.5" y="20" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/>
+  <!-- ── LID ── -->
+  <!-- lid shadow -->
+  <path d="M2.5,13.5 L2.5,10 Q2.5,5.5 11,5.5 Q19.5,5.5 19.5,10 L19.5,13.5 Z" fill="#2e0e00"/>
+  <!-- lid main fill -->
+  <path d="M1.5,13 L1.5,9.5 Q1.5,5 11,5 Q20.5,5 20.5,9.5 L20.5,13 Z" fill="#a04000"/>
+  <!-- lid left shadow -->
+  <path d="M1.5,13 L1.5,9.5 Q1.5,5 4,5 L4,13 Z" fill="rgba(0,0,0,0.2)"/>
+  <!-- lid right shadow -->
+  <path d="M20.5,13 L20.5,9.5 Q20.5,5 18,5 L18,13 Z" fill="rgba(0,0,0,0.15)"/>
+  <!-- lid glass highlight -->
+  <ellipse cx="11" cy="8.5" rx="5.5" ry="2" fill="rgba(255,240,180,0.28)"/>
+  <ellipse cx="9" cy="7.5" rx="2.5" ry="1" fill="rgba(255,255,220,0.18)"/>
+  <!-- lid gold border -->
+  <path d="M1.5,13 L1.5,9.5 Q1.5,5 11,5 Q20.5,5 20.5,9.5 L20.5,13" fill="none" stroke="#e8a000" stroke-width="1"/>
+  <!-- ── CENTER BAND (lid-body join) ── -->
+  <rect x="1" y="12.2" width="20" height="1.8" fill="#4a1c00" stroke="#e8a000" stroke-width="0.6"/>
+  <!-- ── LOCK ── -->
+  <!-- lock plate -->
+  <rect x="8.2" y="10.5" width="5.6" height="4.5" rx="1.2" fill="#ffb800" stroke="#ffe060" stroke-width="0.7"/>
+  <!-- lock shackle (arc above plate) -->
+  <path d="M9.5,10.5 L9.5,9 Q9.5,7.5 11,7.5 Q12.5,7.5 12.5,9 L12.5,10.5" stroke="#ffdd50" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <!-- keyhole circle -->
+  <circle cx="11" cy="12.2" r="1.2" fill="#7c3200"/>
+  <!-- keyhole slot -->
+  <rect x="10.4" y="12.2" width="1.2" height="1.8" rx="0.4" fill="#7c3200"/>
+  <!-- ── SPARKLES ── -->
+  <!-- top center star -->
+  <path d="M11,2.5 L11.4,1.2 L11.8,2.5 L11.4,3.8 Z" fill="#fff4a0"/>
+  <path d="M10.1,2.5 L11.4,2.1 L12.7,2.5 L11.4,2.9 Z" fill="#fff4a0"/>
+  <!-- left sparkle -->
+  <path d="M5,4.5 L5.3,3.5 L5.6,4.5 L5.3,5.5 Z" fill="#ffe060" opacity="0.85"/>
+  <!-- right sparkle -->
+  <path d="M17,4 L17.25,3.1 L17.5,4 L17.25,4.9 Z" fill="#ffe060" opacity="0.8"/>
+</svg></span></div>
+    <div class="slot s-orange"><span>1.6</span><span class="slot-x">×</span></div>
+    <div class="slot s-yellow"><span>1.2</span><span class="slot-x">×</span></div>
+    <div class="slot s-warm"><span>1.1</span><span class="slot-x">×</span></div>
+    <div class="slot s-neutral"><span>1</span><span class="slot-x">×</span></div>
+    <div class="slot s-low"><span>0.4</span><span class="slot-x">×</span></div>
+    <div class="slot s-neutral"><span>1</span><span class="slot-x">×</span></div>
+    <div class="slot s-warm"><span>1.1</span><span class="slot-x">×</span></div>
+    <div class="slot s-yellow"><span>1.2</span><span class="slot-x">×</span></div>
+    <div class="slot s-orange"><span>1.6</span><span class="slot-x">×</span></div>
+    <div class="slot s-mystery"><span class="slot-icon"><svg viewBox="0 0 22 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- ★ glow corona behind chest -->
+  <ellipse cx="11" cy="18" rx="9" ry="7" fill="rgba(255,180,0,0.12)"/>
+  <!-- ── BODY ── -->
+  <!-- body shadow layer (3D depth) -->
+  <rect x="2.5" y="14" width="17" height="10" rx="2" fill="#2e0e00"/>
+  <!-- body main -->
+  <rect x="1.5" y="13" width="17" height="10" rx="2" fill="#7c3200"/>
+  <!-- body face highlight (top-left lit) -->
+  <rect x="1.5" y="13" width="17" height="4" rx="2" fill="rgba(255,140,40,0.18)"/>
+  <!-- body left shadow -->
+  <rect x="1.5" y="13" width="3" height="10" rx="2" fill="rgba(0,0,0,0.22)"/>
+  <!-- body right shadow -->
+  <rect x="15.5" y="13" width="3" height="10" rx="2" fill="rgba(0,0,0,0.18)"/>
+  <!-- bottom decorative band -->
+  <rect x="1.5" y="19.5" width="17" height="2" fill="#4a1c00"/>
+  <!-- body gold border -->
+  <rect x="1.5" y="13" width="17" height="10" rx="2" fill="none" stroke="#e8a000" stroke-width="1"/>
+  <!-- ── CORNER CLASPS ── -->
+  <rect x="1" y="12.5" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/>
+  <rect x="18.5" y="12.5" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/>
+  <rect x="1" y="20" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/>
+  <rect x="18.5" y="20" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/>
+  <!-- ── LID ── -->
+  <!-- lid shadow -->
+  <path d="M2.5,13.5 L2.5,10 Q2.5,5.5 11,5.5 Q19.5,5.5 19.5,10 L19.5,13.5 Z" fill="#2e0e00"/>
+  <!-- lid main fill -->
+  <path d="M1.5,13 L1.5,9.5 Q1.5,5 11,5 Q20.5,5 20.5,9.5 L20.5,13 Z" fill="#a04000"/>
+  <!-- lid left shadow -->
+  <path d="M1.5,13 L1.5,9.5 Q1.5,5 4,5 L4,13 Z" fill="rgba(0,0,0,0.2)"/>
+  <!-- lid right shadow -->
+  <path d="M20.5,13 L20.5,9.5 Q20.5,5 18,5 L18,13 Z" fill="rgba(0,0,0,0.15)"/>
+  <!-- lid glass highlight -->
+  <ellipse cx="11" cy="8.5" rx="5.5" ry="2" fill="rgba(255,240,180,0.28)"/>
+  <ellipse cx="9" cy="7.5" rx="2.5" ry="1" fill="rgba(255,255,220,0.18)"/>
+  <!-- lid gold border -->
+  <path d="M1.5,13 L1.5,9.5 Q1.5,5 11,5 Q20.5,5 20.5,9.5 L20.5,13" fill="none" stroke="#e8a000" stroke-width="1"/>
+  <!-- ── CENTER BAND (lid-body join) ── -->
+  <rect x="1" y="12.2" width="20" height="1.8" fill="#4a1c00" stroke="#e8a000" stroke-width="0.6"/>
+  <!-- ── LOCK ── -->
+  <!-- lock plate -->
+  <rect x="8.2" y="10.5" width="5.6" height="4.5" rx="1.2" fill="#ffb800" stroke="#ffe060" stroke-width="0.7"/>
+  <!-- lock shackle (arc above plate) -->
+  <path d="M9.5,10.5 L9.5,9 Q9.5,7.5 11,7.5 Q12.5,7.5 12.5,9 L12.5,10.5" stroke="#ffdd50" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  <!-- keyhole circle -->
+  <circle cx="11" cy="12.2" r="1.2" fill="#7c3200"/>
+  <!-- keyhole slot -->
+  <rect x="10.4" y="12.2" width="1.2" height="1.8" rx="0.4" fill="#7c3200"/>
+  <!-- ── SPARKLES ── -->
+  <!-- top center star -->
+  <path d="M11,2.5 L11.4,1.2 L11.8,2.5 L11.4,3.8 Z" fill="#fff4a0"/>
+  <path d="M10.1,2.5 L11.4,2.1 L12.7,2.5 L11.4,2.9 Z" fill="#fff4a0"/>
+  <!-- left sparkle -->
+  <path d="M5,4.5 L5.3,3.5 L5.6,4.5 L5.3,5.5 Z" fill="#ffe060" opacity="0.85"/>
+  <!-- right sparkle -->
+  <path d="M17,4 L17.25,3.1 L17.5,4 L17.25,4.9 Z" fill="#ffe060" opacity="0.8"/>
+</svg></span></div>
+    <div class="slot s-high"><span>3</span><span class="slot-x">×</span></div>
+    <div class="slot s-jackpot"><span>25</span><span class="slot-x">×</span></div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <!-- 左侧：投注 + 难度 -->
+    <div class="ctrl-selectors">
+      <div class="ctrl-sel">
+        <button class="sel-arrow">‹</button>
+        <div class="sel-info">
+          <span class="sel-label">投注</span>
+          <span class="sel-value">5</span>
+        </div>
+        <button class="sel-arrow">›</button>
+      </div>
+      <div class="ctrl-sel">
+        <button class="sel-arrow">‹</button>
+        <div class="sel-info">
+          <span class="sel-label">难度</span>
+          <span class="sel-value sel-mode">稳健</span>
+        </div>
+        <button class="sel-arrow">›</button>
+      </div>
+    </div>
+    <!-- 开始 -->
+    <button class="start-btn">开始</button>
+    <!-- 自动 -->
+    <button class="auto-btn">
+      <span class="auto-icon">↺</span>
+      <span>自动</span>
+    </button>
+  </div>
+
+  <!-- Footer -->
+
+</div><!-- /device -->
+
+<script>
+// 分裂钉位置（模块级，drawBoard 和 initGame 共享）
+const splits = [
+  [2, 2],           // row2 中间钉（第3行，共5颗，col 0-4）
+  [6, 2], [6, 6],   // row6 左右对称（距中心col4各2格）
+];
+
+function drawBoard(glows = {}) {
+  const canvas = document.getElementById('board');
+  const wrap   = canvas.parentElement;
+
+  // 让 board canvas 向上延伸，覆盖 machine-wrap 区域，共用一套瓷砖
+  const machineWrap = document.querySelector('.machine-wrap');
+  const mwH = machineWrap ? machineWrap.offsetHeight : 0;
+  wrap.style.marginTop = (-mwH) + 'px';
+
+  const W      = wrap.offsetWidth;
+
+  const ROWS  = 13;
+  const SLOTS = 15;
+  const pegR  = 4.0;
+  const padT  = 10 + mwH;  // 钉板从 machine-wrap 底部下方 10px 开始
+  const padB  = 7;
+  const rowH  = 22.5;
+  const H     = padT + ROWS * rowH + padB;
+
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const cx  = W / 2;
+  const d   = W / SLOTS;
+
+  const pegX = (row, col) => cx - ((row + 2) * d) / 2 + col * d;
+  const pegY = (row)      => padT + row * rowH + rowH / 2;
+
+  // splits 定义在模块级
+
+  const topY      = padT + rowH / 2;
+  const botY      = H - padB;
+  const slope     = d / (2 * rowH);
+  // 穹顶半宽 = 7d/4，墙从穹顶底角精确起始，钉子距墙始终保持 d
+  const domeR     = Math.round(7 * d / 4);
+  const domeBaseY = padT;                              // 穹顶底部 y
+  const wallTL    = cx - domeR;
+  const wallTR    = cx + domeR;
+  const wallBL    = wallTL - (botY - domeBaseY) * slope;
+  const wallBR    = wallTR + (botY - domeBaseY) * slope;
+
+  // ── Canvas base fill（防止底部透出 board-wrap 渐变）──────────────────
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#2820a0';
+  ctx.fillRect(0, 0, W, H);
+
+  // ── Mosaic background tiles (areas outside trapezoid walls) ──────────
+  const tileSize = 28;
+  const tileColors = [
+    'rgba(140,55,210,0.55)',
+    'rgba(100,35,175,0.45)',
+    'rgba(185,65,225,0.50)',
+    'rgba(120,45,195,0.40)',
+    'rgba(210,75,185,0.45)',
+    'rgba(75,28,165,0.35)',
+    'rgba(160,50,200,0.48)',
+  ];
+
+  for (let ty = 0; ty < H; ty += tileSize) {
+    const progress  = (ty - domeBaseY) / (botY - domeBaseY);
+    const progressC = Math.max(0, progress);  // 梯形顶部以上按 progress=0 绘侧边
+    const lw = Math.max(0, wallTL + (wallBL - wallTL) * progressC);
+    const rw = Math.min(W, wallTR + (wallBR - wallTR) * progressC);
+
+    for (let tx = 0; tx < W; tx += tileSize) {
+      const tileR = tx + tileSize - 2;
+      if (tileR <= lw || tx >= rw) {
+        const idx = ((Math.floor(ty / tileSize) * 5) + Math.floor(tx / tileSize) * 3) % tileColors.length;
+        ctx.fillStyle = tileColors[idx];
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(tx + 1, ty + 1, tileSize - 3, tileSize - 3, 3);
+        } else {
+          ctx.rect(tx + 1, ty + 1, tileSize - 3, tileSize - 3);
+        }
+        ctx.fill();
+      }
+    }
+  }
+
+  // ── 穹顶底部 → 底槽：统一填充，消除接缝 ────────────────────────────
+  const domeBottomY = mwH - 9;   // ≈ 96，CSS 穹顶底部在 canvas 中的位置
+  const tubeL = cx - 45;
+  const tubeR = cx + 45;
+
+  // 连接器 + 梯形合并为一个路径，共用同一渐变，彻底消除接缝
+  ctx.beginPath();
+  ctx.moveTo(tubeL, domeBottomY);
+  ctx.lineTo(tubeR, domeBottomY);
+  ctx.lineTo(wallTR, domeBaseY);
+  ctx.lineTo(wallBR, botY);
+  ctx.lineTo(wallBL, botY);
+  ctx.lineTo(wallTL, domeBaseY);
+  ctx.closePath();
+  const trapGrad = ctx.createLinearGradient(0, domeBottomY, 0, botY);
+  trapGrad.addColorStop(0,    'rgba(18,8,80,1)');
+  trapGrad.addColorStop(0.08, 'rgba(110,55,200,0.97)');
+  trapGrad.addColorStop(0.45, 'rgba(125,60,215,0.95)');
+  trapGrad.addColorStop(0.88, 'rgba(95,38,180,0.93)');
+  trapGrad.addColorStop(1,    'rgba(40,32,160,1.0)');
+  ctx.fillStyle = trapGrad;
+  ctx.fill();
+
+  // ── Junction glow at top center ──────────────────────────────────────
+  const jg = ctx.createRadialGradient(cx, domeBaseY, 0, cx, domeBaseY, 80);
+  jg.addColorStop(0,   'rgba(120,200,255,0.35)');
+  jg.addColorStop(0.5, 'rgba(80,140,255,0.12)');
+  jg.addColorStop(1,   'transparent');
+  ctx.fillStyle = jg;
+  ctx.beginPath();
+  ctx.arc(cx, domeBaseY, 80, 0, Math.PI * 2);
+  ctx.fill();
+
+  // ── 霓虹墙线：从穹顶底部连续延伸到底槽 ──────────────────────────────
+  ctx.lineCap   = 'round';
+  ctx.lineWidth = 6;
+  ctx.shadowBlur  = 18;
+  ctx.shadowColor = 'rgba(0,230,255,0.9)';
+  ctx.strokeStyle = '#00ddee';
+
+  ctx.beginPath();
+  ctx.moveTo(tubeL, domeBottomY);
+  ctx.lineTo(wallTL, domeBaseY);
+  ctx.lineTo(wallBL, botY);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(tubeR, domeBottomY);
+  ctx.lineTo(wallTR, domeBaseY);
+  ctx.lineTo(wallBR, botY);
+  ctx.stroke();
+
+  ctx.shadowBlur = 0;
+
+  // ── Pegs ─────────────────────────────────────────────────────────────
+  for (let row = 0; row < ROWS; row++) {
+    const numPegs = row + 3;
+    for (let col = 0; col < numPegs; col++) {
+      const x       = pegX(row, col);
+      const y       = pegY(row);
+      const isSplit = splits.some(([sr, sc]) => sr === row && sc === col);
+
+      if (isSplit) {
+        const spikes  = 6;
+        // 呼吸脉冲：0~1 正弦，每颗钉相位略有偏移增加层次感
+        const phase   = (row * 7 + col * 3) * 0.8;
+        const pulse   = 0.5 + 0.5 * Math.sin(Date.now() / 700 + phase);
+        const outerR  = pegR * (1.9 + pulse * 0.5);   // 9.5~12px 呼吸
+        const innerR  = pegR * 0.72;
+        const glowR   = outerR + 5 + pulse * 5;
+
+        // Outer breathing glow（金色）
+        const ga = ctx.createRadialGradient(x, y, 0, x, y, glowR);
+        ga.addColorStop(0,   `rgba(255,210,50,${0.45 + pulse * 0.3})`);
+        ga.addColorStop(0.5, `rgba(255,160,20,${0.15 + pulse * 0.1})`);
+        ga.addColorStop(1,   'transparent');
+        ctx.fillStyle = ga;
+        ctx.beginPath(); ctx.arc(x, y, glowR, 0, Math.PI * 2); ctx.fill();
+
+        // Starburst shape（金色渐变）
+        ctx.beginPath();
+        for (let i = 0; i < spikes * 2; i++) {
+          const angle = (i * Math.PI / spikes) - Math.PI / 2;
+          const r = i % 2 === 0 ? outerR : innerR;
+          const sx = x + Math.cos(angle) * r;
+          const sy = y + Math.sin(angle) * r;
+          i === 0 ? ctx.moveTo(sx, sy) : ctx.lineTo(sx, sy);
+        }
+        ctx.closePath();
+        const sg = ctx.createRadialGradient(x - 1, y - 2, 0, x, y, outerR);
+        sg.addColorStop(0,   '#fff0a0');
+        sg.addColorStop(0.4, '#ffcc20');
+        sg.addColorStop(0.8, '#dd8800');
+        sg.addColorStop(1,   '#995500');
+        ctx.fillStyle = sg;
+        ctx.fill();
+
+        // Center circle
+        const cg = ctx.createRadialGradient(x - 1, y - 1.5, 0, x, y, innerR);
+        cg.addColorStop(0, '#fffde0');
+        cg.addColorStop(1, '#ffaa00');
+        ctx.fillStyle = cg;
+        ctx.beginPath(); ctx.arc(x, y, innerR, 0, Math.PI * 2); ctx.fill();
+
+        // Center shine
+        ctx.fillStyle = `rgba(255,255,220,${0.6 + pulse * 0.3})`;
+        ctx.beginPath(); ctx.arc(x - 1, y - 1.5, innerR * 0.38, 0, Math.PI * 2); ctx.fill();
+
+      } else {
+        // Drop shadow
+        const sh = ctx.createRadialGradient(x + 2, y + 2.5, 0, x + 2, y + 2.5, pegR + 2);
+        sh.addColorStop(0,   'rgba(25,5,65,0.6)');
+        sh.addColorStop(1,   'transparent');
+        ctx.fillStyle = sh;
+        ctx.beginPath(); ctx.arc(x + 2, y + 2.5, pegR + 2, 0, Math.PI * 2); ctx.fill();
+
+        // Peg body — embossed purple
+        const p = ctx.createRadialGradient(x - 2, y - 2, 0, x, y, pegR);
+        p.addColorStop(0,   'rgba(168,92,238,0.95)');
+        p.addColorStop(0.55,'rgba(120,50,195,0.97)');
+        p.addColorStop(1,   'rgba(80,25,150,1)');
+        ctx.fillStyle = p;
+        ctx.beginPath(); ctx.arc(x, y, pegR, 0, Math.PI * 2); ctx.fill();
+
+        // Specular highlight
+        ctx.fillStyle = 'rgba(220,180,255,0.25)';
+        ctx.beginPath(); ctx.arc(x - 2, y - 2, pegR * 0.42, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // 碰撞高亮：加法混合让钉子自然变亮，不覆盖原色
+      const gAmt = glows[row * 20 + col] || 0;
+      if (gAmt > 0) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        const gr = ctx.createRadialGradient(x, y, 0, x, y, pegR);
+        gr.addColorStop(0,   `rgba(255,240,160,${gAmt * 0.9})`);
+        gr.addColorStop(1,   `rgba(120,180,255,0)`);
+        ctx.fillStyle = gr;
+        ctx.beginPath(); ctx.arc(x, y, pegR, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+    }
+  }
+}
+
+// ── 穹顶球物理动画 ──────────────────────────────────────────────────────────
+(function initDomePhysics() {
+  const dc   = document.getElementById('dome-canvas');
+  if (!dc) return;
+  const dx   = dc.getContext('2d');
+  const DPR  = window.devicePixelRatio || 1;
+  // canvas sized 180x180 for 2× sharpness (logical 90px)
+  const S    = 90;   // logical size
+  const CR   = 44;   // = S/2 - 1，球边缘触到视觉内壁再弹
+  const CX   = 45, CY = 46;  // center (略偏下)
+  const GRAV   = 0.07;   // 自然重力
+  const DAMP   = 0.85;   // 碰壁衰减
+  const SWIRL  = 0.055;  // 顺时针气流
+
+  // 13颗金球 + 2颗红球
+  const GOLD = ['#ffd84a','#e89000','#b05a00','#6e3000'];
+  const RED  = ['#ff5533','#cc2200','#881100','#440800'];
+  const BALL_R = 7;    // 与主 ballR 一致（直径14px CSS）
+
+  const N = 15;
+  const balls = Array.from({length: N}, (_, i) => {
+    const angle = (i / N) * Math.PI * 2;
+    const r = (CR - BALL_R) * (0.4 + Math.random() * 0.5);
+    const spd = 0.8 + Math.random() * 0.7;
+    const dir = (Math.random() * Math.PI * 2);
+    const pal = (i === 0 || i === 7) ? RED : GOLD;
+    return {
+      x:  CX + Math.cos(angle) * r,
+      y:  CY + Math.sin(angle) * r,
+      vx:  Math.cos(dir) * spd,
+      vy:  Math.sin(dir) * spd,
+      r:  BALL_R,
+      pal,
+    };
+  });
+
+  function step() {
+    dx.clearRect(0, 0, S * 2, S * 2);  // 180×180 physical
+    dx.save();
+    dx.scale(2, 2);
+
+    // Dark sphere background — fill entire logical canvas
+    const bg = dx.createRadialGradient(CX - 10, CY - 14, 3, CX, CY, S * 0.5);
+    bg.addColorStop(0,   'rgba(30,15,80,0.97)');
+    bg.addColorStop(0.7, 'rgba(10,5,40,0.99)');
+    bg.addColorStop(1,   'rgba(5,2,20,1)');
+    dx.fillStyle = bg;
+    dx.beginPath(); dx.arc(CX, CY, S * 0.5, 0, Math.PI * 2); dx.fill();
+
+    // Physics
+    for (const b of balls) {
+      // 重力
+      b.vy += GRAV;
+      // 顺时针涡流 + 随机纵向扰动
+      const ddx0 = b.x - CX, ddy0 = b.y - CY;
+      const dist0 = Math.sqrt(ddx0*ddx0 + ddy0*ddy0) || 1;
+      b.vx +=  (ddy0 / dist0) * SWIRL;
+      b.vy += -(ddx0 / dist0) * SWIRL;
+      // 小幅随机垂直脉冲，增加乱序感
+      b.vy += (Math.random() - 0.5) * 0.06;
+      // 速度限制 + 保持最低速（防止停止）
+      const spd = Math.sqrt(b.vx*b.vx + b.vy*b.vy);
+      const MIN_SPD = 0.4, MAX_SPD = 2.0;
+      if (spd > MAX_SPD) { b.vx *= MAX_SPD/spd; b.vy *= MAX_SPD/spd; }
+      else if (spd < MIN_SPD && spd > 0) { b.vx *= MIN_SPD/spd; b.vy *= MIN_SPD/spd; }
+
+      b.x += b.vx;
+      b.y += b.vy;
+
+      // 圆壁碰撞（仅壁碰时适度衰减）
+      const ddx = b.x - CX, ddy = b.y - CY;
+      const dist = Math.sqrt(ddx*ddx + ddy*ddy);
+      if (dist + b.r > CR) {
+        const nx = ddx/dist, ny = ddy/dist;
+        const dot = b.vx*nx + b.vy*ny;
+        b.vx = (b.vx - 2*dot*nx) * DAMP;
+        b.vy = (b.vy - 2*dot*ny) * DAMP;
+        const ov = dist + b.r - CR;
+        b.x -= nx * ov; b.y -= ny * ov;
+      }
+    }
+    // Ball-ball collision
+    for (let i = 0; i < balls.length; i++) {
+      for (let j = i + 1; j < balls.length; j++) {
+        const a = balls[i], bb2 = balls[j];
+        const dx2 = a.x - bb2.x, dy2 = a.y - bb2.y;
+        const dist2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+        const minD = a.r + bb2.r;
+        if (dist2 < minD && dist2 > 0) {
+          const nx = dx2/dist2, ny = dy2/dist2;
+          const ov = (minD - dist2) / 2;
+          a.x += nx*ov;  a.y += ny*ov;
+          bb2.x -= nx*ov; bb2.y -= ny*ov;
+          const relVx = a.vx - bb2.vx, relVy = a.vy - bb2.vy;
+          const dot = relVx*nx + relVy*ny;
+          if (dot < 0) {
+            a.vx  -= dot * nx * 0.75;  a.vy  -= dot * ny * 0.75;
+            bb2.vx += dot * nx * 0.75; bb2.vy += dot * ny * 0.75;
+          }
+        }
+      }
+    }
+
+    // Draw balls — 与主 canvas drawBall 保持一致的渐变方式
+    for (const b of balls) {
+      const hx = b.x - b.r * 0.40, hy = b.y - b.r * 0.40;
+      const g = dx.createRadialGradient(hx, hy, 0, hx, hy, b.r * 2.0);
+      g.addColorStop(0,    b.pal[0]);
+      g.addColorStop(0.40, b.pal[1]);
+      g.addColorStop(0.75, b.pal[2]);
+      g.addColorStop(1,    b.pal[3]);
+      dx.fillStyle = g;
+      dx.beginPath(); dx.arc(b.x, b.y, b.r, 0, Math.PI * 2); dx.fill();
+    }
+
+    dx.restore();
+    requestAnimationFrame(step);
+  }
+  step();
+})();
+
+window.addEventListener('load', () => {
+  drawBoard();
+  initGame();
+  updateSlots(modeIdx);
+});
+
+// ── 倍率配置（null = 宝箱，随机 1-100×）──
+// 以下基础倍率会在页面加载后由 RTP 校准 IIFE 自动缩放，目标 RTP = 97.5%
+let slotConfigs = [
+  [25,  3,  null, 1.6, 1.2, 1.1, 1,   0.4, 1,   1.1, 1.2, 1.6, null,  3,  25],
+  [50,  5,  null, 2,   1.5, 1.2, 0.8, 0.2, 0.8, 1.2, 1.5, 2,   null,  5,  50],
+  [100, 10, null, 3,   2,   1.5, 0.5, 0.1, 0.5, 1.5, 2,   3,   null, 10, 100],
+];
+
+// ── RTP 校准（蒙特卡洛模拟，含分裂钉权重，目标 97.5%）────────────────────
+(function calibrateSlotConfigs() {
+  const TRIALS = 50000, ROWS = 13, SLOTS = 15;
+  const W = 390, d = W / SLOTS, CX = W / 2;
+  const pX = (r, c) => CX - ((r + 2) * d) / 2 + c * d;
+  // 分裂钉 [row, col, bitIndex]
+  const SPLIT_DEFS = [[2,2,0],[6,2,1],[6,6,2]];
+
+  const weighted = new Float64Array(SLOTS);
+
+  for (let t = 0; t < TRIALS; t++) {
+    const startX = CX + (Math.random() - 0.5) * d * 0.25;
+    // 队列每项：{x, w, row, used}，used = 3-bit 掩码标记已触发的分裂钉
+    const queue = [{x: startX, w: 1, row: 0, used: 0}];
+
+    while (queue.length) {
+      const {x: bx, w: bw, row: brow, used: bu} = queue.pop();
+      let x = bx, didSplit = false;
+
+      for (let r = brow; r < ROWS; r++) {
+        // 找最近的钉子
+        const nPegs = r + 3;
+        let bc = 0, bd = Infinity;
+        for (let c = 0; c < nPegs; c++) {
+          const dist = Math.abs(x - pX(r, c));
+          if (dist < bd) { bd = dist; bc = c; }
+        }
+        // 判断是否命中未用的分裂钉
+        let si = -1;
+        for (const [sr, sc, idx] of SPLIT_DEFS) {
+          if (sr === r && sc === bc && !(bu & (1 << idx))) { si = idx; break; }
+        }
+        if (si >= 0) {
+          const nu = bu | (1 << si), px = pX(r, bc), sw = bw * 0.55;
+          queue.push({x: Math.max(1, px - d * 0.5), w: sw, row: r + 1, used: nu});
+          queue.push({x: Math.min(W - 1, px + d * 0.5), w: sw, row: r + 1, used: nu});
+          didSplit = true; break;
+        }
+        // 普通钉：随机向左或向右偏转
+        const px = pX(r, bc);
+        x = Math.max(1, Math.min(W - 1, px + (Math.random() < 0.5 ? -1 : 1) * d * 0.5));
+      }
+
+      if (!didSplit) {
+        weighted[Math.max(0, Math.min(SLOTS - 1, Math.floor(x / d)))] += bw;
+      }
+    }
+  }
+
+  const total = weighted.reduce((a, b) => a + b, 0);
+  const B = total / TRIALS; // 每局期望球数（分裂后权重=1，B > 1）
+  const probs = Array.from(weighted, c => c / total);
+  const MYSTERY_EV = 10.5; // 宝箱随机 1~20 的期望值
+
+  slotConfigs = slotConfigs.map(cfg => {
+    // 分别计算宝箱和非宝箱的「单球」RTP 贡献
+    const mysteryRTP    = cfg.reduce((s, v, i) => v === null ? s + probs[i] * MYSTERY_EV : s, 0);
+    const nonMysteryRTP = cfg.reduce((s, v, i) => v !== null ? s + probs[i] * v         : s, 0);
+    // 每局期望总收益 = B × (mysteryRTP + nonMysteryRTP × scale) = 0.975
+    // → scale = (0.975/B - mysteryRTP) / nonMysteryRTP
+    const scale = Math.max(0.10, Math.min(1.20, (0.975 / B - mysteryRTP) / nonMysteryRTP));
+    console.log(`[RTP Calib] B=${B.toFixed(3)}  mystRTP=${(mysteryRTP*100).toFixed(2)}%  scale=${scale.toFixed(4)}`);
+    return cfg.map(v => v === null ? null : parseFloat((v * scale).toFixed(2)));
+  });
+
+  console.log('[RTP Calib] 校准完成，新 slotConfigs:', JSON.stringify(slotConfigs));
+})();
+
+// 倍率 → 颜色 class 映射
+function valToClass(v) {
+  if (v === null) return 's-mystery';
+  if (v >= 25)   return 's-jackpot';
+  if (v >= 3)    return 's-high';
+  if (v >= 1.5)  return 's-orange';
+  if (v >= 1.2)  return 's-yellow';
+  if (v >= 1.05) return 's-warm';
+  if (v >= 0.8)  return 's-neutral';
+  return 's-low';
+}
+
+// 保存宝箱槽的原始 HTML（含 SVG）
+const slotEls = document.querySelectorAll('.slot');
+const mysteryHTML = slotEls[2].innerHTML;
+
+function updateSlots(idx) {
+  const cfg = slotConfigs[idx];
+  slotEls.forEach((slot, i) => {
+    const val = cfg[i];
+    slot.className = 'slot ' + valToClass(val);
+    if (val === null) {
+      slot.innerHTML = mysteryHTML;
+    } else {
+      const disp = val >= 10 ? Math.round(val) : +val.toFixed(1);
+      slot.innerHTML = `<span>${disp}</span><span class="slot-x">×</span>`;
+    }
+  });
+}
+
+// 难度切换
+const modes = ['稳健', '激进', '暴富'];
+const modeColors = ['#ffcc22', '#ff8833', '#dd44ff'];
+let modeIdx = 0;
+const modeEl = document.querySelector('.sel-mode');
+document.querySelectorAll('.ctrl-sel')[1].querySelectorAll('.sel-arrow').forEach((btn, dir) => {
+  btn.addEventListener('click', () => {
+    modeIdx = (modeIdx + (dir === 1 ? 1 : -1) + modes.length) % modes.length;
+    modeEl.textContent = modes[modeIdx];
+    modeEl.style.color = modeColors[modeIdx];
+    updateSlots(modeIdx);
+  });
+});
+
+// 投注切换
+const betValues = [1, 2, 5, 10, 20, 50, 100];
+let betIdx = 2;
+const betEl = document.querySelector('.ctrl-sel:first-child .sel-value');
+document.querySelectorAll('.ctrl-sel')[0].querySelectorAll('.sel-arrow').forEach((btn, dir) => {
+  btn.addEventListener('click', () => {
+    betIdx = Math.max(0, Math.min(betValues.length - 1, betIdx + (dir === 1 ? 1 : -1)));
+    betEl.textContent = betValues[betIdx];
+  });
+});
+
+// ══════════════════════════════════════════════
+//  游戏主逻辑
+// ══════════════════════════════════════════════
+function initGame() {
+  // ── 常量（与 drawBoard 保持一致）──
+  const ROWS  = 13;
+  const SLOTS = 15;
+  const pegR  = 4.0;
+  const ballR = 7;
+  const mwH   = (document.querySelector('.machine-wrap')?.offsetHeight) || 0;
+  const padT  = 10 + mwH;
+  const padB  = 7;
+  const rowH  = 22.5;
+  const W     = 390;
+  const H     = padT + ROWS * rowH + padB;
+  const cx    = W / 2;
+  const d     = W / SLOTS;
+
+  // 钉子坐标
+  const pegX = (row, col) => cx - ((row + 2) * d) / 2 + col * d;
+  const pegY = (row)      => padT + row * rowH + rowH / 2;
+
+  // ── 状态 ──
+  let balance        = 1730.50;
+  let autoMode       = false;
+  let balls          = [];      // 多球支持
+  let pegGlows       = {};      // pegKey -> 0~1 亮度
+  let pendingSettles = 0;       // 等待结算的球数
+  let pendingWin     = 0;       // 本轮累计盈利（所有球结算完后一次性加入余额）
+  let rafId          = null;
+
+  // ── DOM 引用 ──
+  const canvas   = document.getElementById('board');
+  const ctx      = canvas.getContext('2d');
+  const balEl    = document.querySelector('.bal-value');
+  const startBtn = document.querySelector('.start-btn');
+  const autoBtn  = document.querySelector('.auto-btn');
+  const histList = document.querySelector('.hist-list');
+
+  // 余额格式化
+  function fmtBalance(v) {
+    return '$' + v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+  balEl.textContent = fmtBalance(balance);
+
+  // ── 历史倍率 class ──
+  function histClass(m) {
+    if (m >= 25)  return 'h-jackpot';
+    if (m >= 3)   return 'h-high';
+    if (m >= 1.5) return 'h-mid';
+    if (m < 1)    return 'h-low';
+    return 'h-mid';
+  }
+
+  function addHistory(multiplier) {
+    const badge = document.createElement('div');
+    badge.className = 'hist-badge ' + histClass(multiplier);
+    badge.textContent = multiplier + '×';
+    histList.appendChild(badge);
+    histList.scrollLeft = histList.scrollWidth;
+    while (histList.children.length > 30) histList.removeChild(histList.firstChild);
+  }
+
+  // 按分裂深度返回球颜色 [高光, 中, 深, 最深]
+  const BALL_PALETTES = [
+    ['#ffd84a','#e89000','#b05a00','#6e3000'], // depth 0：原金色
+    ['#ff8844','#d04000','#8a2000','#4a0a00'], // depth 1：橙红
+    ['#ff4466','#c01040','#780020','#380010'], // depth 2：深红
+  ];
+
+  // ── 绘制单球 ──
+  function drawBall(x, y, alpha = 1, depth = 0) {
+    ctx.shadowBlur = 0;
+    ctx.globalAlpha = alpha;
+    const pal = BALL_PALETTES[Math.min(depth, BALL_PALETTES.length - 1)];
+    const hx = x - ballR * 0.40;
+    const hy = y - ballR * 0.40;
+    const grad = ctx.createRadialGradient(hx, hy, 0, hx, hy, ballR * 2.0);
+    grad.addColorStop(0,    pal[0]);
+    grad.addColorStop(0.40, pal[1]);
+    grad.addColorStop(0.75, pal[2]);
+    grad.addColorStop(1,    pal[3]);
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(x, y, ballR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  // ── 绘制球 + 尾部幻影 ──
+  function drawBallWithTrail(ball) {
+    ctx.globalAlpha = 1;
+    drawBall(ball.x, ball.y, 1, ball.depth || 0);
+  }
+
+  // ── 物理更新 ──
+  function updateBall(ball, dt = 1) {
+    // 重力（按 dt 缩放）
+    ball.vy += 0.032;
+    if (ball.vy > 1.8) ball.vy = 1.8;
+
+    ball.vx *= 0.98;
+
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+
+    // 边界反弹
+    if (ball.x < ballR)     { ball.x = ballR;     ball.vx =  Math.abs(ball.vx) * 0.5; }
+    if (ball.x > W - ballR) { ball.x = W - ballR; ball.vx = -Math.abs(ball.vx) * 0.5; }
+
+    if (!ball.cooldown) ball.cooldown = {};
+    let hitResult = null;
+    const minDist = ballR + pegR;
+
+    // ── 宽区分裂钉预检（半径19px，匹配星形视觉）──
+    const splitR = ballR + pegR * 3;
+    for (const [sr, sc] of splits) {
+      const spk = sr * 20 + sc;
+      if (ball.usedSplits?.[spk]) continue;
+      const spx = pegX(sr, sc), spy = pegY(sr);
+      const sdx = ball.x - spx, sdy = ball.y - spy;
+      if (sdx * sdx + sdy * sdy < splitR * splitR) {
+        if (!ball.usedSplits) ball.usedSplits = {};
+        ball.usedSplits[spk] = true;
+        hitResult = { pegKey: spk, isSplit: true };
+        pegGlows[spk] = 1;
+        break;
+      }
+    }
+
+    for (let row = 0; row < ROWS; row++) {
+      const numPegs = row + 3;
+      for (let col = 0; col < numPegs; col++) {
+        const pegKey = row * 20 + col;
+        const px = pegX(row, col);
+        const py = pegY(row);
+        const dx = ball.x - px;
+        const dy = ball.y - py;
+        const distSq = dx * dx + dy * dy;
+
+        if (distSq >= minDist * minDist) continue; // 不在碰撞范围，跳过
+
+        const dist = Math.sqrt(distSq);
+        const nx = dx / dist;
+        const ny = dy / dist;
+
+        // ── 始终推出，确保无视觉重叠 ──
+        ball.x = px + nx * (minDist + 2);
+        ball.y = py + ny * (minDist + 2);
+
+        if (ball.cooldown[pegKey] > 0) {
+          // 冷却中：仅推出，不改速度
+          ball.cooldown[pegKey]--;
+          continue;
+        }
+
+        // ── 碰撞响应：侧向偏转模型 ──
+        const side = dx >= 0 ? 1 : -1;
+        ball.vx = side * (0.45 + Math.random() * 0.55);
+        ball.vy = Math.max(Math.abs(ball.vy) * 0.65, 0.35) - 0.08;
+        ball.cooldown[pegKey] = 18;
+
+        pegGlows[pegKey] = 1;
+        if (!hitResult) {
+          hitResult = { pegKey, isSplit: false };
+        }
+      }
+    }
+    return hitResult;
+  }
+
+  // ── 检测落槽 ──
+  function checkLanded(ball) {
+    const landY = H - ballR;
+    if (ball.y >= landY) {
+      // 计算槽 index（x 坐标 / 槽宽，夹紧到 0~14）
+      const slotW = W / SLOTS;
+      let idx = Math.floor(ball.x / slotW);
+      idx = Math.max(0, Math.min(SLOTS - 1, idx));
+      return idx;
+    }
+    return -1;
+  }
+
+  // ── 宝箱加权随机（范围1-100，期望≈10.5）──
+  // 65%→1-5  24%→6-20  9%→21-60  2%→61-100
+  function rollMystery() {
+    const r = Math.random();
+    if (r < 0.65) return 1  + Math.floor(Math.random() * 5);   // 1-5
+    if (r < 0.89) return 6  + Math.floor(Math.random() * 15);  // 6-20
+    if (r < 0.98) return 21 + Math.floor(Math.random() * 40);  // 21-60
+    return            61 + Math.floor(Math.random() * 40);      // 61-100
+  }
+
+  // ── 宝箱揭示动画 ──
+  function revealMystery(slotEl, resolvedMultiplier, done) {
+    const iconEl = slotEl.querySelector('.slot-icon');
+    if (!iconEl) { done(); return; }
+
+    // 快速滚动数字 600ms
+    let rollCount = 0;
+    const rollInterval = setInterval(() => {
+      iconEl.innerHTML = `<span class="mystery-reveal">${Math.floor(Math.random() * 100) + 1}</span>`;
+      rollCount++;
+      if (rollCount >= 12) {
+        clearInterval(rollInterval);
+        // 定格最终倍率
+        iconEl.innerHTML = `<span class="mystery-reveal">${resolvedMultiplier}</span>`;
+        done();
+      }
+    }, 50);
+  }
+
+  // ── 还原宝箱 ──
+  function restoreMystery(slotEl) {
+    slotEl.innerHTML = mysteryHTML;
+  }
+
+  // ── 结算 ──
+  function settle(slotIdx, weight = 1) {
+    const cfg  = slotConfigs[modeIdx];
+    let   val  = cfg[slotIdx];
+    let   multiplier;
+
+    const slotEl = slotEls[slotIdx];
+
+    // 宝箱：加权随机 1~100（期望≈10.5）
+    if (val === null) {
+      multiplier = rollMystery();
+    } else {
+      multiplier = val;
+    }
+
+    const bet    = betValues[betIdx];
+    const won    = parseFloat((bet * weight * multiplier).toFixed(2));
+    pendingWin   = parseFloat((pendingWin + won).toFixed(2));
+
+    // 得分音效
+    if (window._onWin) window._onWin(multiplier);
+
+    // 槽位高亮
+    slotEl.classList.add('winning');
+    setTimeout(() => slotEl.classList.remove('winning'), 500);
+
+    // 飘字：+$XX 显示在对应槽位上方
+    (function showFloatWin() {
+      const boardEl = document.querySelector('.board-wrap');
+      const boardRect = boardEl.getBoundingClientRect();
+      const canvasEl  = document.getElementById('board');
+      const canvasRect = canvasEl.getBoundingClientRect();
+
+      const el = document.createElement('div');
+      el.className = 'float-win' + (multiplier >= 25 ? ' jackpot' : '');
+      el.textContent = '+$' + won.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+      // 用 CSS 像素槽宽（canvas 逻辑宽390 → CSS实际宽）
+      const cssSlotW = canvasRect.width / SLOTS;
+      const slotCenterX = (slotIdx + 0.5) * cssSlotW;
+      const rawX = canvasRect.left - boardRect.left + slotCenterX;
+      const relY = canvasRect.top  - boardRect.top  + canvasRect.height - 20;
+
+      // wrapper 负责水平定位，el 负责向上飘动动画
+      // 两者分离，避免动画 transform 覆盖水平对齐的 translateX
+      const wrapper = document.createElement('div');
+      wrapper.style.cssText = `position:absolute;top:${relY}px;pointer-events:none;z-index:20;`;
+
+      if (slotIdx <= 2) {
+        wrapper.style.left = Math.max(rawX - cssSlotW * 0.5, 2) + 'px';
+      } else if (slotIdx >= SLOTS - 3) {
+        const rightOffset = Math.max(boardRect.width - (rawX + cssSlotW * 0.5), 2);
+        wrapper.style.right = rightOffset + 'px';
+      } else {
+        wrapper.style.left = rawX + 'px';
+        wrapper.style.transform = 'translateX(-50%)';
+      }
+
+      el.style.position = 'static';
+      el.style.zIndex   = '';
+      wrapper.appendChild(el);
+      boardEl.appendChild(wrapper);
+      setTimeout(() => wrapper.remove(), 1500);
+    })();
+
+    function done() {
+      pendingSettles--;
+      if (balls.length === 0 && pendingSettles === 0) afterSettle();
+    }
+
+    if (val === null) {
+      revealMystery(slotEl, multiplier, () => {
+        addHistory(multiplier);
+        setTimeout(() => restoreMystery(slotEl), 1500);
+        done();
+      });
+    } else {
+      addHistory(multiplier);
+      done();
+    }
+  }
+
+  // ── 结算后处理（所有球都落槽后） ──
+  function afterSettle() {
+    // 一次性把本轮盈利加入余额
+    if (pendingWin > 0) {
+      const totalWon = pendingWin;
+      pendingWin = 0;
+      // 等槽位飘字动画结束（1.4s）后留约0.6s间隔再显示余额飘字
+      setTimeout(() => {
+        balance = parseFloat((balance + totalWon).toFixed(2));
+        balEl.textContent = fmtBalance(balance);
+        const wrap = document.querySelector('.balance-wrap');
+        const el = document.createElement('div');
+        el.className = 'bal-float';
+        el.textContent = '+$' + totalWon.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        wrap.appendChild(el);
+        setTimeout(() => el.remove(), 2200);
+      }, 500);
+    } else {
+      pendingWin = 0;
+    }
+
+    startBtn.disabled = false;
+    drawBoard();
+
+    if (autoMode) {
+      setTimeout(() => {
+        if (autoMode) launchBall();
+      }, 800);
+    }
+  }
+
+  // ── 动画循环（多球）──
+  let lastFrameTime = 0;
+  function gameLoop(timestamp) {
+    if (balls.length === 0 && pendingSettles === 0) return;
+    const delta = lastFrameTime ? Math.min(timestamp - lastFrameTime, 50) : 16.67;
+    lastFrameTime = timestamp;
+    const dt = delta / 16.67;  // 连续缩放，避免整数步跳帧
+
+    // 衰减钉子发光
+    Object.keys(pegGlows).forEach(k => {
+      pegGlows[k] -= 0.08;
+      if (pegGlows[k] <= 0) delete pegGlows[k];
+    });
+
+    // 重绘静态层（含钉子发光）
+    drawBoard(pegGlows);
+
+    // 更新 + 绘制每颗球（物理步数按帧率校正，保持 60fps 等效速度）
+    for (let i = balls.length - 1; i >= 0; i--) {
+      const ball = balls[i];
+
+      // 记录尾迹
+      if (!ball.trail) ball.trail = [];
+      ball.trail.push({ x: ball.x, y: ball.y });
+      if (ball.trail.length > 7) ball.trail.shift();
+
+      // 物理更新（连续 delta-time，每帧1次，无跳帧）
+      let hit = null;
+      const h = updateBall(ball, dt);
+      if (h) hit = h;
+      if (hit) {
+        pegGlows[hit.pegKey] = 1.0;
+        const canSplitNow = hit.isSplit &&
+          (ball.splitFrom == null || ball.splitFrom !== hit.pegKey) &&
+          balls.length < 8;
+        if (canSplitNow) {
+          ball.splitFrom = hit.pegKey;
+          const splitW = (ball.weight ?? 1) * 0.55;
+          ball.weight = splitW;
+          ball.depth  = (ball.depth || 0) + 1;
+          balls.push({
+            x:  ball.x,
+            y:  ball.y,
+            vx: -(ball.vx) + (Math.random() - 0.5) * 0.4,
+            vy:  ball.vy  * 0.85,
+            trail:    [],
+            cooldown: {},
+            isSplit:  true,
+            splitFrom: hit.pegKey,
+            weight:   splitW,
+            depth:    ball.depth,
+          });
+          // 分裂特效：粒子 + 飘字 + 音效
+          if (window._onSplit) window._onSplit(ball.x, ball.y);
+        } else if (hit && !hit.isSplit) {
+          // 普通碰钉音效
+          if (window._onHit) window._onHit();
+        }
+      }
+
+      // 绘制（含尾迹）
+      drawBallWithTrail(ball);
+
+      // 落槽检测
+      const idx = checkLanded(ball);
+      if (idx >= 0) {
+        const w = ball.weight ?? 1;
+        balls.splice(i, 1);
+        pendingSettles++;
+        settle(idx, w);
+      }
+    }
+
+    if (balls.length > 0 || pendingSettles > 0) {
+      rafId = requestAnimationFrame(gameLoop);
+    }
+  }
+
+  // ── 发球 ──
+  function launchBall() {
+    const bet = betValues[betIdx];
+    if (balance < bet) {
+      startBtn.textContent = '余额不足';
+      setTimeout(() => { startBtn.textContent = '开始'; }, 1200);
+      return;
+    }
+
+    balance = parseFloat((balance - bet).toFixed(2));
+    balEl.textContent = fmtBalance(balance);
+    startBtn.disabled = true;
+
+    balls.push({
+      x:  cx + (Math.random() - 0.5) * 20,
+      y:  padT - 16,
+      vx: 0,
+      vy: 1.6,
+      trail:    [],
+      cooldown: {},
+      isSplit:   false,
+      splitFrom: null,
+      weight:    1.0,
+    });
+
+    if (!rafId || balls.length === 1) {
+      rafId = requestAnimationFrame(gameLoop);
+    }
+  }
+
+  // ── 开始按钮 ──
+  startBtn.addEventListener('click', () => {
+    launchBall();
+  });
+
+  // ── 自动按钮 ──
+  const autoTextEl = autoBtn.querySelector('span:last-child');
+  autoBtn.addEventListener('click', () => {
+    autoMode = !autoMode;
+    if (autoMode) {
+      autoBtn.classList.add('active');
+      autoTextEl.textContent = '停止';
+      if (balls.length === 0 && pendingSettles === 0) launchBall();
+    } else {
+      autoBtn.classList.remove('active');
+      autoTextEl.textContent = '自动';
+    }
+  });
+
+  // ── 常驻呼吸动画（idle 时持续刷新钉板）──
+  (function breathingLoop() {
+    if (balls.length === 0 && pendingSettles === 0) {
+      drawBoard(pegGlows);
+    }
+    requestAnimationFrame(breathingLoop);
+  })();
+}
+</script>
+
+<script>
+// ══════════════════════════════════════════════
+//  音频引擎
+//  BGM  → HTML5 Audio 播放原曲文件 bgm.mp3
+//  SFX  → Web Audio API 程序合成
+// ══════════════════════════════════════════════
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+let bgGain = null;
+let musicOn = true;
+
+// HTML5 Audio BGM
+let bgAudio = null;
+
+// ── BGM：HTML5 Audio 播放原曲文件 ──
+// 将音频文件命名为 bgm.mp3（或 bgm.ogg）放在与 HTML 同目录即可
+function startBGM() {
+  if (bgAudio) return;
+  bgAudio = new Audio('./bgm.mp3');
+  bgAudio.loop = true;
+  bgAudio.volume = 0.5;
+  if (musicOn) bgAudio.play().catch(() => {});
+}
+
+function getAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new AudioCtx();
+    bgGain = audioCtx.createGain();  // 仅用于 SFX
+    bgGain.gain.value = 1.0;
+    bgGain.connect(audioCtx.destination);
+    startBGM();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+// ── 音效：分裂 ──
+function playSplitSfx() {
+  if (!sfxOn) return;
+  const ctx = getAudioCtx();
+  const now = ctx.currentTime;
+
+  // 柔和上升音调：三声轻铃，正弦波，低音量，慢衰减
+  [0, 0.08, 0.16].forEach((dt, i) => {
+    const osc = ctx.createOscillator();
+    const env = ctx.createGain();
+    const g   = ctx.createGain();
+    g.gain.value = 0.10;
+    osc.connect(env); env.connect(g); g.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(520 + i * 130, now + dt);
+    osc.frequency.linearRampToValueAtTime(640 + i * 130, now + dt + 0.22);
+    env.gain.setValueAtTime(0, now + dt);
+    env.gain.linearRampToValueAtTime(0.7, now + dt + 0.02);
+    env.gain.exponentialRampToValueAtTime(0.001, now + dt + 0.38);
+    osc.start(now + dt);
+    osc.stop(now + dt + 0.4);
+  });
+
+  // 轻微气泡噪声（音量极低，增加质感）
+  const buf  = ctx.createBuffer(1, ctx.sampleRate * 0.08, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++)
+    data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.025));
+  const src  = ctx.createBufferSource();
+  const nG   = ctx.createGain();
+  nG.gain.value = 0.06;
+  src.buffer = buf; src.connect(nG); nG.connect(ctx.destination);
+  src.start(now); src.stop(now + 0.08);
+}
+
+// ── 音效：碰钉 ──
+function playHitSfx() {
+  if (!sfxOn) return;
+  const ctx = getAudioCtx();
+  const now = ctx.currentTime;
+  const osc = ctx.createOscillator();
+  const env = ctx.createGain();
+  const g = ctx.createGain(); g.gain.value = 0.12;
+  osc.connect(env); env.connect(g); g.connect(ctx.destination);
+  osc.type = 'triangle';
+  osc.frequency.value = 480 + Math.random() * 120;
+  env.gain.setValueAtTime(0.6, now);
+  env.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+  osc.start(now); osc.stop(now + 0.09);
+}
+
+// ── 音效：落槽得分 ──
+function playWinSfx(multiplier) {
+  if (!sfxOn) return;
+  const ctx = getAudioCtx();
+  const now = ctx.currentTime;
+  const freqs = multiplier >= 10 ? [523, 659, 784, 1047] : [392, 494, 587];
+  freqs.forEach((f, i) => {
+    const osc = ctx.createOscillator();
+    const env = ctx.createGain();
+    const g = ctx.createGain(); g.gain.value = 0.22;
+    osc.connect(env); env.connect(g); g.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.value = f;
+    const t = now + i * 0.07;
+    env.gain.setValueAtTime(0.7, t);
+    env.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+    osc.start(t); osc.stop(t + 0.26);
+  });
+}
+
+// ── 设置按钮 & 面板 ──
+let sfxOn = true;
+const settingsBtn   = document.getElementById('settingsBtn');
+const settingsPanel = document.getElementById('settingsPanel');
+const toggleMusic   = document.getElementById('toggleMusic');
+const toggleSfx     = document.getElementById('toggleSfx');
+
+// 点按钮：切换面板显示
+settingsBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  getAudioCtx();
+  settingsPanel.classList.toggle('open');
+});
+
+// 点面板外：收起
+document.addEventListener('click', e => {
+  if (!settingsPanel.contains(e.target) && e.target !== settingsBtn) {
+    settingsPanel.classList.remove('open');
+  }
+});
+
+// 音乐开关
+toggleMusic.addEventListener('change', () => {
+  musicOn = toggleMusic.checked;
+  if (bgAudio) {
+    if (musicOn) bgAudio.play().catch(() => {});
+    else bgAudio.pause();
+  }
+});
+
+// 音效开关
+toggleSfx.addEventListener('change', () => {
+  sfxOn = toggleSfx.checked;
+});
+
+// 第一次用户交互时启动音频（浏览器自动播放策略）
+document.addEventListener('click', () => getAudioCtx(), { once: true });
+</script>
+
+<script>
+// ══════════════════════════════════════════════
+//  粒子系统 + SPLIT! 飘字（挂在 initGame 之后）
+// ══════════════════════════════════════════════
+(function patchGame() {
+  // 等 initGame 完成后再 patch
+  const canvas = document.getElementById('board');
+  if (!canvas) return;
+
+  // ── 粒子池 ──
+  const particles = [];
+
+  function spawnSplitParticles(x, y) {
+    const colors = ['#00eeff', '#80ffee', '#ffffff', '#ffe080', '#00ccff'];
+    for (let i = 0; i < 28; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1.5 + Math.random() * 3.5;
+      particles.push({
+        x, y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 1.5,
+        life: 1,
+        decay: 0.025 + Math.random() * 0.02,
+        r: 2 + Math.random() * 3,
+        color: colors[Math.floor(Math.random() * colors.length)],
+      });
+    }
+  }
+
+  // ── 每帧更新粒子（叠加在 canvas 上层）──
+  const dpr = window.devicePixelRatio || 1;
+  function drawParticles() {
+    if (particles.length === 0) return;
+    const ctx = canvas.getContext('2d');
+    // 只绘制，不清空（清空由 drawBoard 做）
+    ctx.save();
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x  += p.vx;
+      p.y  += p.vy;
+      p.vy += 0.12; // 粒子重力
+      p.vx *= 0.97;
+      p.life -= p.decay;
+      if (p.life <= 0) { particles.splice(i, 1); continue; }
+      ctx.globalAlpha = p.life;
+      ctx.fillStyle = p.color;
+      ctx.shadowBlur = 6; ctx.shadowColor = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
+  // ── SPLIT! 飘字 ──
+  function showSplitText(canvasX, canvasY) {
+    const boardEl = document.querySelector('.board-wrap');
+    const canvasEl = document.getElementById('board');
+    const boardRect = boardEl.getBoundingClientRect();
+    const canvasRect = canvasEl.getBoundingClientRect();
+
+    const scaleX = canvasRect.width / 390;
+    const scaleY = canvasRect.height / (canvasEl.height / dpr);
+
+    const el = document.createElement('div');
+    el.className = 'float-split';
+    el.textContent = '分裂！';
+
+    const px = canvasRect.left - boardRect.left + canvasX * scaleX;
+    const py = canvasRect.top  - boardRect.top  + canvasY * scaleY;
+
+    const wrap = document.createElement('div');
+    wrap.style.cssText = `position:absolute;left:${px}px;top:${py}px;pointer-events:none;z-index:30;`;
+    wrap.appendChild(el);
+    boardEl.appendChild(wrap);
+    setTimeout(() => wrap.remove(), 1300);
+  }
+
+  // ── Patch: 拦截 requestAnimationFrame 渲染循环，在每帧末尾绘制粒子 ──
+  const origRAF = window.requestAnimationFrame.bind(window);
+  window.requestAnimationFrame = function(cb) {
+    return origRAF(function(ts) {
+      cb(ts);
+      drawParticles();
+    });
+  };
+
+  // ── 暴露全局函数供 initGame 内部调用 ──
+  window._onSplit = function(x, y) {
+    spawnSplitParticles(x, y);
+    showSplitText(x, y - 10);
+    playSplitSfx();
+  };
+  window._onHit = function() {
+    playHitSfx();
+  };
+  window._onWin = function(mult) {
+    playWinSfx(mult);
+  };
+})();
+</script>
+</body>
+</html>

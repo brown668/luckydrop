@@ -896,6 +896,7 @@ body {
 <script>
 // ── 当前行数（8-16），X 行对应 X+1 个倍率槽 ──
 let selectedRows = 13;
+const PAD_SIDE = 10;   // 钉板左右各留 10px，远离手机边缘
 
 // 分裂钉：仅 13 行时启用
 function getSplits() {
@@ -911,10 +912,10 @@ function drawBoard(glows = {}) {
   const mwH = machineWrap ? machineWrap.offsetHeight : 0;
   wrap.style.marginTop = (-mwH) + 'px';
 
-  const W      = wrap.offsetWidth;
+  const W      = wrap.offsetWidth;   // canvas 保持全宽，避免背景色露边
 
   const ROWS       = selectedRows;
-  const SLOTS      = selectedRows + 1;         // 第一行2钉 → 底行(ROWS+1)钉 → ROWS+1槽
+  const SLOTS      = selectedRows + 1;         // 第一行3钉 → 底行(ROWS+2)钉 → ROWS+1槽
   const PEG_AREA_H = 292.5;                    // 钉板区高度固定，行数多则钉子小
   const padT       = 10 + mwH;
   const padB       = 7;
@@ -926,11 +927,14 @@ function drawBoard(glows = {}) {
   canvas.height = H * dpr;
   canvas.style.width  = W + 'px';
   canvas.style.height = H + 'px';
+  canvas.style.marginLeft  = '';
+  canvas.style.marginRight = '';
 
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
   const cx   = W / 2;
-  const d    = W / SLOTS;
+  // 钉子有效宽度收窄 PAD_SIDE，底行钉子不顶边
+  const d    = (W - 2 * PAD_SIDE) / SLOTS;
   const pegR = Math.min(rowH, d) * 0.17;   // 钉子半径随行高/槽宽等比缩放
 
   // 第一行始终3颗钉子，底行钉数=槽数+1，左右压住槽边界
@@ -1287,8 +1291,8 @@ function buildBaseConfigs(rows) {
 
 // RTP 校准：蒙特卡洛模拟 → 等比缩放使期望 RTP ≈ 97.5%
 function calibrateConfigs(rows, base) {
-  const SLOTS  = rows + 1;                                // 第一行2钉 → ROWS+1槽
-  const W = 390, d = W / SLOTS, CX = W / 2;
+  const SLOTS  = rows + 1;                                // 第一行3钉 → ROWS+1槽
+  const W = 390, d = (W - 2 * PAD_SIDE) / SLOTS, CX = W / 2;
   const TRIALS = 50000;
   const curSplits = getSplits();
   const pX = (r, c) => CX - ((r + 2) * d) / 2 + c * d; // 第一行3钉公式
@@ -1359,10 +1363,11 @@ let slotEls = [];
 // 根据当前 selectedRows 重建槽位 DOM
 function rebuildSlotDom() {
   const container = document.querySelector('.slots');
-  const slots = selectedRows + 1;  // 第一行2钉 → ROWS+1槽
+  const slots = selectedRows + 1;  // 第一行3钉 → ROWS+1槽
   const cfg   = slotConfigs[modeIdx] || [];
-  // 槽宽 ≈ 390/slots，字体随槽数缩放（最小 8px）
-  const slotW  = 390 / slots;
+  container.style.padding = `0 ${PAD_SIDE}px 4px`;   // 与钉板左右留白对齐
+  // 槽宽与钉板有效宽度对齐
+  const slotW  = (390 - 2 * PAD_SIDE) / slots;
   const fsize  = Math.max(8, Math.min(11, Math.floor(slotW * 0.38))) + 'px';
   const xsize  = Math.max(6, Math.min(9,  Math.floor(slotW * 0.28))) + 'px';
 
@@ -1477,7 +1482,7 @@ function initGame() {
   const W          = 390;
   const H          = padT + PEG_AREA_H + padB;
   const cx         = W / 2;
-  const d          = W / SLOTS;
+  const d          = (W - 2 * PAD_SIDE) / SLOTS;  // 钉子收窄，留边距
   const pegR       = Math.min(rowH, d) * 0.17;
   const ballR      = Math.max(4, Math.min(9, pegR * 1.75));
   const splits = getSplits();
@@ -1633,9 +1638,8 @@ function initGame() {
   function checkLanded(ball) {
     const landY = H - ballR;
     if (ball.y >= landY) {
-      // 计算槽 index（x 坐标 / 槽宽，夹紧到 0~14）
-      const slotW = W / SLOTS;
-      let idx = Math.floor(ball.x / slotW);
+      // 计算槽 index（钉子从 PAD_SIDE 开始，d = (W-2*PAD_SIDE)/SLOTS）
+      let idx = Math.floor((ball.x - PAD_SIDE) / d);
       idx = Math.max(0, Math.min(SLOTS - 1, idx));
       return idx;
     }
@@ -1713,9 +1717,11 @@ function initGame() {
       el.className = 'float-win' + (multiplier >= 25 ? ' jackpot' : '');
       el.textContent = '+$' + won.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-      // 用 CSS 像素槽宽（canvas 逻辑宽390 → CSS实际宽）
-      const cssSlotW = canvasRect.width / SLOTS;
-      const slotCenterX = (slotIdx + 0.5) * cssSlotW;
+      // 用 CSS 像素槽宽（钉子偏移 PAD_SIDE，有效宽度 = canvas宽 - 2*PAD_SIDE_CSS）
+      const scale = canvasRect.width / 390;
+      const PAD_CSS  = PAD_SIDE * scale;
+      const cssSlotW = (canvasRect.width - 2 * PAD_CSS) / SLOTS;
+      const slotCenterX = PAD_CSS + (slotIdx + 0.5) * cssSlotW;
       const rawX = canvasRect.left - boardRect.left + slotCenterX;
       const relY = canvasRect.top  - boardRect.top  + canvasRect.height - 20;
 

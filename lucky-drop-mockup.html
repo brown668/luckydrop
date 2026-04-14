@@ -914,7 +914,7 @@ function drawBoard(glows = {}) {
   const W      = wrap.offsetWidth;
 
   const ROWS       = selectedRows;
-  const SLOTS      = selectedRows + 1;
+  const SLOTS      = selectedRows + 2;         // 第一行3钉 → 底行(ROWS+2)钉 → ROWS+2槽
   const PEG_AREA_H = 292.5;                    // 钉板区高度固定，行数多则钉子小
   const padT       = 10 + mwH;
   const padB       = 7;
@@ -933,17 +933,21 @@ function drawBoard(glows = {}) {
   const d    = W / SLOTS;
   const pegR = Math.min(rowH, d) * 0.17;   // 钉子半径随行高/槽宽等比缩放
 
-  const pegX = (row, col) => cx - ((row + 1) * d) / 2 + col * d;
+  // 第一行始终3颗钉子：numPegs = row + 3
+  const pegX = (row, col) => cx - ((row + 2) * d) / 2 + col * d;
   const pegY = (row)      => padT + row * rowH + rowH / 2;
 
   const splits = getSplits();
 
-  const topY      = padT + rowH / 2;
-  const botY      = H - padB;
-  const slope     = d / (2 * rowH);
-  // 穹顶半宽 = 7d/4，墙从穹顶底角精确起始，钉子距墙始终保持 d
-  const domeR     = Math.round(7 * d / 4);
-  const domeBaseY = padT;                              // 穹顶底部 y
+  const topY = padT + rowH / 2;
+  const botY = H - padB;
+
+  // 外侧发光壁固定不随行数变化（以 15槽/13行 为基准参考）
+  const WALL_d    = W / 15;
+  const WALL_rowH = PEG_AREA_H / 13;
+  const domeR     = Math.round(7 * WALL_d / 4);    // ≈ 45px，固定
+  const slope     = WALL_d / (2 * WALL_rowH);       // ≈ 0.578，固定
+  const domeBaseY = padT;
   const wallTL    = cx - domeR;
   const wallTR    = cx + domeR;
   const wallBL    = wallTL - (botY - domeBaseY) * slope;
@@ -1044,7 +1048,7 @@ function drawBoard(glows = {}) {
 
   // ── Pegs ─────────────────────────────────────────────────────────────
   for (let row = 0; row < ROWS; row++) {
-    const numPegs = row + 2;
+    const numPegs = row + 3;   // 第一行固定 3 钉
     for (let col = 0; col < numPegs; col++) {
       const x       = pegX(row, col);
       const y       = pegY(row);
@@ -1261,17 +1265,18 @@ window.addEventListener('load', () => {
   initGame();
 });
 
-// ── 倍率参考表（从边缘到中心，d=0..8，覆盖 8-16 行/9-17 槽）──
+// ── 倍率参考表（从边缘到中心，d=0..9，覆盖 8-16 行/10-18 槽）──
+// d=7 是 13行/15槽 的中心值，与原始配置保持一致
 const SLOT_REF = [
-  [25,  3,  null, 1.6, 1.2, 1.1, 1.0, 0.8, 0.4],   // 稳健
-  [50,  5,  null, 2.0, 1.5, 1.2, 0.8, 0.5, 0.2],   // 激进
-  [100, 10, null, 3.0, 2.0, 1.5, 0.8, 0.4, 0.1],   // 暴富
+  [25,  3,  null, 1.6, 1.2, 1.1, 1.0, 0.4, 0.3, 0.2],   // 稳健
+  [50,  5,  null, 2.0, 1.5, 1.2, 0.8, 0.2, 0.15, 0.1],  // 激进
+  [100, 10, null, 3.0, 2.0, 1.5, 0.5, 0.1, 0.08, 0.05], // 暴富
 ];
 
 // 根据行数生成基础倍率配置（对称展开）
 function buildBaseConfigs(rows) {
   return SLOT_REF.map(ref => {
-    const slots = rows + 1;
+    const slots = rows + 2;            // 第一行3钉 → ROWS+2槽
     const half  = Math.floor(slots / 2);
     const left  = ref.slice(0, half);
     return slots % 2 === 1
@@ -1282,11 +1287,11 @@ function buildBaseConfigs(rows) {
 
 // RTP 校准：蒙特卡洛模拟 → 等比缩放使期望 RTP ≈ 97.5%
 function calibrateConfigs(rows, base) {
-  const SLOTS  = rows + 1;
+  const SLOTS  = rows + 2;                                // 第一行3钉 → ROWS+2槽
   const W = 390, d = W / SLOTS, CX = W / 2;
   const TRIALS = 50000;
   const curSplits = getSplits();
-  const pX = (r, c) => CX - ((r + 1) * d) / 2 + c * d;
+  const pX = (r, c) => CX - ((r + 2) * d) / 2 + c * d; // 第一行3钉公式
 
   const weighted = new Float64Array(SLOTS);
   for (let t = 0; t < TRIALS; t++) {
@@ -1296,7 +1301,7 @@ function calibrateConfigs(rows, base) {
       const {x: bx, w: bw, row: brow, used: bu} = queue.pop();
       let x = bx, didSplit = false;
       for (let r = brow; r < rows; r++) {
-        const nPegs = r + 2;
+        const nPegs = r + 3;   // 第一行3钉
         let bc = 0, bd = Infinity;
         for (let c = 0; c < nPegs; c++) {
           const dist = Math.abs(x - pX(r, c));
@@ -1354,18 +1359,24 @@ let slotEls = [];
 // 根据当前 selectedRows 重建槽位 DOM
 function rebuildSlotDom() {
   const container = document.querySelector('.slots');
-  const slots = selectedRows + 1;
+  const slots = selectedRows + 2;  // 第一行3钉 → ROWS+2槽
   const cfg   = slotConfigs[modeIdx] || [];
+  // 槽宽 ≈ 390/slots，字体随槽数缩放（最小 8px）
+  const slotW  = 390 / slots;
+  const fsize  = Math.max(8, Math.min(11, Math.floor(slotW * 0.38))) + 'px';
+  const xsize  = Math.max(6, Math.min(9,  Math.floor(slotW * 0.28))) + 'px';
+
   container.innerHTML = '';
   for (let i = 0; i < slots; i++) {
     const div = document.createElement('div');
     const val = cfg[i];
     div.className = 'slot ' + valToClass(val);
+    div.style.fontSize = fsize;
     if (val === null) {
       div.innerHTML = MYSTERY_HTML;
     } else {
       const disp = val >= 10 ? Math.round(val) : +val.toFixed(1);
-      div.innerHTML = `<span>${disp}</span><span class="slot-x">×</span>`;
+      div.innerHTML = `<span>${disp}</span><span class="slot-x" style="font-size:${xsize}">×</span>`;
     }
     container.appendChild(div);
   }
@@ -1457,7 +1468,7 @@ function initGame() {
 
   // ── 常量（与 drawBoard 保持一致）──
   const ROWS       = selectedRows;
-  const SLOTS      = selectedRows + 1;
+  const SLOTS      = selectedRows + 2;  // 第一行3钉 → ROWS+2槽
   const mwH        = (document.querySelector('.machine-wrap')?.offsetHeight) || 0;
   const padT       = 10 + mwH;
   const padB       = 7;
@@ -1471,8 +1482,8 @@ function initGame() {
   const ballR      = Math.max(4, Math.min(9, pegR * 1.75));
   const splits = getSplits();
 
-  // 钉子坐标（X 行 → X+1 槽，使用 row+1 公式）
-  const pegX = (row, col) => cx - ((row + 1) * d) / 2 + col * d;
+  // 钉子坐标（第一行3钉公式）
+  const pegX = (row, col) => cx - ((row + 2) * d) / 2 + col * d;
   const pegY = (row)      => padT + row * rowH + rowH / 2;
 
   // ── 状态（balance/autoMode/balls 等为模块级，跨 initGame 调用持久）──
@@ -1578,7 +1589,7 @@ function initGame() {
     }
 
     for (let row = 0; row < ROWS; row++) {
-      const numPegs = row + 2;
+      const numPegs = row + 3;   // 第一行固定 3 钉
       for (let col = 0; col < numPegs; col++) {
         const pegKey = row * 20 + col;
         const px = pegX(row, col);

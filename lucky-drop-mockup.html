@@ -9,7 +9,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background: #06060f;
+  background: radial-gradient(ellipse at 50% 30%, #12406a 0%, #051528 70%, #020814 100%);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -19,7 +19,7 @@ body {
 }
 
 .page-label {
-  color: rgba(0,220,255,0.4);
+  color: rgba(120,200,255,0.4);
   font-size: 10px;
   letter-spacing: 5px;
   text-transform: uppercase;
@@ -32,26 +32,26 @@ body {
   height: 844px;              /* iPhone 14 逻辑高度，固定不变 */
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, #3848cc 0%, #5230b8 35%, #6838c0 70%, #5028a8 100%);
+  background: linear-gradient(180deg, #0a3a78 0%, #0d5090 40%, #1566a8 70%, #196fb0 100%);
   border-radius: 44px;
-  border: 6px solid #2838a0;
+  border: 6px solid #062148;
   overflow: hidden;
   box-shadow:
-    0 0 0 1px rgba(80,120,255,0.3),
-    0 32px 120px rgba(60,80,200,0.3),
-    0 0 60px rgba(80,40,200,0.2);
+    0 0 0 1px rgba(60,140,255,0.25),
+    0 32px 120px rgba(10,40,90,0.45),
+    0 0 60px rgba(20,80,160,0.25);
 }
 
 /* Status bar */
 .status {
-  height: 38px;
-  background: rgba(20,8,50,0.5);
+  height: 34px;
+  background: rgba(4,20,48,0.75);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 22px;
   font-size: 11px;
-  color: rgba(180,200,255,0.5);
+  color: rgba(200,225,255,0.55);
   font-family: 'Space Mono', monospace;
 }
 
@@ -59,40 +59,52 @@ body {
 
 /* ─── Header ─── */
 .header {
-  height: 62px;
-  background: rgba(16,6,44,0.97);
-  border-bottom: 1px solid rgba(100,60,220,0.25);
+  height: 54px;
+  background: linear-gradient(180deg, rgba(4,18,40,0.92), rgba(6,28,58,0.88));
+  border-bottom: 1px solid rgba(80,150,220,0.22);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 18px;
 }
+.hdr-icons { display: flex; align-items: center; gap: 14px; }
+.hdr-icon {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  opacity: 0.88;
+  transition: opacity .18s, transform .18s;
+}
+.hdr-icon:hover { opacity: 1; transform: scale(1.08); }
+.hdr-icon svg { width: 22px; height: 22px; fill: #fff; }
 .logo-wrap { display: flex; flex-direction: column; gap: 2px; }
 .sub-chest { width: 16px; height: 19px; vertical-align: middle; margin: 0 3px 2px; filter: drop-shadow(0 0 4px rgba(255,200,60,0.9)); }
 .logo-sub {
-  font-size: 12px;
+  font-size: 11px;
   letter-spacing: 0.5px;
-  color: rgba(230,210,255,0.85);
+  color: rgba(190,220,255,0.85);
   font-weight: 600;
   line-height: 1;
 }
 .logo-sub em {
   font-style: normal;
-  color: #ffdd44;
+  color: #ffd84a;
   font-weight: 700;
   text-shadow: 0 0 10px rgba(255,220,60,0.9), 0 0 20px rgba(255,180,0,0.5);
 }
 .logo {
   font-size: 18px;
   font-weight: 700;
-  letter-spacing: 4px;
-  color: #ffdd44;
-  text-shadow: 0 0 12px rgba(255,220,60,0.7), 0 0 28px rgba(255,180,0,0.4);
+  letter-spacing: 3px;
+  color: #ffffff;
+  text-shadow: 0 0 12px rgba(120,200,255,0.55), 0 2px 2px rgba(0,0,0,0.45);
 }
-.logo span { color: #ee44aa; text-shadow: 0 0 12px rgba(238,68,170,0.7); }
+.logo span { color: #4ad66a; text-shadow: 0 0 12px rgba(80,220,130,0.7); }
 .balance-wrap { text-align: right; }
-.bal-label { font-size: 8px; letter-spacing: 2px; color: #5544aa; display: block; margin-bottom: 1px; }
-.bal-value { font-family: 'Space Mono', monospace; font-size: 15px; color: #ffcc33; text-shadow: 0 0 10px rgba(255,200,50,0.7); }
+.bal-label { font-size: 8px; letter-spacing: 2px; color: #6ea0cc; display: block; margin-bottom: 1px; }
+.bal-value { font-family: 'Space Mono', monospace; font-size: 15px; color: #ffd84a; text-shadow: 0 0 10px rgba(255,200,50,0.7); }
 .balance-wrap { position: relative; }
 @keyframes balFloat {
   0%   { opacity: 1; transform: translateY(0)    scale(1); }
@@ -118,8 +130,8 @@ body {
 .history-bar {
   display: flex;
   align-items: center;
-  background: rgba(10,4,30,0.85);
-  border-bottom: 1px solid rgba(100,60,220,0.2);
+  background: rgba(4,18,40,0.9);
+  border-bottom: 1px solid rgba(80,150,220,0.2);
   padding: 5px 8px;
   gap: 5px;
   overflow: hidden;
@@ -145,36 +157,37 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(180deg, #2eaa44, #1a7a2e);
+  background: linear-gradient(180deg, #2b82cf, #0e4a8a);
   color: #fff;
-  border: 1px solid rgba(80,220,100,0.4);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+  border: 1px solid rgba(120,200,255,0.45);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(200,235,255,0.25);
 }
 .hist-badge.h-low {
-  background: linear-gradient(180deg, #1e8a32, #145a20);
-  border-color: rgba(60,180,80,0.4);
-  color: rgba(255,255,255,0.75);
+  background: linear-gradient(180deg, #1a5a96, #0a3666);
+  border-color: rgba(80,150,210,0.35);
+  color: rgba(220,235,255,0.85);
 }
 .hist-badge.h-mid {
-  background: linear-gradient(180deg, #28b840, #1a8230);
+  background: linear-gradient(180deg, #2b82cf, #105ba0);
 }
 .hist-badge.h-high {
-  background: linear-gradient(180deg, #e07020, #a84808);
-  border-color: rgba(255,140,40,0.5);
-  box-shadow: 0 1px 6px rgba(220,100,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+  background: linear-gradient(180deg, #2b82cf, #105ba0);
+  border-color: rgba(255,160,80,0.65);
+  box-shadow: 0 1px 6px rgba(255,130,40,0.4), inset 0 1px 0 rgba(210,235,255,0.25);
 }
 .hist-badge.h-jackpot {
-  background: linear-gradient(180deg, #e03060, #aa1040);
-  border-color: rgba(255,80,120,0.5);
-  box-shadow: 0 1px 8px rgba(220,40,80,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
+  background: linear-gradient(180deg, #2e8ddc, #1260a8);
+  border-color: rgba(255,110,130,0.7);
+  box-shadow: 0 1px 8px rgba(255,80,100,0.45), inset 0 1px 0 rgba(210,235,255,0.3);
 }
 .hist-badge.h-mega {
-  background: linear-gradient(180deg, #cc44ff, #8800cc);
-  border-color: rgba(210,130,255,0.6);
-  box-shadow: 0 1px 10px rgba(180,60,255,0.6), inset 0 1px 0 rgba(255,220,255,0.2);
+  background: linear-gradient(180deg, #3598e8, #155fae);
+  border-color: rgba(255,220,90,0.85);
+  color: #fffbe0;
+  box-shadow: 0 1px 10px rgba(255,210,80,0.55), inset 0 1px 0 rgba(220,240,255,0.35);
 }
 
-/* ─── Lottery Dome ─── */
+/* ─── 球门发球区 ─── */
 .machine-wrap {
   display: flex;
   flex-direction: column;
@@ -188,44 +201,55 @@ body {
   pointer-events: none;  /* 视觉层，不拦截下层点击事件 */
 }
 
-/* 全圆穹顶 */
+/* 球门区：矩形球门框 + 球网（参考图风格：细密白色鱼网背景） */
 .dome-shell {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
+  width: 192px;
+  height: 82px;
+  border-radius: 2px 2px 0 0;
   position: relative;
   overflow: hidden;
+  /* 球网底色：偏蓝深色（远处看台阴影） */
+  background:
+    linear-gradient(180deg, rgba(40,70,105,0.55) 0%, rgba(20,45,75,0.78) 55%, rgba(12,30,55,0.88) 100%);
+  border: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
   box-shadow:
-    0 0 0 3px rgba(0,220,255,0.90),
-    0 0 20px rgba(0,200,255,0.70),
-    0 0 50px rgba(160,0,255,0.35),
-    inset 0 0 30px rgba(0,30,100,0.5);
+    0 0 0 1px rgba(255,255,255,0.3),
+    0 4px 10px rgba(0,0,0,0.35),
+    inset 0 0 12px rgba(0,20,40,0.55);
 }
-.dome-shell canvas {
-  display: block;
-  width: 90px;
-  height: 90px;
-}
-/* Top glass shine */
+/* 球网纹理：细密方格（白色） */
 .dome-shell::before {
   content: '';
   position: absolute;
-  top: 7px; left: 20px;
-  width: 50%; height: 32%;
-  border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.05) 55%, transparent 100%);
-  transform: rotate(-12deg);
+  inset: 0;
+  background:
+    repeating-linear-gradient(90deg,
+      transparent 0 5px,
+      rgba(255,255,255,0.38) 5px 5.6px),
+    repeating-linear-gradient(0deg,
+      transparent 0 4.5px,
+      rgba(255,255,255,0.32) 4.5px 5.1px);
   pointer-events: none;
   z-index: 2;
+  mask-image: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.95) 60%, rgba(0,0,0,0.6) 100%);
+  -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.95) 60%, rgba(0,0,0,0.6) 100%);
+}
+.dome-shell canvas {
+  display: block;
+  width: 186px;
+  height: 76px;
+  position: relative;
+  z-index: 3;
 }
 .dome-shell::after { content: none; }
 
-/* 衔接条：透明让 canvas 瓦片透出 */
+/* 球门横梁下接的草坪过渡 */
 .dome-base {
   width: 100%;
-  height: 12px;
+  height: 4px;
   background: transparent;
-  margin-top: -3px;
+  margin-top: 0;
 }
 .dome-crossbar { display: none; }
 
@@ -291,7 +315,7 @@ body {
   position: relative;
   z-index: 1;
   overflow: visible;
-  background: linear-gradient(180deg, #4030b8 0%, #5535c0 40%, #4828b0 85%, #2820a0 100%);
+  background: linear-gradient(180deg, #0a4a8c 0%, #1b6ca8 35%, #2a8c4a 65%, #1e6e36 100%);
 }
 .board-canvas {
   display: block;
@@ -301,15 +325,25 @@ body {
 /* ─── Bottom Slots ─── */
 .slots {
   display: flex;
-  background: linear-gradient(180deg, #2820a0, #1e1888);
-  padding: 0 2px 4px;
-  gap: 1px;
+  background: linear-gradient(180deg, #0c2a48 0%, #071e3a 100%);
+  padding: 6px 2px 4px;
+  gap: 3px;
   margin-top: 0;
+  position: relative;
+}
+/* 底部槽位顶端的蓝色发光条（参考图的亮蓝边） */
+.slots::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10px; right: 10px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #4ac4ff 15%, #7edcff 50%, #4ac4ff 85%, transparent);
+  box-shadow: 0 0 10px rgba(80,200,255,0.75);
 }
 .slot {
   flex: 1;
-  height: 28px;
-  border-radius: 4px;
+  height: 30px;
+  border-radius: 5px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -324,224 +358,395 @@ body {
   cursor: pointer;
   transition: all 0.12s;
 }
+/* 槽位顶部的亮蓝色反光条（类似玻璃折射光） */
 .slot::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 50%;
-  background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent);
-  border-radius: 4px 4px 0 0;
+  top: 2px; left: 3px; right: 3px;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(120,210,255,0.15), rgba(160,230,255,0.6) 50%, rgba(120,210,255,0.15));
+  box-shadow: 0 0 4px rgba(100,200,255,0.7);
 }
-.slot-x  { font-size: 8px; color: rgba(255,255,255,0.75); line-height: 1; margin-top: -2px; }
+.slot-x  { font-size: 8px; color: rgba(255,255,255,0.9); line-height: 1; margin-top: -1px; }
 
-/* 色阶：高倍红 → 橙 → 黄 → 中性 → 低倍绿 */
+/* 球场主题：所有槽位统一蓝色玻璃底，仅通过亮度和边框色区分倍率档次 */
 
-/* ≥100× — 金紫，顶级大奖 */
+/* ≥100× — 最亮蓝+金边，顶级大奖，脉冲 */
 .s-mega {
-  background: linear-gradient(180deg, #cc44ff, #8800cc);
-  border: 1px solid rgba(210,130,255,0.7);
+  background: linear-gradient(180deg, #2a7dcf 0%, #1a5aa0 50%, #0d4284 100%);
+  border: 1px solid rgba(255,215,80,0.85);
   color: #fff;
-  box-shadow: 0 0 14px rgba(180,60,255,0.8), inset 0 1px 0 rgba(255,220,255,0.3);
+  box-shadow: 0 0 14px rgba(255,200,60,0.6), inset 0 1px 0 rgba(180,230,255,0.45);
   animation: pulseMega 1.5s ease-in-out infinite;
 }
 @keyframes pulseMega {
-  0%,100% { box-shadow: 0 0 12px rgba(180,60,255,0.7); }
-  50%      { box-shadow: 0 0 28px rgba(220,80,255,1.0), 0 0 44px rgba(160,40,240,0.45); }
+  0%,100% { box-shadow: 0 0 12px rgba(255,200,60,0.5), inset 0 1px 0 rgba(180,230,255,0.45); }
+  50%      { box-shadow: 0 0 26px rgba(255,210,80,0.95), 0 0 40px rgba(255,180,40,0.5), inset 0 1px 0 rgba(200,240,255,0.55); }
 }
 
-/* 25× — 深红，脉冲 */
+/* 25× — 亮蓝+红边，脉冲 */
 .s-jackpot {
-  background: linear-gradient(180deg, #f03060, #aa1040);
-  border: 1px solid rgba(255,120,150,0.6);
+  background: linear-gradient(180deg, #2878c5 0%, #1a5896 50%, #0c4080 100%);
+  border: 1px solid rgba(255,120,130,0.75);
   color: #fff;
-  box-shadow: 0 0 12px rgba(240,50,90,0.7), inset 0 1px 0 rgba(255,200,210,0.25);
+  box-shadow: 0 0 12px rgba(255,90,100,0.5), inset 0 1px 0 rgba(170,220,255,0.4);
   animation: pulseRed 2s ease-in-out infinite;
 }
 @keyframes pulseRed {
-  0%,100% { box-shadow: 0 0 10px rgba(240,50,90,0.6); }
-  50%      { box-shadow: 0 0 22px rgba(255,80,110,1.0); }
+  0%,100% { box-shadow: 0 0 10px rgba(255,90,100,0.4); }
+  50%      { box-shadow: 0 0 22px rgba(255,100,110,0.85); }
 }
 
-/* 3× — 橙红 */
+/* 3× — 蓝+橙边 */
 .s-high {
-  background: linear-gradient(180deg, #e06020, #aa3008);
-  border: 1px solid rgba(255,150,80,0.5);
+  background: linear-gradient(180deg, #2674c0 0%, #175492 50%, #0b3e7e 100%);
+  border: 1px solid rgba(255,160,80,0.6);
   color: #fff;
-  box-shadow: 0 0 8px rgba(220,80,20,0.4), inset 0 1px 0 rgba(255,190,150,0.18);
+  box-shadow: 0 0 8px rgba(255,130,40,0.35), inset 0 1px 0 rgba(170,220,255,0.35);
 }
 
-/* 1.6× — 橙 */
+/* 1.6× — 蓝+亮黄边 */
 .s-orange {
-  background: linear-gradient(180deg, #c07010, #8a4a00);
-  border: 1px solid rgba(255,180,60,0.4);
+  background: linear-gradient(180deg, #2370bd 0%, #155290 50%, #0a3c7a 100%);
+  border: 1px solid rgba(255,210,110,0.55);
   color: #fff;
-  box-shadow: inset 0 1px 0 rgba(255,210,140,0.15);
+  box-shadow: inset 0 1px 0 rgba(160,215,255,0.3);
 }
 
-/* 1.2× — 黄绿 */
+/* 1.2× — 中蓝 */
 .s-yellow {
-  background: linear-gradient(180deg, #888010, #525000);
-  border: 1px solid rgba(220,210,60,0.4);
+  background: linear-gradient(180deg, #216cb8 0%, #13508a 50%, #093a77 100%);
+  border: 1px solid rgba(140,210,255,0.5);
   color: #fff;
-  box-shadow: inset 0 1px 0 rgba(240,240,140,0.12);
+  box-shadow: inset 0 1px 0 rgba(160,215,255,0.28);
 }
 
-/* 1.1× — 暗黄绿 */
+/* 1.1× — 偏深蓝 */
 .s-warm {
-  background: linear-gradient(180deg, #4a7020, #2a4a10);
-  border: 1px solid rgba(160,220,80,0.35);
+  background: linear-gradient(180deg, #1e68b4 0%, #114c85 50%, #083671 100%);
+  border: 1px solid rgba(120,200,250,0.45);
   color: #fff;
-  box-shadow: inset 0 1px 0 rgba(180,255,120,0.1);
+  box-shadow: inset 0 1px 0 rgba(150,210,255,0.25);
 }
 
-/* 1× — 中性绿 */
+/* 1× — 深蓝 */
 .s-neutral {
-  background: linear-gradient(180deg, #289048, #166030);
-  border: 1px solid rgba(80,210,110,0.4);
-  color: #eeffee;
-  box-shadow: inset 0 1px 0 rgba(150,255,170,0.12);
+  background: linear-gradient(180deg, #1c64af 0%, #10487f 50%, #07326b 100%);
+  border: 1px solid rgba(100,185,240,0.4);
+  color: #eaf4ff;
+  box-shadow: inset 0 1px 0 rgba(140,205,255,0.22);
 }
 
-/* 0.4× — 低倍绿 */
+/* 0.4× — 最深蓝 */
 .s-low {
-  background: linear-gradient(180deg, #20b850, #0e7830);
-  border: 1px solid rgba(60,220,100,0.45);
-  color: #ccffdd;
-  box-shadow: 0 0 8px rgba(30,200,80,0.35), inset 0 1px 0 rgba(140,255,170,0.15);
+  background: linear-gradient(180deg, #175ea6 0%, #0d4178 50%, #052b60 100%);
+  border: 1px solid rgba(90,170,225,0.4);
+  color: #dcebff;
+  box-shadow: inset 0 1px 0 rgba(130,195,250,0.2);
 }
 
 
 /* ─── Controls ─── */
 .controls {
   flex: 1;                    /* 吸收 canvas 高度变化，保持 device 总高 844px */
-  background: linear-gradient(180deg, #2a1460, #1a0c48);
-  display: flex;
+  background: linear-gradient(180deg, #1e7e36 0%, #165a26 55%, #0e3f1c 100%);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-rows: 1fr 1fr;
+  column-gap: 10px;
+  row-gap: 8px;
+  padding: 14px 14px 18px;
+  border-top: 2px solid rgba(255,255,255,0.12);
   align-items: stretch;
-  padding: 10px 10px 12px;
-  gap: 8px;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  position: relative;
+}
+/* 草坪横纹装饰 */
+.controls::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(180deg,
+      rgba(255,255,255,0.03) 0,
+      rgba(255,255,255,0.03) 14px,
+      transparent 14px,
+      transparent 28px);
+  pointer-events: none;
 }
 
-/* 左侧双排选择器 */
-.ctrl-selectors {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  flex-shrink: 0;
-  flex: 0 0 180px;
-}
+/* 通用蓝色圆角面板（控制区 & 右侧浮动） */
 .ctrl-sel {
   display: flex;
   align-items: center;
-  background: rgba(15,5,45,0.85);
-  border-radius: 10px;
-  padding: 0 5px;
-  height: 44px;
-  gap: 4px;
-  border: 1px solid rgba(255,255,255,0.08);
+  background: linear-gradient(180deg, #2b82cf 0%, #1961a8 50%, #0e4a8a 100%);
+  border-radius: 14px;
+  padding: 0 4px;
+  height: 54px;
+  gap: 3px;
+  border: 2px solid #083367;
+  box-shadow:
+    inset 0 1px 0 rgba(180,230,255,0.45),
+    inset 0 -1px 0 rgba(0,0,0,0.25),
+    0 2px 6px rgba(0,0,0,0.35);
+  position: relative;
+  overflow: hidden;
 }
+.ctrl-sel::before {
+  content: '';
+  position: absolute;
+  top: 2px; left: 6px; right: 6px;
+  height: 30%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.28), transparent);
+  border-radius: 10px 10px 20px 20px;
+  pointer-events: none;
+}
+
+/* grid 布局定位 */
+.ctrl-buy    { grid-column: 1; grid-row: 1; }
+.ctrl-bet    { grid-column: 3; grid-row: 1; }
+.ctrl-balls  { grid-column: 1; grid-row: 2; }
+.ctrl-auto   { grid-column: 3; grid-row: 2; }
+
 .sel-arrow {
-  width: 36px; height: 34px;
-  background: linear-gradient(180deg, #6633bb, #441899);
-  border: none;
-  border-radius: 8px;
+  width: 34px; height: 40px;
+  background: linear-gradient(180deg, #3d98e8 0%, #1c70c0 45%, #0e4e96 100%);
+  border: 1.5px solid #062c5c;
+  border-radius: 10px;
   color: #fff;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
   font-family: 'Chakra Petch', sans-serif;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
+  box-shadow: inset 0 1px 0 rgba(220,240,255,0.55), inset 0 -1px 0 rgba(0,0,0,0.2);
+  position: relative;
+  z-index: 1;
 }
-.sel-arrow:hover  { background: linear-gradient(180deg, #8855dd, #6622bb); }
+.sel-arrow:hover  { filter: brightness(1.08); }
 .sel-arrow:disabled {
-  background: linear-gradient(180deg, #221144, #160a2a);
-  opacity: 0.38;
+  background: linear-gradient(180deg, #4a6a8a, #2e4462);
+  opacity: 0.45;
   cursor: not-allowed;
 }
 .sel-info {
   flex: 1;
   text-align: center;
-  line-height: 1.15;
+  line-height: 1.05;
+  position: relative;
+  z-index: 1;
 }
 .sel-label {
   display: block;
-  font-size: 13px;
+  font-size: 9px;
   font-weight: 700;
   color: #fff;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  margin-bottom: 3px;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 .sel-value {
   display: block;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
-  color: #ffcc22;
-  font-family: 'Space Mono', monospace;
-  line-height: 1.1;
-}
-
-/* 开始按钮 */
-.start-btn {
-  flex: 1;
-  background: linear-gradient(180deg, #5588ff, #2244dd);
-  border: none;
-  border-radius: 12px;
   color: #fff;
   font-family: 'Chakra Petch', sans-serif;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+}
+.sel-value-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 6px;
+}
+.sel-icon-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 18px;
+}
+.sel-icon-group span {
+  opacity: 0.35;
+  transition: all .18s;
+  filter: grayscale(1);
+}
+.sel-icon-group span.active {
+  opacity: 1;
+  filter: none;
+  text-shadow: 0 0 8px rgba(255,120,40,0.9);
+}
+
+/* 开始按钮：参考图大足球 PLAY */
+.start-btn {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  width: 112px;
+  align-self: center;
+  justify-self: center;
+  height: 112px;
+  background: radial-gradient(circle at 35% 30%, #ffffff 0%, #f2f2f2 55%, #bfbfbf 100%);
+  border: 3px solid #1a4a8c;
+  border-radius: 50%;
+  color: #0a3a78;
+  font-family: 'Chakra Petch', sans-serif;
   font-size: 24px;
-  font-weight: 700;
-  letter-spacing: 4px;
+  font-weight: 900;
+  letter-spacing: 3px;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(60,100,255,0.45), inset 0 1px 0 rgba(255,255,255,0.2);
+  box-shadow:
+    0 6px 18px rgba(0,0,0,0.55),
+    0 0 0 3px rgba(255,255,255,0.15),
+    inset 0 3px 6px rgba(255,255,255,0.7),
+    inset 0 -4px 8px rgba(0,0,0,0.18);
   position: relative;
   overflow: hidden;
+  z-index: 2;
+  text-shadow: 0 2px 3px rgba(0,0,0,0.12);
 }
-.start-btn::after {
+/* 足球黑色五边形装饰（分散在四周） */
+.start-btn::before {
   content: '';
   position: absolute;
-  top: -50%; left: -60%;
-  width: 35%; height: 200%;
-  background: rgba(255,255,255,0.12);
-  transform: skewX(-22deg);
-  animation: shine 3.5s ease-in-out infinite 1s;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 34%, rgba(0,0,0,0.08) 64%, transparent 66%),
+    radial-gradient(circle at 18% 22%, #222 7px, transparent 8px),
+    radial-gradient(circle at 82% 22%, #222 7px, transparent 8px),
+    radial-gradient(circle at 18% 78%, #222 7px, transparent 8px),
+    radial-gradient(circle at 82% 78%, #222 7px, transparent 8px);
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.82;
 }
+.start-btn:hover  { filter: brightness(1.06); }
+.start-btn:active { transform: scale(0.97); }
+.start-btn span {
+  /* PLAY 文字容器：居中显示在足球中心 */
+  position: relative;
+  z-index: 1;
+  display: block;
+  text-align: center;
+  color: #0a3a78;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 3px rgba(255,255,255,0.35), 0 1px 1px rgba(0,0,0,0.18);
+  pointer-events: none;
+}
+
 @keyframes shine {
   0%    { left: -60%; }
   40%,100% { left: 130%; }
 }
 
-/* 自动按钮 */
-.auto-btn {
-  flex: 0 0 68px;
-  background: linear-gradient(180deg, #ffcc33, #cc8800);
-  border: none;
-  border-radius: 12px;
-  color: #fff;
-  font-family: 'Chakra Petch', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  cursor: pointer;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 4px;
-  box-shadow: 0 4px 16px rgba(220,120,0,0.4);
-}
-.auto-icon { font-size: 24px; line-height: 1; }
-
 /* ─── Footer ─── */
 .footer {
   height: 34px;
-  background: #04040e;
+  background: #021528;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  border-top: 1px solid rgba(255,255,255,0.03);
+  border-top: 1px solid rgba(80,140,200,0.08);
 }
-.f-user { font-size: 9px; color: #223344; letter-spacing: 1px; }
-.f-demo { font-size: 9px; color: #1a2a36; letter-spacing: 1px; }
+.f-user { font-size: 9px; color: #1f3a5a; letter-spacing: 1px; }
+.f-demo { font-size: 9px; color: #15293f; letter-spacing: 1px; }
+
+/* ─── 右侧浮动面板（RISK LEVEL + LINES）─── */
+.side-panel {
+  position: absolute;
+  top: 90px;
+  right: 8px;
+  width: 116px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 15;
+  pointer-events: auto;
+}
+.side-panel .ctrl-sel {
+  height: 52px;
+  padding: 0 4px;
+}
+.side-panel .sel-arrow {
+  width: 28px; height: 36px;
+  font-size: 18px;
+  border-radius: 8px;
+}
+.side-panel .sel-label {
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  margin-bottom: 2px;
+}
+.side-panel .sel-value {
+  font-size: 15px;
+}
+.side-panel .ctrl-sel.risk-panel {
+  padding: 6px 8px;
+  height: 52px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+}
+/* risk-panel 没有箭头按钮，关闭顶部反光条避免遮挡 label */
+.risk-panel::before { display: none; }
+.risk-panel .sel-label {
+  margin-bottom: 3px;
+}
+/* BUY FEATURES 无箭头面板：sel-info 居中占满 */
+.ctrl-buy .sel-info { padding: 4px 0; }
+.ctrl-buy .sel-icon-group { justify-content: center; margin-top: 2px; }
+
+/* 控制区四个面板：label 绝对定位在 ctrl-sel 顶部横跨全宽，避免被 sel-info flex 宽度截断 */
+.controls .ctrl-sel { padding-top: 14px; }
+.controls .ctrl-sel > .sel-label-abs {
+  position: absolute;
+  top: 5px;
+  left: 3px;
+  right: 3px;
+  margin: 0;
+  z-index: 5;
+  text-align: center;
+  pointer-events: none;
+  font-size: 9px;
+  letter-spacing: 0.6px;
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+  text-transform: uppercase;
+  white-space: nowrap;
+  display: block;
+}
+.controls .ctrl-sel .sel-info { padding-top: 0; }
+.controls .ctrl-sel .sel-value { font-size: 17px; }
+.ctrl-buy .sel-info { padding: 2px 0 !important; }
+.risk-flames {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 18px;
+  line-height: 1;
+}
+.risk-flames .flame {
+  cursor: pointer;
+  filter: grayscale(1) brightness(0.7);
+  opacity: 0.55;
+  transition: all .18s;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+}
+.risk-flames .flame.active {
+  filter: none;
+  opacity: 1;
+  text-shadow: 0 0 8px rgba(255,140,40,0.95), 0 0 16px rgba(255,100,20,0.5);
+  transform: scale(1.12);
+}
+.risk-flames .flame:hover { opacity: 0.85; }
 
 /* ─── 槽位高亮 ─── */
 .slot.winning {
@@ -553,16 +758,21 @@ body {
 
 /* ─── 开始按钮禁用态 ─── */
 .start-btn:disabled {
-  background: linear-gradient(180deg, #334488, #223366);
+  filter: grayscale(0.5) brightness(0.8);
   cursor: not-allowed;
-  opacity: 0.6;
+  opacity: 0.65;
 }
 
-/* ─── 自动按钮激活态 ─── */
-.auto-btn.active {
-  background: linear-gradient(180deg, #ffaa00, #cc6600);
-  box-shadow: 0 4px 20px rgba(255,140,0,0.6);
+/* ─── 自动按钮激活态（新：ctrl-auto 高亮）─── */
+.ctrl-auto.active {
+  background: linear-gradient(180deg, #ffb03d 0%, #e8820e 50%, #c46400 100%);
+  border-color: #8a4800;
+  box-shadow:
+    inset 0 1px 0 rgba(255,235,170,0.55),
+    inset 0 -1px 0 rgba(0,0,0,0.25),
+    0 0 18px rgba(255,150,40,0.6);
 }
+.ctrl-auto.active .sel-value { color: #fff; }
 
 
 /* ─── SPLIT! 飘字 ─── */
@@ -591,26 +801,19 @@ body {
 
 /* ─── 设置按钮 & 面板 ─── */
 .settings-btn {
-  position: absolute;
-  top: 8px; right: 12px;
-  width: 28px; height: 28px;
-  border: none; background: transparent;
-  cursor: pointer; z-index: 50;
-  font-size: 17px; line-height: 28px;
-  opacity: 0.55; transition: opacity .2s;
+  display: none;           /* 原紫色齿轮按钮已废弃，改为 header 右上角图标 */
 }
-.settings-btn:hover { opacity: 1; }
 
 .settings-panel {
   display: none;
   position: absolute;
-  top: 38px; right: 8px;
-  background: rgba(18, 12, 60, 0.97);
-  border: 1px solid rgba(120, 80, 255, 0.45);
+  top: 48px; right: 14px;
+  background: linear-gradient(180deg, #0d3866 0%, #072548 100%);
+  border: 1.5px solid rgba(80,160,220,0.45);
   border-radius: 14px;
   padding: 8px 12px;
   z-index: 60;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.55);
   min-width: 0;
 }
 .settings-panel.open { display: block; }
@@ -623,13 +826,13 @@ body {
   padding: 4px 0;
 }
 .settings-row:not(:last-child) {
-  border-bottom: 1px solid rgba(120,80,255,0.18);
+  border-bottom: 1px solid rgba(80,160,220,0.22);
   padding-bottom: 9px; margin-bottom: 2px;
 }
 .settings-label {
   font-family: 'Chakra Petch', sans-serif;
   font-size: 12px; font-weight: 600;
-  color: rgba(210,190,255,0.9);
+  color: rgba(200,225,255,0.92);
   letter-spacing: 0.04em;
 }
 
@@ -649,7 +852,7 @@ body {
   transition: background .22s;
   position: relative;
 }
-.toggle-switch input:checked + .toggle-track { background: #7c3aed; }
+.toggle-switch input:checked + .toggle-track { background: #2eaa54; }
 .toggle-track::after {
   content: '';
   position: absolute;
@@ -665,7 +868,7 @@ body {
 </head>
 <body>
 
-<p class="page-label">LUCKY DROP — UI Design v2.0</p>
+<p class="page-label">GOAL DROP — FOOTBALL EDITION</p>
 
 <div class="device">
 
@@ -678,12 +881,20 @@ body {
   <!-- Header -->
   <div class="header">
     <div class="logo-wrap">
-      <div class="logo">LUCKY<span>DROP</span></div>
-      <div class="logo-sub">挑战边缘极限 最高赢取 <em>100×</em></div>
+      <div class="logo">GOAL<span>DROP</span></div>
+      <div class="logo-sub">挑战边缘极限 最高赢取 <em>1000×</em></div>
     </div>
-    <div class="balance-wrap">
-      <span class="bal-label">余额</span>
-      <span class="bal-value">$1,730.50</span>
+    <div class="hdr-icons">
+      <div class="balance-wrap">
+        <span class="bal-label">余额</span>
+        <span class="bal-value">$1,730.50</span>
+      </div>
+      <div class="hdr-icon" id="iconSound" title="音效">
+        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+      </div>
+      <div class="hdr-icon" id="iconMenu" title="菜单">
+        <svg viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+      </div>
     </div>
   </div>
 
@@ -702,10 +913,10 @@ body {
     </div>
   </div>
 
-  <!-- Launcher dome — sits above board, no overlap -->
+  <!-- 球门发球区：白色球门 + 网内一堆足球 -->
   <div class="machine-wrap">
     <div class="dome-shell">
-      <canvas id="dome-canvas" width="180" height="180" style="width:90px;height:90px;"></canvas>
+      <canvas id="dome-canvas" width="372" height="152" style="width:186px;height:76px;"></canvas>
     </div>
     <div class="dome-base">
       <div class="dome-crossbar"></div>
@@ -732,6 +943,26 @@ body {
       </div>
     </div>
     <canvas class="board-canvas" id="board"></canvas>
+
+    <!-- 右侧浮动：RISK LEVEL + LINES -->
+    <div class="side-panel">
+      <div class="ctrl-sel risk-panel ctrl-risk">
+        <span class="sel-label">RISK LEVEL</span>
+        <div class="risk-flames">
+          <span class="flame active" data-risk="0">🔥</span>
+          <span class="flame" data-risk="1">🔥</span>
+          <span class="flame" data-risk="2">🔥</span>
+        </div>
+      </div>
+      <div class="ctrl-sel ctrl-rows">
+        <button class="sel-arrow">‹</button>
+        <div class="sel-info">
+          <span class="sel-label">LINES</span>
+          <span class="sel-value sel-rows">13</span>
+        </div>
+        <button class="sel-arrow">›</button>
+      </div>
+    </div>
   </div>
 
   <!-- Slots (初始占位，onload 后由 rebuildSlotDom 重建) -->
@@ -753,42 +984,50 @@ body {
     <div class="slot s-jackpot"><span>25</span><span class="slot-x">×</span></div>
   </div>
 
-  <!-- Controls -->
+  <!-- Controls: grid 布局，中心 PLAY 足球按钮 -->
   <div class="controls">
-    <!-- 左侧：投注 + 难度 -->
-    <div class="ctrl-selectors">
-      <div class="ctrl-sel">
-        <button class="sel-arrow">‹</button>
-        <div class="sel-info">
-          <span class="sel-label">投注</span>
-          <span class="sel-value">5</span>
+    <!-- 左上：BUY FEATURES（装饰/占位按钮） -->
+    <div class="ctrl-sel ctrl-buy" id="btnBuyFeatures" title="购买特色">
+      <span class="sel-label-abs">BUY FEATURES</span>
+      <div class="sel-info">
+        <div class="sel-icon-group">
+          <span>🎯</span><span>⚡</span><span>🎁</span>
         </div>
-        <button class="sel-arrow">›</button>
-      </div>
-      <div class="ctrl-sel">
-        <button class="sel-arrow">‹</button>
-        <div class="sel-info">
-          <span class="sel-label">难度</span>
-          <span class="sel-value sel-mode">佛系</span>
-        </div>
-        <button class="sel-arrow">›</button>
-      </div>
-      <div class="ctrl-sel">
-        <button class="sel-arrow">‹</button>
-        <div class="sel-info">
-          <span class="sel-label">行数</span>
-          <span class="sel-value sel-rows">13</span>
-        </div>
-        <button class="sel-arrow">›</button>
       </div>
     </div>
-    <!-- 开始 -->
-    <button class="start-btn">开始</button>
-    <!-- 自动 -->
-    <button class="auto-btn">
-      <span class="auto-icon">↺</span>
-      <span>自动</span>
-    </button>
+
+    <!-- 右上：BET AMOUNT（投注） -->
+    <div class="ctrl-sel ctrl-bet">
+      <span class="sel-label-abs">BET AMOUNT</span>
+      <button class="sel-arrow">‹</button>
+      <div class="sel-info">
+        <span class="sel-value">5</span>
+      </div>
+      <button class="sel-arrow">›</button>
+    </div>
+
+    <!-- 左下：BALLS AMOUNT（同发球数） -->
+    <div class="ctrl-sel ctrl-balls">
+      <span class="sel-label-abs">BALLS AMOUNT</span>
+      <button class="sel-arrow">‹</button>
+      <div class="sel-info">
+        <span class="sel-value sel-balls">1</span>
+      </div>
+      <button class="sel-arrow">›</button>
+    </div>
+
+    <!-- 右下：AUTO（自动投注数） -->
+    <div class="ctrl-sel ctrl-auto">
+      <span class="sel-label-abs">AUTO</span>
+      <button class="sel-arrow">‹</button>
+      <div class="sel-info">
+        <span class="sel-value sel-auto">0</span>
+      </div>
+      <button class="sel-arrow">›</button>
+    </div>
+
+    <!-- 中心 PLAY 足球按钮 -->
+    <button class="start-btn" aria-label="开始"><span>PLAY</span></button>
   </div>
 
   <!-- Footer -->
@@ -802,7 +1041,7 @@ const PAD_SIDE   = 10;
 const ROWS_MAX   = 16;                               // 固定参考行数（决定canvas高度）
 const D_16       = (390 - 2 * PAD_SIDE) / 17;       // ≈ 21.76px，16行基准钉间距
 const ROW_H16    = D_16 * Math.sqrt(3) / 2;         // ≈ 18.84px，16行基准行高
-const WALL_SLOPE = 1 / Math.sqrt(3);                 // 等边三角形斜率（永远固定）
+const WALL_SLOPE = 0.19;                             // 缓梯形（参考图：轻微透视，场地几乎铺满画布）
 // d(ROWS) = D_16 * ROWS_MAX / ROWS — 行少则间距大，铺满固定三角形
 // domeR(d) = 3*d/4 — 壁顶开口始终与外沿钉对齐
 
@@ -854,104 +1093,136 @@ function drawBoard(glows = {}) {
   const topY = pegY(0);
   const botY = H - padB;
 
-  // 发光壁：斜率固定；domeR 跟随 d；domeBaseY 跟随钉子顶部
-  const domeR     = 3 * d / 4;
+  // 场地边界：顶部 = 球门口（tube），底部 = 近满画布；梯形缓透视
   const slope     = WALL_SLOPE;
   const domeBaseY = padT + pegShift;
-  const wallTL    = cx - domeR;
-  const wallTR    = cx + domeR;
-  const wallBL    = wallTL - (botY - domeBaseY) * slope;
-  const wallBR    = wallTR + (botY - domeBaseY) * slope;
 
-  // ── Canvas base fill（防止底部透出 board-wrap 渐变）──────────────────
+  // ── Canvas base fill：球场外侧深蓝（看台/深色渐变）──────────────
   ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = '#2820a0';
+  const outBg = ctx.createLinearGradient(0, 0, 0, H);
+  outBg.addColorStop(0,    '#0a3a6c');
+  outBg.addColorStop(0.45, '#12558e');
+  outBg.addColorStop(1,    '#0a3866');
+  ctx.fillStyle = outBg;
   ctx.fillRect(0, 0, W, H);
 
-  // ── Mosaic background tiles (areas outside trapezoid walls) ──────────
-  const tileSize = 28;
-  const tileColors = [
-    'rgba(140,55,210,0.55)',
-    'rgba(100,35,175,0.45)',
-    'rgba(185,65,225,0.50)',
-    'rgba(120,45,195,0.40)',
-    'rgba(210,75,185,0.45)',
-    'rgba(75,28,165,0.35)',
-    'rgba(160,50,200,0.48)',
-  ];
+  // ── 球场草坪梯形（缓和透视、宽顶口、深浅横条）──────────────────
+  const domeBottomY = mwH - 9;
+  const tubeL = cx - 130;  // 顶部开口宽（参考图：场地上沿宽度≈底边的70%）
+  const tubeR = cx + 130;
+  // 场地墙：从 tube 直接向下延伸到底部（梯形两侧略外扩）
+  const fieldVertH = botY - domeBottomY;
+  const wallBL     = tubeL - fieldVertH * slope;
+  const wallBR     = tubeR + fieldVertH * slope;
+  const wallTL     = tubeL;  // 兼容后续引用
+  const wallTR     = tubeR;
 
-  for (let ty = 0; ty < H; ty += tileSize) {
-    const progress  = (ty - domeBaseY) / (botY - domeBaseY);
-    const progressC = Math.max(0, progress);  // 梯形顶部以上按 progress=0 绘侧边
-    const lw = Math.max(0, wallTL + (wallBL - wallTL) * progressC);
-    const rw = Math.min(W, wallTR + (wallBR - wallTR) * progressC);
-
-    for (let tx = 0; tx < W; tx += tileSize) {
-      const tileR = tx + tileSize - 2;
-      if (tileR <= lw || tx >= rw) {
-        const idx = ((Math.floor(ty / tileSize) * 5) + Math.floor(tx / tileSize) * 3) % tileColors.length;
-        ctx.fillStyle = tileColors[idx];
-        ctx.beginPath();
-        if (ctx.roundRect) {
-          ctx.roundRect(tx + 1, ty + 1, tileSize - 3, tileSize - 3, 3);
-        } else {
-          ctx.rect(tx + 1, ty + 1, tileSize - 3, tileSize - 3);
-        }
-        ctx.fill();
-      }
-    }
-  }
-
-  // ── 穹顶底部 → 底槽：统一填充，消除接缝 ────────────────────────────
-  const domeBottomY = mwH - 9;   // ≈ 96，CSS 穹顶底部在 canvas 中的位置
-  const tubeL = cx - 45;
-  const tubeR = cx + 45;
-
-  // 连接器 + 梯形合并为一个路径，共用同一渐变，彻底消除接缝
+  // 草坪渐变：顶部略深（远）→ 底部略亮（近）
+  ctx.save();
   ctx.beginPath();
   ctx.moveTo(tubeL, domeBottomY);
   ctx.lineTo(tubeR, domeBottomY);
-  ctx.lineTo(wallTR, domeBaseY);
   ctx.lineTo(wallBR, botY);
   ctx.lineTo(wallBL, botY);
-  ctx.lineTo(wallTL, domeBaseY);
   ctx.closePath();
-  const trapGrad = ctx.createLinearGradient(0, domeBottomY, 0, botY);
-  trapGrad.addColorStop(0,    'rgba(18,8,80,1)');
-  trapGrad.addColorStop(0.08, 'rgba(110,55,200,0.97)');
-  trapGrad.addColorStop(0.45, 'rgba(125,60,215,0.95)');
-  trapGrad.addColorStop(0.88, 'rgba(95,38,180,0.93)');
-  trapGrad.addColorStop(1,    'rgba(40,32,160,1.0)');
-  ctx.fillStyle = trapGrad;
-  ctx.fill();
+  ctx.clip();  // 梯形区域裁剪
 
-  // ── Junction glow at top center ──────────────────────────────────────
-  const jg = ctx.createRadialGradient(cx, domeBaseY, 0, cx, domeBaseY, 80);
-  jg.addColorStop(0,   'rgba(120,200,255,0.35)');
-  jg.addColorStop(0.5, 'rgba(80,140,255,0.12)');
-  jg.addColorStop(1,   'transparent');
-  ctx.fillStyle = jg;
+  // 基底草绿（参考图：饱和度高的鲜绿）
+  const grassGrad = ctx.createLinearGradient(0, domeBottomY, 0, botY);
+  grassGrad.addColorStop(0,    '#3aa860');
+  grassGrad.addColorStop(0.35, '#37a058');
+  grassGrad.addColorStop(0.7,  '#2f9852');
+  grassGrad.addColorStop(1,    '#288348');
+  ctx.fillStyle = grassGrad;
+  ctx.fillRect(0, domeBottomY - 4, W, botY - domeBottomY + 6);
+
+  // 横向草坪条纹（参考图：宽明显条纹，模拟割草机痕迹）
+  const fieldH  = botY - domeBottomY;
+  const stripeN = 7;                          // 7 条带交替
+  const stripeH = fieldH / stripeN;
+  for (let i = 0; i < stripeN; i++) {
+    const yA = domeBottomY + i * stripeH;
+    ctx.fillStyle = (i % 2 === 0) ? 'rgba(255,255,255,0.07)' : 'rgba(0,30,15,0.10)';
+    ctx.fillRect(0, yA, W, stripeH + 0.5);
+  }
+
+  // 草坪斑驳纹理（细噪点）
+  ctx.globalAlpha = 0.06;
+  for (let i = 0; i < 80; i++) {
+    const nx = Math.random() * W;
+    const ny = domeBottomY + Math.random() * fieldH;
+    const nr = 0.6 + Math.random() * 1.4;
+    ctx.fillStyle = (Math.random() < 0.5) ? '#ffffff' : '#0a3018';
+    ctx.beginPath(); ctx.arc(nx, ny, nr, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // ── 球场白色标线 ─────────────────────────────────────────────
+  ctx.lineWidth   = 1.6;
+  ctx.strokeStyle = 'rgba(255,255,255,0.92)';
+  ctx.shadowBlur  = 0;
+
+  // 顶部"D"弧（球门弧 / penalty arc，朝下，紧贴球门口）
+  const topArcY = domeBottomY + 3;
+  const topArcR = 26;
   ctx.beginPath();
-  ctx.arc(cx, domeBaseY, 80, 0, Math.PI * 2);
-  ctx.fill();
-
-  // ── 霓虹墙线：从穹顶底部连续延伸到底槽 ──────────────────────────────
-  ctx.lineCap   = 'round';
-  ctx.lineWidth = 6;
-  ctx.shadowBlur  = 18;
-  ctx.shadowColor = 'rgba(0,230,255,0.9)';
-  ctx.strokeStyle = '#00ddee';
-
-  ctx.beginPath();
-  ctx.moveTo(tubeL, domeBottomY);
-  ctx.lineTo(wallTL, domeBaseY);
-  ctx.lineTo(wallBL, botY);
+  ctx.arc(cx, topArcY, topArcR, Math.PI * 0.08, Math.PI * 0.92);
   ctx.stroke();
 
+  // 中线（横线，沿梯形宽度变化）
+  const midY = (domeBottomY + botY) / 2;
+  const midProgress = (midY - domeBaseY) / (botY - domeBaseY);
+  const midL = wallTL + (wallBL - wallTL) * midProgress;
+  const midR = wallTR + (wallBR - wallTR) * midProgress;
+  ctx.beginPath();
+  ctx.moveTo(midL, midY);
+  ctx.lineTo(midR, midY);
+  ctx.stroke();
+
+  // 中圈
+  const ccR = Math.min(46, (midR - midL) * 0.20);
+  ctx.beginPath();
+  ctx.arc(cx, midY, ccR, 0, Math.PI * 2);
+  ctx.stroke();
+  // 中圈圆点
+  ctx.fillStyle = 'rgba(255,255,255,0.92)';
+  ctx.beginPath(); ctx.arc(cx, midY, 2.5, 0, Math.PI * 2); ctx.fill();
+
+  // 底部禁区弧（半圆，朝上）
+  const penAreaY = botY - 4;
+  const penAreaR = 46;
+  ctx.beginPath();
+  ctx.arc(cx, penAreaY, penAreaR, Math.PI * 1.08, Math.PI * 1.92);
+  ctx.stroke();
+
+  ctx.restore();
+
+  // ── 球场边界白线（梯形外框，参考图细线无发光）──
+  ctx.lineCap   = 'round';
+  ctx.lineWidth = 2;
+  ctx.shadowBlur  = 4;
+  ctx.shadowColor = 'rgba(255,255,255,0.35)';
+  ctx.strokeStyle = 'rgba(255,255,255,0.92)';
+
+  // 顶线（球门线，水平）
+  ctx.beginPath();
+  ctx.moveTo(tubeL, domeBottomY);
+  ctx.lineTo(tubeR, domeBottomY);
+  ctx.stroke();
+  // 左墙
+  ctx.beginPath();
+  ctx.moveTo(tubeL, domeBottomY);
+  ctx.lineTo(wallBL, botY);
+  ctx.stroke();
+  // 右墙
   ctx.beginPath();
   ctx.moveTo(tubeR, domeBottomY);
-  ctx.lineTo(wallTR, domeBaseY);
   ctx.lineTo(wallBR, botY);
+  ctx.stroke();
+  // 底线（连接左右墙底部）
+  ctx.beginPath();
+  ctx.moveTo(wallBL, botY - 1);
+  ctx.lineTo(wallBR, botY - 1);
   ctx.stroke();
 
   ctx.shadowBlur = 0;
@@ -1011,24 +1282,24 @@ function drawBoard(glows = {}) {
         ctx.beginPath(); ctx.arc(x - 1, y - 1.5, innerR * 0.38, 0, Math.PI * 2); ctx.fill();
 
       } else {
-        // Drop shadow
-        const sh = ctx.createRadialGradient(x + 2, y + 2.5, 0, x + 2, y + 2.5, pegR + 2);
-        sh.addColorStop(0,   'rgba(25,5,65,0.6)');
+        // Drop shadow — 深草投影
+        const sh = ctx.createRadialGradient(x + 1.2, y + 1.8, 0, x + 1.2, y + 1.8, pegR + 2.2);
+        sh.addColorStop(0,   'rgba(0,25,12,0.55)');
         sh.addColorStop(1,   'transparent');
         ctx.fillStyle = sh;
-        ctx.beginPath(); ctx.arc(x + 2, y + 2.5, pegR + 2, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x + 1.2, y + 1.8, pegR + 2.2, 0, Math.PI * 2); ctx.fill();
 
-        // Peg body — embossed purple
-        const p = ctx.createRadialGradient(x - 2, y - 2, 0, x, y, pegR);
-        p.addColorStop(0,   'rgba(168,92,238,0.95)');
-        p.addColorStop(0.55,'rgba(120,50,195,0.97)');
-        p.addColorStop(1,   'rgba(80,25,150,1)');
+        // Peg body — 浅绿凸起（参考图：草坪色调的立体小圆点）
+        const p = ctx.createRadialGradient(x - pegR * 0.45, y - pegR * 0.55, 0, x, y, pegR);
+        p.addColorStop(0,    '#e8f5de');
+        p.addColorStop(0.55, '#c7dfa8');
+        p.addColorStop(1,    '#7aa86a');
         ctx.fillStyle = p;
         ctx.beginPath(); ctx.arc(x, y, pegR, 0, Math.PI * 2); ctx.fill();
 
-        // Specular highlight
-        ctx.fillStyle = 'rgba(220,180,255,0.25)';
-        ctx.beginPath(); ctx.arc(x - 2, y - 2, pegR * 0.42, 0, Math.PI * 2); ctx.fill();
+        // 顶面高光
+        ctx.fillStyle = 'rgba(255,255,255,0.65)';
+        ctx.beginPath(); ctx.arc(x - pegR * 0.35, y - pegR * 0.45, pegR * 0.32, 0, Math.PI * 2); ctx.fill();
       }
 
       // 碰撞高亮：加法混合让钉子自然变亮，不覆盖原色
@@ -1047,120 +1318,131 @@ function drawBoard(glows = {}) {
   }
 }
 
-// ── 穹顶球物理动画 ──────────────────────────────────────────────────────────
-(function initDomePhysics() {
+// ── 球门内足球堆物理动画（椭圆形网，足球堆叠在底部轻微抖动）─────────
+(function initGoalPhysics() {
   const dc   = document.getElementById('dome-canvas');
   if (!dc) return;
   const dx   = dc.getContext('2d');
-  const DPR  = window.devicePixelRatio || 1;
-  // canvas sized 180x180 for 2× sharpness (logical 90px)
-  const S    = 90;   // logical size
-  const CR   = 44;   // = S/2 - 1，球边缘触到视觉内壁再弹
-  const CX   = 45, CY = 46;  // center (略偏下)
-  const GRAV   = 0.07;   // 自然重力
-  const DAMP   = 0.85;   // 碰壁衰减
-  const SWIRL  = 0.055;  // 顺时针气流
+  // canvas 物理 372x152，CSS 186x76，scale(2,2) 对齐 → logical = CSS 尺寸
+  const W_L  = 186;
+  const H_L  = 76;
+  const GRAV = 0.12;
+  const DAMP = 0.45;
+  const FRIC = 0.88;
+  const BALL_R = 8;
 
-  // 13颗金球 + 2颗红球
-  const GOLD = ['#ffd84a','#e89000','#b05a00','#6e3000'];
-  const RED  = ['#ff5533','#cc2200','#881100','#440800'];
-  const BALL_R = 7;    // 与主 ballR 一致（直径14px CSS）
-
-  const N = 15;
+  // 12 颗足球堆满球门
+  const N = 12;
   const balls = Array.from({length: N}, (_, i) => {
-    const angle = (i / N) * Math.PI * 2;
-    const r = (CR - BALL_R) * (0.4 + Math.random() * 0.5);
-    const spd = 0.8 + Math.random() * 0.7;
-    const dir = (Math.random() * Math.PI * 2);
-    const pal = (i === 0 || i === 7) ? RED : GOLD;
     return {
-      x:  CX + Math.cos(angle) * r,
-      y:  CY + Math.sin(angle) * r,
-      vx:  Math.cos(dir) * spd,
-      vy:  Math.sin(dir) * spd,
+      x:  12 + Math.random() * (W_L - 24),
+      y:  6 + Math.random() * (H_L - 24),
+      vx: (Math.random() - 0.5) * 0.8,
+      vy: 0,
       r:  BALL_R,
-      pal,
+      rot: Math.random() * Math.PI * 2,
+      vrot: (Math.random() - 0.5) * 0.03,
     };
   });
 
+  // 绘制单个足球：按截角二十面体正投影精确绘制（与下落足球共用算法）
+  function drawMiniFoot(b) {
+    dx.save();
+    dx.translate(b.x, b.y);
+    dx.rotate(b.rot);
+    drawSoccerGlyph(dx, 0, 0, b.r);
+    dx.restore();
+  }
+  // 与 drawSoccerBall 共用同一截角二十面体正投影几何
+  function drawSoccerGlyph(cx2d, x, y, R) {
+    cx2d.save();
+    cx2d.fillStyle = 'rgba(0,0,0,0.38)';
+    cx2d.beginPath(); cx2d.arc(x + 0.5, y + 1.0, R * 0.96, 0, Math.PI * 2); cx2d.fill();
+    cx2d.restore();
+
+    // 黑底
+    cx2d.fillStyle = '#141414';
+    cx2d.beginPath(); cx2d.arc(x, y, R, 0, Math.PI * 2); cx2d.fill();
+
+    const r1       = R * 0.26;
+    const a1       = r1 * Math.cos(Math.PI / 5);
+    const s1       = 2 * r1 * Math.sin(Math.PI / 5);
+    const r2       = s1;
+    const a2       = r2 * Math.cos(Math.PI / 6);
+    const hex_dist = a1 + a2;
+
+    const wg = cx2d.createRadialGradient(x - R * 0.3, y - R * 0.35, 0, x, y, R);
+    wg.addColorStop(0, '#ffffff'); wg.addColorStop(0.7, '#f3f4f6'); wg.addColorStop(1, '#c8ced4');
+    cx2d.fillStyle = wg;
+    for (let i = 0; i < 5; i++) {
+      const ang = (i * Math.PI * 2) / 5 - Math.PI / 2;
+      const hx = x + Math.cos(ang) * hex_dist;
+      const hy = y + Math.sin(ang) * hex_dist;
+      cx2d.beginPath();
+      for (let j = 0; j < 6; j++) {
+        const vang = ang + Math.PI + Math.PI / 6 + (j * Math.PI / 3);
+        const vx = hx + Math.cos(vang) * r2;
+        const vy = hy + Math.sin(vang) * r2;
+        j === 0 ? cx2d.moveTo(vx, vy) : cx2d.lineTo(vx, vy);
+      }
+      cx2d.closePath();
+      cx2d.fill();
+    }
+
+    const sh = cx2d.createRadialGradient(x - R * 0.4, y - R * 0.45, 0, x - R * 0.4, y - R * 0.45, R * 0.95);
+    sh.addColorStop(0, 'rgba(255,255,255,0.45)');
+    sh.addColorStop(0.55, 'rgba(255,255,255,0.06)');
+    sh.addColorStop(1, 'rgba(255,255,255,0)');
+    cx2d.fillStyle = sh;
+    cx2d.beginPath(); cx2d.arc(x, y, R - 0.5, 0, Math.PI * 2); cx2d.fill();
+  }
+
   function step() {
-    dx.clearRect(0, 0, S * 2, S * 2);  // 180×180 physical
+    dx.clearRect(0, 0, W_L * 2, H_L * 2);
     dx.save();
     dx.scale(2, 2);
 
-    // Dark sphere background — fill entire logical canvas
-    const bg = dx.createRadialGradient(CX - 10, CY - 14, 3, CX, CY, S * 0.5);
-    bg.addColorStop(0,   'rgba(30,15,80,0.97)');
-    bg.addColorStop(0.7, 'rgba(10,5,40,0.99)');
-    bg.addColorStop(1,   'rgba(5,2,20,1)');
-    dx.fillStyle = bg;
-    dx.beginPath(); dx.arc(CX, CY, S * 0.5, 0, Math.PI * 2); dx.fill();
-
-    // Physics
+    // 物理：重力+摩擦+底面/侧壁碰撞
     for (const b of balls) {
-      // 重力
       b.vy += GRAV;
-      // 顺时针涡流 + 随机纵向扰动
-      const ddx0 = b.x - CX, ddy0 = b.y - CY;
-      const dist0 = Math.sqrt(ddx0*ddx0 + ddy0*ddy0) || 1;
-      b.vx +=  (ddy0 / dist0) * SWIRL;
-      b.vy += -(ddx0 / dist0) * SWIRL;
-      // 小幅随机垂直脉冲，增加乱序感
-      b.vy += (Math.random() - 0.5) * 0.06;
-      // 速度限制 + 保持最低速（防止停止）
-      const spd = Math.sqrt(b.vx*b.vx + b.vy*b.vy);
-      const MIN_SPD = 0.4, MAX_SPD = 2.0;
-      if (spd > MAX_SPD) { b.vx *= MAX_SPD/spd; b.vy *= MAX_SPD/spd; }
-      else if (spd < MIN_SPD && spd > 0) { b.vx *= MIN_SPD/spd; b.vy *= MIN_SPD/spd; }
+      b.vx *= FRIC;
+      b.x  += b.vx;
+      b.y  += b.vy;
+      b.rot += b.vrot;
 
-      b.x += b.vx;
-      b.y += b.vy;
-
-      // 圆壁碰撞（仅壁碰时适度衰减）
-      const ddx = b.x - CX, ddy = b.y - CY;
-      const dist = Math.sqrt(ddx*ddx + ddy*ddy);
-      if (dist + b.r > CR) {
-        const nx = ddx/dist, ny = ddy/dist;
-        const dot = b.vx*nx + b.vy*ny;
-        b.vx = (b.vx - 2*dot*nx) * DAMP;
-        b.vy = (b.vy - 2*dot*ny) * DAMP;
-        const ov = dist + b.r - CR;
-        b.x -= nx * ov; b.y -= ny * ov;
-      }
+      // 左右墙
+      if (b.x - b.r < 2)       { b.x = 2 + b.r;       b.vx =  Math.abs(b.vx) * DAMP; }
+      if (b.x + b.r > W_L - 2) { b.x = W_L - 2 - b.r; b.vx = -Math.abs(b.vx) * DAMP; }
+      // 底面
+      if (b.y + b.r > H_L - 1) { b.y = H_L - 1 - b.r; b.vy = -Math.abs(b.vy) * DAMP; b.vrot *= 0.9; }
+      // 顶部（球门横梁内侧）
+      if (b.y - b.r < 2)       { b.y = 2 + b.r;       b.vy =  Math.abs(b.vy) * DAMP; }
     }
-    // Ball-ball collision
+    // 球碰球
     for (let i = 0; i < balls.length; i++) {
       for (let j = i + 1; j < balls.length; j++) {
-        const a = balls[i], bb2 = balls[j];
-        const dx2 = a.x - bb2.x, dy2 = a.y - bb2.y;
-        const dist2 = Math.sqrt(dx2*dx2 + dy2*dy2);
-        const minD = a.r + bb2.r;
-        if (dist2 < minD && dist2 > 0) {
-          const nx = dx2/dist2, ny = dy2/dist2;
-          const ov = (minD - dist2) / 2;
-          a.x += nx*ov;  a.y += ny*ov;
-          bb2.x -= nx*ov; bb2.y -= ny*ov;
-          const relVx = a.vx - bb2.vx, relVy = a.vy - bb2.vy;
+        const a = balls[i], b2 = balls[j];
+        const dx2 = a.x - b2.x, dy2 = a.y - b2.y;
+        const dist = Math.sqrt(dx2*dx2 + dy2*dy2);
+        const minD = a.r + b2.r;
+        if (dist < minD && dist > 0) {
+          const nx = dx2/dist, ny = dy2/dist;
+          const ov = (minD - dist) / 2;
+          a.x  += nx*ov;  a.y  += ny*ov;
+          b2.x -= nx*ov;  b2.y -= ny*ov;
+          const relVx = a.vx - b2.vx, relVy = a.vy - b2.vy;
           const dot = relVx*nx + relVy*ny;
           if (dot < 0) {
-            a.vx  -= dot * nx * 0.75;  a.vy  -= dot * ny * 0.75;
-            bb2.vx += dot * nx * 0.75; bb2.vy += dot * ny * 0.75;
+            a.vx  -= dot * nx * 0.7;  a.vy  -= dot * ny * 0.7;
+            b2.vx += dot * nx * 0.7;  b2.vy += dot * ny * 0.7;
           }
         }
       }
     }
 
-    // Draw balls — 与主 canvas drawBall 保持一致的渐变方式
-    for (const b of balls) {
-      const hx = b.x - b.r * 0.40, hy = b.y - b.r * 0.40;
-      const g = dx.createRadialGradient(hx, hy, 0, hx, hy, b.r * 2.0);
-      g.addColorStop(0,    b.pal[0]);
-      g.addColorStop(0.40, b.pal[1]);
-      g.addColorStop(0.75, b.pal[2]);
-      g.addColorStop(1,    b.pal[3]);
-      dx.fillStyle = g;
-      dx.beginPath(); dx.arc(b.x, b.y, b.r, 0, Math.PI * 2); dx.fill();
-    }
+    // 绘制（按 y 排序，后画的在上）
+    balls.sort((a, b) => a.y - b.y);
+    for (const b of balls) drawMiniFoot(b);
 
     dx.restore();
     requestAnimationFrame(step);
@@ -1285,35 +1567,46 @@ function updateSlots(idx) {
   });
 }
 
-// 难度切换
+// ═══════════════════════════════════════════════════════════
+//  控制器：RISK LEVEL（难度/火焰）+ LINES + BET + BALLS + AUTO
+// ═══════════════════════════════════════════════════════════
+
+// 难度（RISK LEVEL）— 通过 3 个火焰切换
 const modes = ['佛系', '刺激', '疯狂'];
-const modeColors = ['#ffcc22', '#ff8833', '#dd44ff'];
+const modeColors = ['#ffd84a', '#ff8833', '#dd44ff'];
 let modeIdx = 0;
-const modeEl = document.querySelector('.sel-mode');
-document.querySelectorAll('.ctrl-sel')[1].querySelectorAll('.sel-arrow').forEach((btn, dir) => {
-  btn.addEventListener('click', () => {
+const flameEls = document.querySelectorAll('.risk-flames .flame');
+function renderFlames() {
+  flameEls.forEach((f, i) => {
+    f.classList.toggle('active', i <= modeIdx);
+  });
+}
+renderFlames();
+flameEls.forEach((f, i) => {
+  f.addEventListener('click', () => {
     if (balls.length > 0 || pendingSettles > 0) return;
-    modeIdx = (modeIdx + (dir === 1 ? 1 : -1) + modes.length) % modes.length;
-    modeEl.textContent = modes[modeIdx];
-    modeEl.style.color = modeColors[modeIdx];
+    modeIdx = i;
+    renderFlames();
     updateSlots(modeIdx);
   });
 });
 
-// ── 飞行中锁定控制器（投注/难度/行数不可变更）──
-// 在 launchBall() 时锁定，afterSettle() 时解锁
-const _ctrlArrows = document.querySelectorAll('.ctrl-sel .sel-arrow');
+// ── 飞行中锁定控制器（投注/难度/行数/球数/自动不可变更）──
+const _ctrlArrows = document.querySelectorAll(
+  '.ctrl-bet .sel-arrow, .ctrl-rows .sel-arrow, .ctrl-balls .sel-arrow, .ctrl-auto .sel-arrow'
+);
 function lockControls(lock) {
   _ctrlArrows.forEach(btn => { btn.disabled = lock; });
-  // 解锁时还原行数边界状态（updateRowArrows 在此时已定义）
+  flameEls.forEach(f => { f.style.pointerEvents = lock ? 'none' : ''; f.style.opacity = lock ? (f.classList.contains('active') ? 0.7 : 0.35) : ''; });
+  // 解锁时还原行数边界状态
   if (!lock && typeof updateRowArrows === 'function') updateRowArrows();
 }
 
-// 投注切换
+// 投注切换（BET AMOUNT）
 const betValues = [1, 2, 5, 10, 15, 20, 25, 50, 100, 200, 500, 1000];
 let betIdx = 2;
-const betEl = document.querySelector('.ctrl-sel:first-child .sel-value');
-document.querySelectorAll('.ctrl-sel')[0].querySelectorAll('.sel-arrow').forEach((btn, dir) => {
+const betEl = document.querySelector('.ctrl-bet .sel-value');
+document.querySelectorAll('.ctrl-bet .sel-arrow').forEach((btn, dir) => {
   btn.addEventListener('click', () => {
     if (balls.length > 0 || pendingSettles > 0) return;
     betIdx = Math.max(0, Math.min(betValues.length - 1, betIdx + (dir === 1 ? 1 : -1)));
@@ -1321,11 +1614,36 @@ document.querySelectorAll('.ctrl-sel')[0].querySelectorAll('.sel-arrow').forEach
   });
 });
 
+// 球数（BALLS AMOUNT）— 一次发球数，1~5 球
+const ballsPerRound = [1, 2, 3, 4, 5];
+let ballsIdx = 0;
+const ballsEl = document.querySelector('.sel-balls');
+document.querySelectorAll('.ctrl-balls .sel-arrow').forEach((btn, dir) => {
+  btn.addEventListener('click', () => {
+    if (balls.length > 0 || pendingSettles > 0) return;
+    ballsIdx = Math.max(0, Math.min(ballsPerRound.length - 1, ballsIdx + (dir === 1 ? 1 : -1)));
+    ballsEl.textContent = ballsPerRound[ballsIdx];
+  });
+});
+
+// 自动（AUTO）— 自动次数，0 表示关闭；正数表示连发次数
+const autoValues = [0, 10, 25, 50, 100, 250, 500];
+let autoIdx = 0;
+const autoEl = document.querySelector('.sel-auto');
+document.querySelectorAll('.ctrl-auto .sel-arrow').forEach((btn, dir) => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (balls.length > 0 || pendingSettles > 0) return;
+    autoIdx = Math.max(0, Math.min(autoValues.length - 1, autoIdx + (dir === 1 ? 1 : -1)));
+    autoEl.textContent = autoValues[autoIdx];
+  });
+});
+
 // 行数切换
 const rowValues = [8, 9, 10, 11, 12, 13, 14, 15, 16];
 let rowIdx = rowValues.indexOf(13); // 默认 13
 const rowEl = document.querySelector('.sel-rows');
-const [rowBtnPrev, rowBtnNext] = document.querySelectorAll('.ctrl-sel')[2].querySelectorAll('.sel-arrow');
+const [rowBtnPrev, rowBtnNext] = document.querySelectorAll('.ctrl-rows .sel-arrow');
 
 function updateRowArrows() {
   rowBtnPrev.disabled = (rowIdx === 0);
@@ -1347,6 +1665,7 @@ updateRowArrows(); // 初始化时同步一次
 // 跨轮次持久状态（行数切换时保留余额）
 let balance        = 1730.50;
 let autoMode       = false;
+let autoRemaining  = 0;         // AUTO 连发剩余次数
 let balls          = [];
 let pegGlows       = {};
 let pendingSettles = 0;
@@ -1405,7 +1724,8 @@ function initGame() {
   const ctx      = canvas.getContext('2d');
   const balEl    = document.querySelector('.bal-value');
   const startBtn = document.querySelector('.start-btn');
-  const autoBtn  = document.querySelector('.auto-btn');
+  const startLbl = startBtn.querySelector('span');           // 内部文本容器（被 CSS 隐藏，仅作状态承载）
+  const autoPanel = document.querySelector('.ctrl-auto');    // AUTO 面板承担自动按钮角色
   const histList = document.querySelector('.hist-list');
 
   // 行数切换后重置按钮状态（上一局球若未落槽已被清除，按钮应可用）
@@ -1439,30 +1759,80 @@ function initGame() {
     while (histList.children.length > 30) histList.removeChild(histList.firstChild);
   }
 
-  // 按分裂深度返回球颜色 [高光, 中, 深, 最深]
+  // 足球配色：底色(白) + 五边形色 + 阴影 + 最深（用于分裂态标识）
   const BALL_PALETTES = [
-    ['#ffd84a','#e89000','#b05a00','#6e3000'], // depth 0：原金色
-    ['#ff8844','#d04000','#8a2000','#4a0a00'], // depth 1：橙红
-    ['#ff4466','#c01040','#780020','#380010'], // depth 2：深红
+    ['#ffffff','#1a1a1a','#d8dce0'],   // depth 0：经典黑白足球
+    ['#fff1e0','#8a2a08','#d8bfa8'],   // depth 1：暖橙足球
+    ['#ffdfe5','#880020','#d8a8b0'],   // depth 2：深红足球
   ];
 
-  // ── 绘制单球 ──
+  // ── 绘制单球（足球样式：白底 + 5 个黑色五边形）──
   function drawBall(x, y, alpha = 1, depth = 0) {
     ctx.shadowBlur = 0;
     ctx.globalAlpha = alpha;
-    const pal = BALL_PALETTES[Math.min(depth, BALL_PALETTES.length - 1)];
-    const hx = x - ballR * 0.40;
-    const hy = y - ballR * 0.40;
-    const grad = ctx.createRadialGradient(hx, hy, 0, hx, hy, ballR * 2.0);
-    grad.addColorStop(0,    pal[0]);
-    grad.addColorStop(0.40, pal[1]);
-    grad.addColorStop(0.75, pal[2]);
-    grad.addColorStop(1,    pal[3]);
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(x, y, ballR, 0, Math.PI * 2);
-    ctx.fill();
+    drawSoccerBall(ctx, x, y, ballR);
     ctx.globalAlpha = 1;
+  }
+
+  /**
+   * 按截角二十面体正投影绘制 ⚽ 足球
+   * 几何布局（共享边构型）：
+   *   - 中心黑色正五边形（边长 s1）
+   *   - 5 个白色正六边形围绕中心五边形，每个六边形的一条内边与中心五边形的一条边重合
+   *   - 相邻两六边形在五边形顶点处"顶点邻接"，它们的外顶点之间留出三角形黑色缝隙
+   *   - 这些黑色缝隙 + 外圆边缘共同构成 5 瓣"背面黑五边形"的可见投影
+   * 底色采用黑色，不再画白色内圆 → 黑色瓣直接透出
+   */
+  function drawSoccerBall(cx2d, x, y, R) {
+    // 阴影
+    cx2d.save();
+    cx2d.fillStyle = 'rgba(0,0,0,0.38)';
+    cx2d.beginPath(); cx2d.arc(x + 0.8, y + 1.4, R * 0.96, 0, Math.PI * 2); cx2d.fill();
+    cx2d.restore();
+
+    // 1. 黑色底圆（作为中心五边形 + 5 瓣 + 外圈细边的共同底色）
+    cx2d.fillStyle = '#141414';
+    cx2d.beginPath(); cx2d.arc(x, y, R, 0, Math.PI * 2); cx2d.fill();
+
+    // 几何参数（截角二十面体正投影）
+    const r1       = R * 0.26;                           // 中心五边形外接圆半径
+    const a1       = r1 * Math.cos(Math.PI / 5);         // 中心五边形 apothem
+    const s1       = 2 * r1 * Math.sin(Math.PI / 5);     // 五边形边长 = 六边形边长
+    const r2       = s1;                                 // 六边形外接圆半径
+    const a2       = r2 * Math.cos(Math.PI / 6);         // 六边形 apothem
+    const hex_dist = a1 + a2;                            // 六边形中心到原点的距离
+
+    // 2. 5 个白色六边形（一条边与中心五边形共享）
+    //    六边形方向：朝内边的法线 = 径向外，所以顶点相对朝内方向偏移 ±30°, ±90°, ±150°
+    const whiteGrad = cx2d.createRadialGradient(x - R * 0.3, y - R * 0.35, 0, x, y, R);
+    whiteGrad.addColorStop(0,    '#ffffff');
+    whiteGrad.addColorStop(0.7,  '#f3f4f6');
+    whiteGrad.addColorStop(1,    '#c8ced4');
+    cx2d.fillStyle = whiteGrad;
+    for (let i = 0; i < 5; i++) {
+      const ang = (i * Math.PI * 2) / 5 - Math.PI / 2;  // 从正上方 72° 均分
+      const hx = x + Math.cos(ang) * hex_dist;
+      const hy = y + Math.sin(ang) * hex_dist;
+      cx2d.beginPath();
+      for (let j = 0; j < 6; j++) {
+        // 顶点角度：朝内方向 ang+π，起点偏移 π/6（让一条边法线对齐径向）
+        const vang = ang + Math.PI + Math.PI / 6 + (j * Math.PI / 3);
+        const vx = hx + Math.cos(vang) * r2;
+        const vy = hy + Math.sin(vang) * r2;
+        j === 0 ? cx2d.moveTo(vx, vy) : cx2d.lineTo(vx, vy);
+      }
+      cx2d.closePath();
+      cx2d.fill();
+    }
+    // 中心五边形区域本身底色就是黑色，无需再画（被 6 个白六边形自然围出）
+
+    // 3. 顶部径向高光（球面质感）
+    const sh = cx2d.createRadialGradient(x - R * 0.4, y - R * 0.45, 0, x - R * 0.4, y - R * 0.45, R * 0.95);
+    sh.addColorStop(0,    'rgba(255,255,255,0.45)');
+    sh.addColorStop(0.55, 'rgba(255,255,255,0.06)');
+    sh.addColorStop(1,    'rgba(255,255,255,0)');
+    cx2d.fillStyle = sh;
+    cx2d.beginPath(); cx2d.arc(x, y, R - 0.5, 0, Math.PI * 2); cx2d.fill();
   }
 
   // ── 绘制球 + 尾部幻影 ──
@@ -1654,10 +2024,25 @@ function initGame() {
     lockControls(false);
     drawBoard();
 
-    if (autoMode) {
+    if (autoMode && autoRemaining > 0) {
       setTimeout(() => {
-        if (autoMode) launchBall();
-      }, 800);
+        if (autoMode && autoRemaining > 0) {
+          const ok = launchBall();
+          if (ok) autoRemaining--;
+          else {
+            autoMode = false;
+            autoRemaining = 0;
+            autoPanel.classList.remove('active');
+          }
+        } else if (autoMode) {
+          autoMode = false;
+          autoPanel.classList.remove('active');
+        }
+      }, 600);
+    } else if (autoMode) {
+      // 余数归零，退出自动
+      autoMode = false;
+      autoPanel.classList.remove('active');
     }
   }
 
@@ -1739,53 +2124,67 @@ function initGame() {
     }
   }
 
-  // ── 发球 ──
+  // ── 一次发球（支持 BALLS AMOUNT 同时多球）──
   function launchBall() {
-    const bet = betValues[betIdx];
-    if (balance < bet) {
-      startBtn.textContent = '余额不足';
-      setTimeout(() => { startBtn.textContent = '开始'; }, 1200);
-      return;
+    const bet       = betValues[betIdx];
+    const ballsCnt  = ballsPerRound[ballsIdx];
+    const totalCost = parseFloat((bet * ballsCnt).toFixed(2));
+    if (balance < totalCost) {
+      if (startLbl) startLbl.textContent = '余额不足';
+      setTimeout(() => { if (startLbl) startLbl.textContent = 'PLAY'; }, 1200);
+      return false;
     }
 
-    balance = parseFloat((balance - bet).toFixed(2));
+    balance = parseFloat((balance - totalCost).toFixed(2));
     balEl.textContent = fmtBalance(balance);
     startBtn.disabled = true;
     lockControls(true);
 
-    balls.push({
-      x:  cx + (Math.random() - 0.5) * 20,
-      y:  padT - 16,
-      vx: 0,
-      vy: 1.6,
-      trail:    [],
-      cooldown: {},
-      isSplit:   false,
-      splitFrom: null,
-      weight:    1.0,
-    });
+    // 同时发射 N 颗球，横向错开避免重叠
+    for (let k = 0; k < ballsCnt; k++) {
+      const spread = (k - (ballsCnt - 1) / 2) * 8;
+      balls.push({
+        x:  cx + spread + (Math.random() - 0.5) * 10,
+        y:  padT - 16 - k * 14,                // 纵向错开，避免首帧重叠
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: 1.6,
+        trail:    [],
+        cooldown: {},
+        isSplit:   false,
+        splitFrom: null,
+        weight:    1.0,
+      });
+    }
 
-    if (!rafId || balls.length === 1) {
+    if (!rafId || balls.length === ballsCnt) {
       rafId = requestAnimationFrame(gameLoop);
     }
+    return true;
   }
 
-  // ── 开始按钮 ──
+  // ── PLAY 足球按钮 ──
+  // 点击：若 AUTO>0 启动连发；再次点击进行中的 PLAY 会停止自动
   startBtn.addEventListener('click', () => {
-    launchBall();
-  }, { signal });
-
-  // ── 自动按钮 ──
-  const autoTextEl = autoBtn.querySelector('span:last-child');
-  autoBtn.addEventListener('click', () => {
-    autoMode = !autoMode;
     if (autoMode) {
-      autoBtn.classList.add('active');
-      autoTextEl.textContent = '停止';
-      if (balls.length === 0 && pendingSettles === 0) launchBall();
-    } else {
-      autoBtn.classList.remove('active');
-      autoTextEl.textContent = '自动';
+      // 停止自动
+      autoMode = false;
+      autoRemaining = 0;
+      autoPanel.classList.remove('active');
+      return;
+    }
+    const autoTotal = autoValues[autoIdx];
+    if (autoTotal > 0) {
+      autoMode      = true;
+      autoRemaining = autoTotal;
+      autoPanel.classList.add('active');
+    }
+    const ok = launchBall();
+    if (!ok && autoMode) {
+      autoMode = false;
+      autoRemaining = 0;
+      autoPanel.classList.remove('active');
+    } else if (autoMode) {
+      autoRemaining--;
     }
   }, { signal });
 
@@ -1907,23 +2306,33 @@ function playWinSfx(multiplier) {
   });
 }
 
-// ── 设置按钮 & 面板 ──
+// ── 设置按钮 & 面板（header 右上角菜单图标承担）──
 let sfxOn = true;
-const settingsBtn   = document.getElementById('settingsBtn');
+const iconMenu      = document.getElementById('iconMenu');
+const iconSound     = document.getElementById('iconSound');
 const settingsPanel = document.getElementById('settingsPanel');
 const toggleMusic   = document.getElementById('toggleMusic');
 const toggleSfx     = document.getElementById('toggleSfx');
 
-// 点按钮：切换面板显示
-settingsBtn.addEventListener('click', e => {
+// 菜单图标：切换面板显示
+iconMenu.addEventListener('click', e => {
   e.stopPropagation();
   getAudioCtx();
   settingsPanel.classList.toggle('open');
 });
 
+// 音量图标：快捷切换音效（点击 = 音效开关）
+iconSound.addEventListener('click', e => {
+  e.stopPropagation();
+  getAudioCtx();
+  sfxOn = !sfxOn;
+  toggleSfx.checked = sfxOn;
+  iconSound.style.opacity = sfxOn ? '0.88' : '0.35';
+});
+
 // 点面板外：收起
 document.addEventListener('click', e => {
-  if (!settingsPanel.contains(e.target) && e.target !== settingsBtn) {
+  if (!settingsPanel.contains(e.target) && e.target !== iconMenu) {
     settingsPanel.classList.remove('open');
   }
 });
@@ -1940,6 +2349,7 @@ toggleMusic.addEventListener('change', () => {
 // 音效开关
 toggleSfx.addEventListener('change', () => {
   sfxOn = toggleSfx.checked;
+  iconSound.style.opacity = sfxOn ? '0.88' : '0.35';
 });
 
 // 第一次用户交互时启动音频（浏览器自动播放策略）

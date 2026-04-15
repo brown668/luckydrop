@@ -900,7 +900,13 @@ body {
 <script>
 // ── 当前行数（8-16），X 行对应 X+1 个倍率槽 ──
 let selectedRows = 13;
-const PAD_SIDE = 10;   // 钉板左右各留 10px，远离手机边缘
+const PAD_SIDE   = 10;
+const ROWS_MAX   = 16;                               // 固定参考行数（决定canvas高度）
+const D_16       = (390 - 2 * PAD_SIDE) / 17;       // ≈ 21.76px，16行基准钉间距
+const ROW_H16    = D_16 * Math.sqrt(3) / 2;         // ≈ 18.84px，16行基准行高
+const WALL_SLOPE = 1 / Math.sqrt(3);                 // 等边三角形斜率（永远固定）
+// d(ROWS) = D_16 * ROWS_MAX / ROWS — 行少则间距大，铺满固定三角形
+// domeR(d) = 3*d/4 — 壁顶开口始终与外沿钉对齐
 
 // 分裂钉：仅 13 行时启用
 function getSplits() {
@@ -919,14 +925,13 @@ function drawBoard(glows = {}) {
   const W      = wrap.offsetWidth;   // canvas 保持全宽，避免背景色露边
 
   const ROWS       = selectedRows;
-  const SLOTS      = selectedRows + 1;         // 第一行3钉 → 底行(ROWS+2)钉 → ROWS+1槽
+  const SLOTS      = selectedRows + 1;
   const padT       = 10 + mwH;
   const padB       = 7;
-  // 等边三角形网格：行高 = 横向间距 × √3/2
-  const d_full     = (W - 2 * PAD_SIDE) / SLOTS;
-  const rowH       = d_full * Math.sqrt(3) / 2;
-  const PEG_AREA_H = rowH * ROWS;              // 总高随行数自适应
-  const H          = padT + PEG_AREA_H + padB;
+  // d 随行数缩放：底行外沿始终贴 PAD_SIDE 安全边缘，行少则钉子更大
+  const d          = (W - 2 * PAD_SIDE) / (ROWS + 1);
+  const rowH       = d * Math.sqrt(3) / 2;
+  const H          = padT + ROW_H16 * ROWS_MAX + padB;  // canvas 高度永远固定
 
   const dpr = window.devicePixelRatio || 1;
   canvas.width  = W * dpr;
@@ -939,24 +944,22 @@ function drawBoard(glows = {}) {
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
   const cx   = W / 2;
-  const d    = d_full;   // 已在上方计算（等边三角形）
-  const pegR = Math.min(rowH, d) * 0.17;   // 钉子半径随行高/槽宽等比缩放
+  const pegR = Math.min(rowH, d) * 0.17;
 
-  // 第一行始终3颗钉子，底行钉数=槽数+1，左右压住槽边界
+  // 底行钉子中心固定在 canvas 底部上方 20px 处（视觉一致性）
+  const pegShift  = (H - padB - 15) - (padT + (ROWS - 0.5) * rowH);
   const pegX = (row, col) => cx - ((row + 2) * d) / 2 + col * d;
-  const pegY = (row)      => padT + row * rowH + rowH / 2;
+  const pegY = (row)      => padT + row * rowH + rowH / 2 + pegShift;
 
   const splits = getSplits();
 
-  const topY = padT + rowH / 2;
+  const topY = pegY(0);
   const botY = H - padB;
 
-  // 外侧发光壁固定不随行数变化（以 14槽/13行 为基准参考，等边三角形）
-  const WALL_d    = W / 15;
-  const WALL_rowH = WALL_d * Math.sqrt(3) / 2;
-  const domeR     = Math.round(7 * WALL_d / 4);    // ≈ 45px，固定
-  const slope     = WALL_d / (2 * WALL_rowH);       // ≈ 0.578，固定
-  const domeBaseY = padT;
+  // 发光壁：斜率固定；domeR 跟随 d；domeBaseY 跟随钉子顶部
+  const domeR     = 3 * d / 4;
+  const slope     = WALL_SLOPE;
+  const domeBaseY = padT + pegShift;
   const wallTL    = cx - domeR;
   const wallTR    = cx + domeR;
   const wallBL    = wallTL - (botY - domeBaseY) * slope;
@@ -1281,23 +1284,30 @@ const SLOT_REF = [
   [50,  5,  null, 2.0, 1.5, 1.2, 0.8, 0.2, 0.15, 0.1],  // 激进
   [100, 10, null, 3.0, 2.0, 1.5, 0.5, 0.1, 0.08, 0.05], // 暴富
 ];
+// 行数≤10 时 null 槽位命中概率过高（>4%），mystRTP 会超出 RTP 目标导致 scale 打底
+// 用以下普通倍率替代，保持数值单调性
+const SLOT_REF_NULL_REPLACE = [2.0, 3.0, 5.0]; // 稳健 / 激进 / 暴富
 
 // 根据行数生成基础倍率配置（对称展开）
 function buildBaseConfigs(rows) {
-  return SLOT_REF.map(ref => {
-    const slots = rows + 1;            // 第一行2钉 → ROWS+1槽
+  return SLOT_REF.map((ref, ri) => {
+    const slots = rows + 1;            // 第一行3钉 → ROWS+1槽
     const half  = Math.floor(slots / 2);
-    const left  = ref.slice(0, half);
+    // 行数≤10 时 null 槽位命中率过高，替换为普通倍率以确保校准正常
+    const useNull = rows >= 11;
+    const r = useNull ? ref : ref.map(v => v === null ? SLOT_REF_NULL_REPLACE[ri] : v);
+    const left  = r.slice(0, half);
     return slots % 2 === 1
-      ? [...left, ref[half], ...left.slice().reverse()]
-      : [...left,             ...left.slice().reverse()];
+      ? [...left, r[half], ...left.slice().reverse()]
+      : [...left,           ...left.slice().reverse()];
   });
 }
 
 // RTP 校准：蒙特卡洛模拟 → 等比缩放使期望 RTP ≈ 97.5%
 function calibrateConfigs(rows, base) {
   const SLOTS  = rows + 1;                                // 第一行3钉 → ROWS+1槽
-  const W = 390, d = (W - 2 * PAD_SIDE) / SLOTS, CX = W / 2;
+  const W = document.querySelector('.board-wrap')?.offsetWidth || 390;
+  const d = (W - 2 * PAD_SIDE) / (rows + 1), CX = W / 2;
   const TRIALS = 50000;
   const curSplits = getSplits();
   const pX = (r, c) => CX - ((r + 2) * d) / 2 + c * d; // 第一行3钉公式
@@ -1370,9 +1380,10 @@ function rebuildSlotDom() {
   const container = document.querySelector('.slots');
   const slots = selectedRows + 1;  // 第一行3钉 → ROWS+1槽
   const cfg   = slotConfigs[modeIdx] || [];
-  container.style.padding = `0 ${PAD_SIDE}px 4px`;   // 与钉板左右留白对齐
-  // 槽宽与钉板有效宽度对齐
-  const slotW  = (390 - 2 * PAD_SIDE) / slots;
+  // 槽宽跟随当前行数的 d（底行外沿 = PAD_SIDE）
+  const d_slot     = (container.offsetWidth - 2 * PAD_SIDE) / slots;
+  container.style.padding = `0 ${PAD_SIDE}px 4px`;
+  const slotW  = d_slot;
   const fsize  = Math.max(8, Math.min(11, Math.floor(slotW * 0.38))) + 'px';
   const xsize  = Math.max(6, Math.min(9,  Math.floor(slotW * 0.28))) + 'px';
 
@@ -1482,19 +1493,20 @@ function initGame() {
   const mwH        = (document.querySelector('.machine-wrap')?.offsetHeight) || 0;
   const padT       = 10 + mwH;
   const padB       = 7;
-  const W          = 390;
+  // 使用实际容器宽度，与 drawBoard 保持一致（.device 有 6px 边框，内容宽 ≠ 390）
+  const W          = document.getElementById('board').parentElement.offsetWidth || 390;
   const cx         = W / 2;
-  const d          = (W - 2 * PAD_SIDE) / SLOTS;  // 钉子收窄，留边距
-  const rowH       = d * Math.sqrt(3) / 2;         // 等边三角形行高
-  const PEG_AREA_H = rowH * ROWS;
-  const H          = padT + PEG_AREA_H + padB;
+  const d          = (W - 2 * PAD_SIDE) / (ROWS + 1); // 底行外沿贴安全边缘，行少钉大
+  const rowH       = d * Math.sqrt(3) / 2;
+  const H          = padT + ROW_H16 * ROWS_MAX + padB; // 固定高度
   const pegR       = Math.min(rowH, d) * 0.17;
   const ballR      = Math.max(4, Math.min(9, pegR * 1.75));
   const splits = getSplits();
 
-  // 钉子坐标（第一行3钉，底行压住槽边界）
+  // 底行钉子中心固定在 canvas 底部上方 15px（与 drawBoard 一致）
+  const pegShift   = (H - padB - 15) - (padT + (ROWS - 0.5) * rowH);
   const pegX = (row, col) => cx - ((row + 2) * d) / 2 + col * d;
-  const pegY = (row)      => padT + row * rowH + rowH / 2;
+  const pegY = (row)      => padT + row * rowH + rowH / 2 + pegShift;
 
   // ── 状态（balance/autoMode/balls 等为模块级，跨 initGame 调用持久）──
   let rafId = null;
@@ -1506,6 +1518,9 @@ function initGame() {
   const startBtn = document.querySelector('.start-btn');
   const autoBtn  = document.querySelector('.auto-btn');
   const histList = document.querySelector('.hist-list');
+
+  // 行数切换后重置按钮状态（上一局球若未落槽已被清除，按钮应可用）
+  if (!autoMode) startBtn.disabled = false;
 
   // 余额格式化
   function fmtBalance(v) {
@@ -1643,8 +1658,9 @@ function initGame() {
   function checkLanded(ball) {
     const landY = H - ballR;
     if (ball.y >= landY) {
-      // 计算槽 index（钉子从 PAD_SIDE 开始，d = (W-2*PAD_SIDE)/SLOTS）
-      let idx = Math.floor((ball.x - PAD_SIDE) / d);
+      // 槽居中，左边界由当前行数的 d 决定
+      const slotLeft = cx - SLOTS * d / 2;
+      let idx = Math.floor((ball.x - slotLeft) / d);
       idx = Math.max(0, Math.min(SLOTS - 1, idx));
       return idx;
     }
@@ -1682,7 +1698,7 @@ function initGame() {
 
   // ── 还原宝箱 ──
   function restoreMystery(slotEl) {
-    slotEl.innerHTML = mysteryHTML;
+    slotEl.innerHTML = MYSTERY_HTML;
   }
 
   // ── 结算 ──
@@ -1722,11 +1738,11 @@ function initGame() {
       el.className = 'float-win' + (multiplier >= 25 ? ' jackpot' : '');
       el.textContent = '+$' + won.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-      // 用 CSS 像素槽宽（钉子偏移 PAD_SIDE，有效宽度 = canvas宽 - 2*PAD_SIDE_CSS）
-      const scale = canvasRect.width / 390;
-      const PAD_CSS  = PAD_SIDE * scale;
-      const cssSlotW = (canvasRect.width - 2 * PAD_CSS) / SLOTS;
-      const slotCenterX = PAD_CSS + (slotIdx + 0.5) * cssSlotW;
+      // 槽居中，CSS 像素下按当前行数 d 缩放（canvasRect.width == W，scale 恒为 1）
+      const d_css       = d;           // d 已用实际 W 计算，无需再乘 scale
+      const cssSlotW    = d_css;       // 单槽宽，用于边缘槽位溢出保护
+      const slotLeftCss = canvasRect.width / 2 - SLOTS * d_css / 2;
+      const slotCenterX = slotLeftCss + (slotIdx + 0.5) * d_css;
       const rawX = canvasRect.left - boardRect.left + slotCenterX;
       const relY = canvasRect.top  - boardRect.top  + canvasRect.height - 20;
 

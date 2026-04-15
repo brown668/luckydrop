@@ -36,6 +36,7 @@ body {
   border-radius: 44px;
   border: 6px solid #062148;
   overflow: hidden;
+  position: relative;         /* 底部抽屉 / backdrop / toast 基于此定位 */
   box-shadow:
     0 0 0 1px rgba(60,140,255,0.25),
     0 32px 120px rgba(10,40,90,0.45),
@@ -65,9 +66,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 18px;
+  padding: 0 12px 0 18px;      /* 右侧 padding 减小，让齿轮更贴边 */
 }
-.hdr-icons { display: flex; align-items: center; gap: 14px; }
+.hdr-icons { display: flex; align-items: center; gap: 22px; }   /* 加大余额与齿轮的间距 */
 .hdr-icon {
   width: 28px; height: 28px;
   display: flex; align-items: center; justify-content: center;
@@ -95,17 +96,50 @@ body {
   text-shadow: 0 0 10px rgba(255,220,60,0.9), 0 0 20px rgba(255,180,0,0.5);
 }
 .logo {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
-  letter-spacing: 3px;
+  letter-spacing: 2.5px;
   color: #ffffff;
   text-shadow: 0 0 12px rgba(120,200,255,0.55), 0 2px 2px rgba(0,0,0,0.45);
+  white-space: nowrap;
 }
-.logo span { color: #4ad66a; text-shadow: 0 0 12px rgba(80,220,130,0.7); }
-.balance-wrap { text-align: right; }
-.bal-label { font-size: 8px; letter-spacing: 2px; color: #6ea0cc; display: block; margin-bottom: 1px; }
-.bal-value { font-family: 'Space Mono', monospace; font-size: 15px; color: #ffd84a; text-shadow: 0 0 10px rgba(255,200,50,0.7); }
-.balance-wrap { position: relative; }
+.logo .logo-golden {
+  color: #ffd84a;
+  text-shadow: 0 0 10px rgba(255,200,50,0.75), 0 2px 2px rgba(0,0,0,0.45);
+}
+/* ─── 底部余额条 ─── */
+.footer-balance {
+  flex-shrink: 0;
+  background: linear-gradient(180deg, rgba(6,28,58,0.92), rgba(4,18,40,0.96));
+  border-top: 1px solid rgba(80,150,220,0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px 12px;
+  position: relative;
+  z-index: 5;
+}
+.balance-wrap {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  position: relative;
+}
+.bal-label {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: #6ea0cc;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.bal-value {
+  font-family: 'Space Mono', monospace;
+  font-size: 19px;
+  font-weight: 700;
+  color: #ffd84a;
+  text-shadow: 0 0 10px rgba(255,200,50,0.75), 0 0 22px rgba(255,180,0,0.35);
+  letter-spacing: 0.5px;
+}
 @keyframes balFloat {
   0%   { opacity: 1; transform: translateY(0)    scale(1); }
   15%  { opacity: 1; transform: translateY(-4px)  scale(1.1); }
@@ -201,45 +235,25 @@ body {
   pointer-events: none;  /* 视觉层，不拦截下层点击事件 */
 }
 
-/* 球门区：矩形球门框 + 球网（参考图风格：细密白色鱼网背景） */
+/* 球门区：使用 goal.png 作为完整 3D 透视球门贴图（含前框/后框/连接杆/顶侧后网） */
 .dome-shell {
-  width: 192px;
-  height: 82px;
-  border-radius: 2px 2px 0 0;
+  width: 108px;    /* 球门宽（基准，稍放大）*/
+  height: 45px;    /* 球门高 ≈ 108 / 2.4 */
+  border-radius: 0;
   position: relative;
-  overflow: hidden;
-  /* 球网底色：偏蓝深色（远处看台阴影） */
-  background:
-    linear-gradient(180deg, rgba(40,70,105,0.55) 0%, rgba(20,45,75,0.78) 55%, rgba(12,30,55,0.88) 100%);
-  border: 2px solid #ffffff;
-  border-bottom: 2px solid #ffffff;
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,0.3),
-    0 4px 10px rgba(0,0,0,0.35),
-    inset 0 0 12px rgba(0,20,40,0.55);
+  overflow: visible;
+  background: url('goal.png') center/100% 100% no-repeat;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.35));
 }
-/* 球网纹理：细密方格（白色） */
-.dome-shell::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    repeating-linear-gradient(90deg,
-      transparent 0 5px,
-      rgba(255,255,255,0.38) 5px 5.6px),
-    repeating-linear-gradient(0deg,
-      transparent 0 4.5px,
-      rgba(255,255,255,0.32) 4.5px 5.1px);
-  pointer-events: none;
-  z-index: 2;
-  mask-image: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.95) 60%, rgba(0,0,0,0.6) 100%);
-  -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.95) 60%, rgba(0,0,0,0.6) 100%);
-}
+.dome-shell::before { content: none; }
 .dome-shell canvas {
   display: block;
-  width: 186px;
-  height: 76px;
-  position: relative;
+  /* 对齐 PNG 前框内部区域：PNG 前框内 L=90/1200=7.5%, R=1110/1200=92.5%, T=70/500=14%, B=450/500=90% */
+  position: absolute;
+  left: 7.5%;
+  top: 14%;
+  width: 85%;
+  height: 76%;
   z-index: 3;
 }
 .dome-shell::after { content: none; }
@@ -799,44 +813,97 @@ body {
   100% { opacity: 0; transform: translateX(-50%) translateY(-60px) scale(0.85); }
 }
 
-/* ─── 设置按钮 & 面板 ─── */
-.settings-btn {
-  display: none;           /* 原紫色齿轮按钮已废弃，改为 header 右上角图标 */
-}
+/* ─── 设置按钮（废弃，保留占位） ─── */
+.settings-btn { display: none; }
 
-.settings-panel {
-  display: none;
+/* ─── 底部抽屉 + 遮罩 ─── */
+.drawer-backdrop {
   position: absolute;
-  top: 48px; right: 14px;
-  background: linear-gradient(180deg, #0d3866 0%, #072548 100%);
-  border: 1.5px solid rgba(80,160,220,0.45);
-  border-radius: 14px;
-  padding: 8px 12px;
-  z-index: 60;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.55);
-  min-width: 0;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
+  z-index: 140;
 }
-.settings-panel.open { display: block; }
+.drawer-backdrop.show {
+  opacity: 1;
+  pointer-events: auto;
+}
 
-.settings-row {
+.settings-drawer {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  background: linear-gradient(180deg, #0d3866 0%, #061a33 100%);
+  border-top: 1.5px solid rgba(80,160,220,0.55);
+  border-radius: 20px 20px 0 0;
+  padding: 10px 18px 28px;
+  transform: translateY(105%);
+  transition: transform .32s cubic-bezier(.22,.85,.35,1);
+  z-index: 150;
+  box-shadow: 0 -10px 32px rgba(0,0,0,0.55);
+}
+.settings-drawer.open { transform: translateY(0); }
+
+.drawer-handle {
+  width: 44px; height: 4px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.32);
+  margin: 4px auto 10px;
+}
+.drawer-title {
+  text-align: center;
+  color: rgba(220,235,255,0.95);
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(80,160,220,0.25);
+  margin-bottom: 4px;
+}
+
+.drawer-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 4px 0;
+  gap: 14px;
+  padding: 13px 4px;
+  cursor: pointer;
+  transition: background .15s;
 }
-.settings-row:not(:last-child) {
-  border-bottom: 1px solid rgba(80,160,220,0.22);
-  padding-bottom: 9px; margin-bottom: 2px;
+.drawer-row:not(:last-child) {
+  border-bottom: 1px solid rgba(80,160,220,0.18);
 }
-.settings-label {
+.drawer-row:hover { background: rgba(80,160,220,0.08); }
+.drawer-row:active { background: rgba(80,160,220,0.14); }
+
+.drawer-icon {
+  width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(160,205,245,0.9);
+  flex-shrink: 0;
+}
+.drawer-icon svg { width: 20px; height: 20px; fill: currentColor; }
+
+.drawer-label {
+  flex: 1;
   font-family: 'Chakra Petch', sans-serif;
-  font-size: 12px; font-weight: 600;
-  color: rgba(200,225,255,0.92);
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(220,235,255,0.95);
   letter-spacing: 0.04em;
 }
+.drawer-arrow {
+  color: rgba(150,200,240,0.55);
+  font-size: 20px;
+  line-height: 1;
+  font-weight: 400;
+}
 
-/* 胶囊开关 */
+.drawer-row-danger .drawer-icon,
+.drawer-row-danger .drawer-label { color: #ff6b78; }
+
+/* 胶囊开关（保留，继续给抽屉内音乐/音效用） */
 .toggle-switch {
   position: relative;
   width: 38px; height: 20px;
@@ -864,6 +931,32 @@ body {
   transition: transform .22s;
 }
 .toggle-switch input:checked + .toggle-track::after { transform: translateX(18px); }
+
+/* ─── Toast ─── */
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: 90px;
+  transform: translateX(-50%) translateY(12px);
+  background: rgba(0,0,0,0.82);
+  color: #fff;
+  padding: 10px 22px;
+  border-radius: 22px;
+  font-family: 'Chakra Petch', 'PingFang SC', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease;
+  z-index: 200;
+  white-space: nowrap;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.45);
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
 </style>
 </head>
 <body>
@@ -881,19 +974,11 @@ body {
   <!-- Header -->
   <div class="header">
     <div class="logo-wrap">
-      <div class="logo">GOAL<span>DROP</span></div>
-      <div class="logo-sub">挑战边缘极限 最高赢取 <em>1000×</em></div>
+      <div class="logo"><span class="logo-golden">GOLDEN</span> GOAL</div>
     </div>
     <div class="hdr-icons">
-      <div class="balance-wrap">
-        <span class="bal-label">余额</span>
-        <span class="bal-value">$1,730.50</span>
-      </div>
-      <div class="hdr-icon" id="iconSound" title="音效">
-        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-      </div>
-      <div class="hdr-icon" id="iconMenu" title="菜单">
-        <svg viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+      <div class="hdr-icon" id="iconMenu" title="设置">
+        <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54C14.36 2.17 14.16 2 13.92 2h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.47c-.12.21-.08.47.12.61l2.03 1.58C4.84 11 4.8 11.32 4.8 11.64v.72c0 .32.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.03-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
       </div>
     </div>
   </div>
@@ -916,7 +1001,7 @@ body {
   <!-- 球门发球区：白色球门 + 网内一堆足球 -->
   <div class="machine-wrap">
     <div class="dome-shell">
-      <canvas id="dome-canvas" width="372" height="152" style="width:186px;height:76px;"></canvas>
+      <canvas id="dome-canvas" width="166" height="66"></canvas>
     </div>
     <div class="dome-base">
       <div class="dome-crossbar"></div>
@@ -925,23 +1010,6 @@ body {
 
   <!-- Peg Board -->
   <div class="board-wrap" style="position:relative;">
-    <button class="settings-btn" id="settingsBtn" title="设置">⚙️</button>
-    <div class="settings-panel" id="settingsPanel">
-      <div class="settings-row">
-        <span class="settings-label">音乐</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="toggleMusic" checked>
-          <span class="toggle-track"></span>
-        </label>
-      </div>
-      <div class="settings-row">
-        <span class="settings-label">音效</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="toggleSfx" checked>
-          <span class="toggle-track"></span>
-        </label>
-      </div>
-    </div>
     <canvas class="board-canvas" id="board"></canvas>
 
     <!-- 右侧浮动：RISK LEVEL + LINES -->
@@ -1030,11 +1098,103 @@ body {
     <button class="start-btn" aria-label="开始"><span>PLAY</span></button>
   </div>
 
-  <!-- Footer -->
+  <!-- 底部余额条 -->
+  <div class="footer-balance">
+    <div class="balance-wrap">
+      <span class="bal-label">余额</span>
+      <span class="bal-value">$1,730.50</span>
+    </div>
+  </div>
+
+  <!-- 设置抽屉遮罩 -->
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+
+  <!-- 底部设置抽屉 -->
+  <div class="settings-drawer" id="settingsPanel">
+    <div class="drawer-handle"></div>
+    <div class="drawer-title">设置</div>
+
+    <div class="drawer-row" id="drawerRules">
+      <span class="drawer-icon">
+        <svg viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM7 4h5v8l-2.5-1.5L7 12V4z"/></svg>
+      </span>
+      <span class="drawer-label">游戏规则</span>
+      <span class="drawer-arrow">›</span>
+    </div>
+
+    <div class="drawer-row" id="drawerMusicRow">
+      <span class="drawer-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+      </span>
+      <span class="drawer-label">音乐</span>
+      <label class="toggle-switch" onclick="event.stopPropagation()">
+        <input type="checkbox" id="toggleMusic" checked>
+        <span class="toggle-track"></span>
+      </label>
+    </div>
+
+    <div class="drawer-row" id="drawerSfxRow">
+      <span class="drawer-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+      </span>
+      <span class="drawer-label">音效</span>
+      <label class="toggle-switch" onclick="event.stopPropagation()">
+        <input type="checkbox" id="toggleSfx" checked>
+        <span class="toggle-track"></span>
+      </label>
+    </div>
+
+    <div class="drawer-row drawer-row-danger" id="drawerExit">
+      <span class="drawer-icon">
+        <svg viewBox="0 0 24 24"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+      </span>
+      <span class="drawer-label">退出游戏</span>
+      <span class="drawer-arrow">›</span>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
 
 </div><!-- /device -->
 
 <script>
+// ── 足球 Sprite：从 ball1.jpg 圆形裁切生成透明 PNG ──
+// 加载完成后其他绘制代码会直接 drawImage 贴图；未加载完时回退到几何绘制
+const BALL_SPRITE = {
+  img:   null,     // 圆形裁切后的 offscreen canvas
+  ready: false,
+};
+(function prepareBallSprite() {
+  const raw = new Image();
+  raw.crossOrigin = 'anonymous';
+  raw.onload = () => {
+    // 原图 728×542，足球大致居中；取方形裁切区域 → 圆形裁切 → 透明
+    const iw = raw.naturalWidth;
+    const ih = raw.naturalHeight;
+    const size = Math.min(iw, ih) - 30;  // 预留 15px 边距规避背景白
+    const cx  = iw / 2;
+    const cy  = ih / 2 - 10;              // 球在图中微偏上，修正
+    const oc = document.createElement('canvas');
+    const S  = 256;                        // sprite 输出尺寸
+    oc.width = S; oc.height = S;
+    const ox = oc.getContext('2d');
+    ox.save();
+    ox.beginPath();
+    ox.arc(S/2, S/2, S/2 - 1, 0, Math.PI * 2);
+    ox.clip();
+    // 源图映射到 sprite 方格
+    ox.drawImage(raw, cx - size/2, cy - size/2, size, size, 0, 0, S, S);
+    ox.restore();
+    BALL_SPRITE.img = oc;
+    BALL_SPRITE.ready = true;
+  };
+  raw.onerror = () => {
+    console.warn('[ball1.jpg] 加载失败，使用回退几何绘制');
+  };
+  raw.src = 'ball1.jpg';
+})();
+
 // ── 当前行数（8-16），X 行对应 X+1 个倍率槽 ──
 let selectedRows = 13;
 const PAD_SIDE   = 10;
@@ -1068,7 +1228,7 @@ function drawBoard(glows = {}) {
   // d 随行数缩放：底行外沿始终贴 PAD_SIDE 安全边缘，行少则钉子更大
   const d          = (W - 2 * PAD_SIDE) / (ROWS + 1);
   const rowH       = d * Math.sqrt(3) / 2;
-  const H          = padT + ROW_H16 * ROWS_MAX + padB;  // canvas 高度永远固定
+  const H          = padT + ROW_H16 * ROWS_MAX + padB - 14;  // canvas 高度（较原始固定高 -14px，目标 ≈360px）
 
   const dpr = window.devicePixelRatio || 1;
   canvas.width  = W * dpr;
@@ -1097,14 +1257,67 @@ function drawBoard(glows = {}) {
   const slope     = WALL_SLOPE;
   const domeBaseY = padT + pegShift;
 
-  // ── Canvas base fill：球场外侧深蓝（看台/深色渐变）──────────────
+  // ── Canvas base fill：球场外侧（虚焦看台夜景，整片柔和蓝色朦胧）──
   ctx.clearRect(0, 0, W, H);
+
+  // 1) 底色：较饱和的蓝色主调（参考图整体蓝色基调）
   const outBg = ctx.createLinearGradient(0, 0, 0, H);
-  outBg.addColorStop(0,    '#0a3a6c');
-  outBg.addColorStop(0.45, '#12558e');
-  outBg.addColorStop(1,    '#0a3866');
+  outBg.addColorStop(0,    '#1e68bd');
+  outBg.addColorStop(0.35, '#1557a5');
+  outBg.addColorStop(1,    '#0a3a7a');
   ctx.fillStyle = outBg;
   ctx.fillRect(0, 0, W, H);
+
+  // 2) 超大尺寸柔和色块：低对比度蓝调互相交融，形成"高斯模糊"朦胧感
+  //    半径 180–260px（远大于外场区域），透明度低，几乎看不见边缘
+  const blurBlobs = [
+    // 左侧朦胧（整块区域的蓝色微调）
+    { x: -0.05, y: 0.02, r: 240, c: '90,170,240',  a: 0.32 },
+    { x:  0.02, y: 0.25, r: 200, c: '30,100,180',  a: 0.35 },
+    { x:  0.22, y: 0.05, r: 180, c: '110,180,250', a: 0.22 },
+    // 右侧朦胧
+    { x:  1.05, y: 0.02, r: 240, c: '90,170,240',  a: 0.32 },
+    { x:  0.98, y: 0.25, r: 200, c: '30,100,180',  a: 0.35 },
+    { x:  0.78, y: 0.05, r: 180, c: '110,180,250', a: 0.22 },
+    // 中下较深（把中部往下压暗，让上方更突出）
+    { x:  0.50, y: 0.35, r: 220, c: '10,45,100',   a: 0.30 },
+  ];
+  for (const B of blurBlobs) {
+    const bx = B.x * W;
+    const by = B.y * H;
+    const g  = ctx.createRadialGradient(bx, by, 0, bx, by, B.r);
+    g.addColorStop(0,    `rgba(${B.c},${B.a})`);
+    g.addColorStop(0.55, `rgba(${B.c},${B.a * 0.5})`);
+    g.addColorStop(1,    `rgba(${B.c},0)`);
+    ctx.fillStyle = g;
+    ctx.fillRect(bx - B.r, by - B.r, B.r * 2, B.r * 2);
+  }
+
+  // 3) 顶部中央"大聚光灯光斑"（参考图顶部那片最亮的柔白区域）
+  //    超大半径 + 超柔过渡，完全看不到圆形边界
+  const spotTop = ctx.createRadialGradient(W * 0.50, -40, 0, W * 0.50, -40, 260);
+  spotTop.addColorStop(0,    'rgba(245,250,255,0.65)');
+  spotTop.addColorStop(0.35, 'rgba(210,230,255,0.30)');
+  spotTop.addColorStop(0.7,  'rgba(170,205,245,0.10)');
+  spotTop.addColorStop(1,    'rgba(130,180,235,0)');
+  ctx.fillStyle = spotTop;
+  ctx.fillRect(0, 0, W, 220);
+
+  // 4) 左右两侧柔光带（参考图两侧偏暗中带微亮的过渡）
+  //    锚点在 canvas 外部，让光从外向内扩散，完全无圆形感
+  const spotLeft = ctx.createRadialGradient(-60, H * 0.10, 0, -60, H * 0.10, 260);
+  spotLeft.addColorStop(0,    'rgba(200,225,255,0.40)');
+  spotLeft.addColorStop(0.5,  'rgba(160,200,245,0.12)');
+  spotLeft.addColorStop(1,    'rgba(100,160,225,0)');
+  ctx.fillStyle = spotLeft;
+  ctx.fillRect(0, 0, 200, 260);
+
+  const spotRight = ctx.createRadialGradient(W + 60, H * 0.10, 0, W + 60, H * 0.10, 260);
+  spotRight.addColorStop(0,    'rgba(200,225,255,0.40)');
+  spotRight.addColorStop(0.5,  'rgba(160,200,245,0.12)');
+  spotRight.addColorStop(1,    'rgba(100,160,225,0)');
+  ctx.fillStyle = spotRight;
+  ctx.fillRect(W - 200, 0, 200, 260);
 
   // ── 球场草坪梯形（缓和透视、宽顶口、深浅横条）──────────────────
   const domeBottomY = mwH - 9;
@@ -1127,74 +1340,74 @@ function drawBoard(glows = {}) {
   ctx.closePath();
   ctx.clip();  // 梯形区域裁剪
 
-  // 基底草绿（参考图：饱和度高的鲜绿）
+  // 基底草绿（参考图：饱和度高的鲜绿，顶部远处略浅）
   const grassGrad = ctx.createLinearGradient(0, domeBottomY, 0, botY);
-  grassGrad.addColorStop(0,    '#3aa860');
-  grassGrad.addColorStop(0.35, '#37a058');
-  grassGrad.addColorStop(0.7,  '#2f9852');
-  grassGrad.addColorStop(1,    '#288348');
+  grassGrad.addColorStop(0,    '#4ab46e');   // 远处略带光照的浅绿
+  grassGrad.addColorStop(0.4,  '#3ba85f');
+  grassGrad.addColorStop(0.75, '#2f9853');
+  grassGrad.addColorStop(1,    '#26823f');   // 近处稍深
   ctx.fillStyle = grassGrad;
   ctx.fillRect(0, domeBottomY - 4, W, botY - domeBottomY + 6);
 
-  // 横向草坪条纹（参考图：宽明显条纹，模拟割草机痕迹）
+  // 横向草坪条纹（参考图：宽明显条纹，模拟割草机痕迹，对比加强）
   const fieldH  = botY - domeBottomY;
-  const stripeN = 7;                          // 7 条带交替
+  const stripeN = 8;                          // 8 条带，更细一点
   const stripeH = fieldH / stripeN;
   for (let i = 0; i < stripeN; i++) {
     const yA = domeBottomY + i * stripeH;
-    ctx.fillStyle = (i % 2 === 0) ? 'rgba(255,255,255,0.07)' : 'rgba(0,30,15,0.10)';
+    // 加强对比：浅条 +12% 白，深条 +18% 黑绿
+    ctx.fillStyle = (i % 2 === 0) ? 'rgba(255,255,250,0.12)' : 'rgba(0,40,18,0.18)';
     ctx.fillRect(0, yA, W, stripeH + 0.5);
   }
 
-  // 草坪斑驳纹理（细噪点）
-  ctx.globalAlpha = 0.06;
-  for (let i = 0; i < 80; i++) {
+  // 细密垂直草丝纹理（每条带内部加上 50-80 根短"草丝"）
+  for (let i = 0; i < stripeN; i++) {
+    const yA = domeBottomY + i * stripeH;
+    const isLight = (i % 2 === 0);
+    const grassColor = isLight ? 'rgba(255,255,240,' : 'rgba(8,40,20,';
+    const grassAlpha = isLight ? 0.08 : 0.12;
+    const grassCount = 70;
+    for (let g = 0; g < grassCount; g++) {
+      const gx = Math.random() * W;
+      const gy = yA + Math.random() * stripeH;
+      const gh = 1.2 + Math.random() * 2.5;        // 草丝长度 1.2-3.7px
+      ctx.strokeStyle = grassColor + grassAlpha + ')';
+      ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.moveTo(gx, gy);
+      ctx.lineTo(gx + (Math.random() - 0.5) * 0.6, gy - gh);
+      ctx.stroke();
+    }
+  }
+
+  // 散落的细小亮斑/暗斑（光斑感）
+  ctx.globalAlpha = 0.5;
+  for (let i = 0; i < 140; i++) {
     const nx = Math.random() * W;
     const ny = domeBottomY + Math.random() * fieldH;
-    const nr = 0.6 + Math.random() * 1.4;
-    ctx.fillStyle = (Math.random() < 0.5) ? '#ffffff' : '#0a3018';
+    const nr = 0.4 + Math.random() * 0.8;
+    const isHi = Math.random() < 0.5;
+    ctx.fillStyle = isHi ? 'rgba(255,255,220,0.18)' : 'rgba(0,25,12,0.22)';
     ctx.beginPath(); ctx.arc(nx, ny, nr, 0, Math.PI * 2); ctx.fill();
   }
   ctx.globalAlpha = 1;
 
-  // ── 球场白色标线 ─────────────────────────────────────────────
-  ctx.lineWidth   = 1.6;
-  ctx.strokeStyle = 'rgba(255,255,255,0.92)';
-  ctx.shadowBlur  = 0;
+  // 边缘暗角（参考图：左右两侧略暗，模拟立体感）
+  const edgeGrad = ctx.createLinearGradient(0, 0, W, 0);
+  edgeGrad.addColorStop(0,    'rgba(0,20,10,0.35)');
+  edgeGrad.addColorStop(0.18, 'rgba(0,20,10,0)');
+  edgeGrad.addColorStop(0.82, 'rgba(0,20,10,0)');
+  edgeGrad.addColorStop(1,    'rgba(0,20,10,0.35)');
+  ctx.fillStyle = edgeGrad;
+  ctx.fillRect(0, domeBottomY, W, fieldH);
+  // 上方光晕（远处略亮）
+  const topGlow = ctx.createLinearGradient(0, domeBottomY, 0, domeBottomY + fieldH * 0.4);
+  topGlow.addColorStop(0, 'rgba(255,255,220,0.10)');
+  topGlow.addColorStop(1, 'rgba(255,255,220,0)');
+  ctx.fillStyle = topGlow;
+  ctx.fillRect(0, domeBottomY, W, fieldH * 0.4);
 
-  // 顶部"D"弧（球门弧 / penalty arc，朝下，紧贴球门口）
-  const topArcY = domeBottomY + 3;
-  const topArcR = 26;
-  ctx.beginPath();
-  ctx.arc(cx, topArcY, topArcR, Math.PI * 0.08, Math.PI * 0.92);
-  ctx.stroke();
-
-  // 中线（横线，沿梯形宽度变化）
-  const midY = (domeBottomY + botY) / 2;
-  const midProgress = (midY - domeBaseY) / (botY - domeBaseY);
-  const midL = wallTL + (wallBL - wallTL) * midProgress;
-  const midR = wallTR + (wallBR - wallTR) * midProgress;
-  ctx.beginPath();
-  ctx.moveTo(midL, midY);
-  ctx.lineTo(midR, midY);
-  ctx.stroke();
-
-  // 中圈
-  const ccR = Math.min(46, (midR - midL) * 0.20);
-  ctx.beginPath();
-  ctx.arc(cx, midY, ccR, 0, Math.PI * 2);
-  ctx.stroke();
-  // 中圈圆点
-  ctx.fillStyle = 'rgba(255,255,255,0.92)';
-  ctx.beginPath(); ctx.arc(cx, midY, 2.5, 0, Math.PI * 2); ctx.fill();
-
-  // 底部禁区弧（半圆，朝上）
-  const penAreaY = botY - 4;
-  const penAreaR = 46;
-  ctx.beginPath();
-  ctx.arc(cx, penAreaY, penAreaR, Math.PI * 1.08, Math.PI * 1.92);
-  ctx.stroke();
-
+  // ── 禁区白色标线已整体去除（大禁区/小禁区/罚球点/D 弧）──
   ctx.restore();
 
   // ── 球场边界白线（梯形外框，参考图细线无发光）──
@@ -1323,16 +1536,16 @@ function drawBoard(glows = {}) {
   const dc   = document.getElementById('dome-canvas');
   if (!dc) return;
   const dx   = dc.getContext('2d');
-  // canvas 物理 372x152，CSS 186x76，scale(2,2) 对齐 → logical = CSS 尺寸
-  const W_L  = 186;
-  const H_L  = 76;
-  const GRAV = 0.12;
+  // canvas 物理 166x66，CSS 83x33，scale(2,2) 对齐 → logical = CSS 尺寸
+  const W_L  = 83;
+  const H_L  = 33;
+  const GRAV = 0.10;
   const DAMP = 0.45;
   const FRIC = 0.88;
-  const BALL_R = 8;
+  const BALL_R = 4.5;  // 球更小，适应小球门
 
-  // 12 颗足球堆满球门
-  const N = 12;
+  // 8 颗足球堆满球门（参考图：球门内塞满 7-9 颗球）
+  const N = 8;
   const balls = Array.from({length: N}, (_, i) => {
     return {
       x:  12 + Math.random() * (W_L - 24),
@@ -1353,12 +1566,17 @@ function drawBoard(glows = {}) {
     drawSoccerGlyph(dx, 0, 0, b.r);
     dx.restore();
   }
-  // 与 drawSoccerBall 共用同一截角二十面体正投影几何
+  // 与 drawSoccerBall 共用同一贴图（ball1.jpg），未加载时回退几何绘制
   function drawSoccerGlyph(cx2d, x, y, R) {
     cx2d.save();
     cx2d.fillStyle = 'rgba(0,0,0,0.38)';
     cx2d.beginPath(); cx2d.arc(x + 0.5, y + 1.0, R * 0.96, 0, Math.PI * 2); cx2d.fill();
     cx2d.restore();
+
+    if (BALL_SPRITE.ready && BALL_SPRITE.img) {
+      cx2d.drawImage(BALL_SPRITE.img, x - R, y - R, R * 2, R * 2);
+      return;
+    }
 
     // 黑底
     cx2d.fillStyle = '#141414';
@@ -1767,10 +1985,10 @@ function initGame() {
   ];
 
   // ── 绘制单球（足球样式：白底 + 5 个黑色五边形）──
-  function drawBall(x, y, alpha = 1, depth = 0) {
+  function drawBall(x, y, alpha = 1, depth = 0, rot = 0) {
     ctx.shadowBlur = 0;
     ctx.globalAlpha = alpha;
-    drawSoccerBall(ctx, x, y, ballR);
+    drawSoccerBall(ctx, x, y, ballR, rot);
     ctx.globalAlpha = 1;
   }
 
@@ -1783,13 +2001,24 @@ function initGame() {
    *   - 这些黑色缝隙 + 外圆边缘共同构成 5 瓣"背面黑五边形"的可见投影
    * 底色采用黑色，不再画白色内圆 → 黑色瓣直接透出
    */
-  function drawSoccerBall(cx2d, x, y, R) {
-    // 阴影
+  function drawSoccerBall(cx2d, x, y, R, rot = 0) {
+    // 阴影（阴影位置不跟随旋转）
     cx2d.save();
     cx2d.fillStyle = 'rgba(0,0,0,0.38)';
     cx2d.beginPath(); cx2d.arc(x + 0.8, y + 1.4, R * 0.96, 0, Math.PI * 2); cx2d.fill();
     cx2d.restore();
 
+    // 优先使用 ball1.jpg 生成的 sprite 贴图（带旋转）
+    if (BALL_SPRITE.ready && BALL_SPRITE.img) {
+      cx2d.save();
+      cx2d.translate(x, y);
+      if (rot) cx2d.rotate(rot);
+      cx2d.drawImage(BALL_SPRITE.img, -R, -R, R * 2, R * 2);
+      cx2d.restore();
+      return;
+    }
+
+    // 回退几何绘制
     // 1. 黑色底圆（作为中心五边形 + 5 瓣 + 外圈细边的共同底色）
     cx2d.fillStyle = '#141414';
     cx2d.beginPath(); cx2d.arc(x, y, R, 0, Math.PI * 2); cx2d.fill();
@@ -1838,7 +2067,7 @@ function initGame() {
   // ── 绘制球 + 尾部幻影 ──
   function drawBallWithTrail(ball) {
     ctx.globalAlpha = 1;
-    drawBall(ball.x, ball.y, 1, ball.depth || 0);
+    drawBall(ball.x, ball.y, 1, ball.depth || 0, ball.rot || 0);
   }
 
   // ── 物理更新 ──
@@ -1852,9 +2081,23 @@ function initGame() {
     ball.x += ball.vx;
     ball.y += ball.vy;
 
-    // 边界反弹
-    if (ball.x < ballR)     { ball.x = ballR;     ball.vx =  Math.abs(ball.vx) * 0.5; }
-    if (ball.x > W - ballR) { ball.x = W - ballR; ball.vx = -Math.abs(ball.vx) * 0.5; }
+    // ── 旋转积分（空气极轻阻尼）──
+    if (ball.rot  == null) ball.rot  = 0;
+    if (ball.vrot == null) ball.vrot = 0;
+    ball.rot  += ball.vrot * dt;
+    ball.vrot *= 0.995;
+
+    // 边界反弹（反弹时注入自旋：ball 被墙弹回，摩擦产生相反方向旋转）
+    if (ball.x < ballR) {
+      ball.x = ballR;
+      ball.vx = Math.abs(ball.vx) * 0.5;
+      ball.vrot += ball.vy / ballR * 0.4;
+    }
+    if (ball.x > W - ballR) {
+      ball.x = W - ballR;
+      ball.vx = -Math.abs(ball.vx) * 0.5;
+      ball.vrot -= ball.vy / ballR * 0.4;
+    }
 
     if (!ball.cooldown) ball.cooldown = {};
     let hitResult = null;
@@ -1907,6 +2150,14 @@ function initGame() {
         ball.vx = side * (0.45 + Math.random() * 0.55);
         ball.vy = Math.max(Math.abs(ball.vy) * 0.65, 0.35) - 0.08;
         ball.cooldown[pegKey] = 18;
+
+        // ── 碰撞驱动旋转：接触点切向速度 → 角速度（摩擦滚动模型）──
+        // 切向量 (tx, ty) = 法向量 (nx, ny) 顺时针旋 90°
+        const tx = -ny;
+        const ty = nx;
+        const vT = ball.vx * tx + ball.vy * ty;  // 切向线速度
+        // ω = v_tangent / R，0.85 为摩擦系数，带轻微随机抖动模拟滑移
+        ball.vrot = vT / ballR * 0.85 + (Math.random() - 0.5) * 0.08;
 
         pegGlows[pegKey] = 1;
         if (!hitResult) {
@@ -2097,6 +2348,8 @@ function initGame() {
             splitFrom: hit.pegKey,
             weight:   splitW,
             depth:    ball.depth,
+            rot:      ball.rot || 0,
+            vrot:     -(ball.vrot || 0) * 0.7 + (Math.random() - 0.5) * 0.2,
           });
           // 分裂特效：粒子 + 飘字 + 音效
           if (window._onSplit) window._onSplit(ball.x, ball.y);
@@ -2153,6 +2406,8 @@ function initGame() {
         isSplit:   false,
         splitFrom: null,
         weight:    1.0,
+        rot:       (Math.random() - 0.5) * Math.PI, // 出场随机姿态
+        vrot:      (Math.random() - 0.5) * 0.05,
       });
     }
 
@@ -2306,35 +2561,57 @@ function playWinSfx(multiplier) {
   });
 }
 
-// ── 设置按钮 & 面板（header 右上角菜单图标承担）──
+// ── 设置抽屉（header 右上角齿轮图标触发）──
 let sfxOn = true;
-const iconMenu      = document.getElementById('iconMenu');
-const iconSound     = document.getElementById('iconSound');
-const settingsPanel = document.getElementById('settingsPanel');
-const toggleMusic   = document.getElementById('toggleMusic');
-const toggleSfx     = document.getElementById('toggleSfx');
+const iconMenu        = document.getElementById('iconMenu');
+const settingsPanel   = document.getElementById('settingsPanel');
+const drawerBackdrop  = document.getElementById('drawerBackdrop');
+const toggleMusic     = document.getElementById('toggleMusic');
+const toggleSfx       = document.getElementById('toggleSfx');
+const drawerRules     = document.getElementById('drawerRules');
+const drawerExit      = document.getElementById('drawerExit');
+const toastEl         = document.getElementById('toast');
 
-// 菜单图标：切换面板显示
+// ── Toast 组件 ──
+let _toastTimer = null;
+function showToast(msg, duration = 1800) {
+  if (!toastEl) return;
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => toastEl.classList.remove('show'), duration);
+}
+
+// 打开抽屉
+function openDrawer() {
+  getAudioCtx();
+  settingsPanel.classList.add('open');
+  drawerBackdrop.classList.add('show');
+}
+// 关闭抽屉
+function closeDrawer() {
+  settingsPanel.classList.remove('open');
+  drawerBackdrop.classList.remove('show');
+}
+
+// 齿轮图标：打开抽屉
 iconMenu.addEventListener('click', e => {
   e.stopPropagation();
-  getAudioCtx();
-  settingsPanel.classList.toggle('open');
+  openDrawer();
 });
 
-// 音量图标：快捷切换音效（点击 = 音效开关）
-iconSound.addEventListener('click', e => {
-  e.stopPropagation();
-  getAudioCtx();
-  sfxOn = !sfxOn;
-  toggleSfx.checked = sfxOn;
-  iconSound.style.opacity = sfxOn ? '0.88' : '0.35';
+// 点击遮罩：关闭抽屉
+drawerBackdrop.addEventListener('click', closeDrawer);
+
+// 游戏规则：toast 敬请期待
+drawerRules.addEventListener('click', () => {
+  showToast('敬请期待');
 });
 
-// 点面板外：收起
-document.addEventListener('click', e => {
-  if (!settingsPanel.contains(e.target) && e.target !== iconMenu) {
-    settingsPanel.classList.remove('open');
-  }
+// 退出游戏：关闭抽屉 + 提示
+drawerExit.addEventListener('click', () => {
+  closeDrawer();
+  showToast('已退出游戏');
 });
 
 // 音乐开关
@@ -2349,7 +2626,6 @@ toggleMusic.addEventListener('change', () => {
 // 音效开关
 toggleSfx.addEventListener('change', () => {
   sfxOn = toggleSfx.checked;
-  iconSound.style.opacity = sfxOn ? '0.88' : '0.35';
 });
 
 // 第一次用户交互时启动音频（浏览器自动播放策略）

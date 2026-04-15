@@ -311,11 +311,12 @@ body {
   height: 28px;
   border-radius: 4px;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  line-height: 1;
   font-family: 'Chakra Petch', sans-serif;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   border: 1px solid transparent;
   position: relative;
@@ -331,7 +332,7 @@ body {
   background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent);
   border-radius: 4px 4px 0 0;
 }
-.slot-x  { font-size: 9px; color: rgba(255,255,255,0.85); margin-left: 1px; }
+.slot-x  { font-size: 8px; color: rgba(255,255,255,0.75); line-height: 1; margin-top: -2px; }
 
 /* 色阶：高倍红 → 橙 → 黄 → 中性 → 低倍绿 */
 
@@ -1236,45 +1237,51 @@ function valToClass(v) {
 let slotEls = [];
 
 // 根据当前 selectedRows 重建槽位 DOM
+// 根据槽宽计算字号：约束来自3字符数字（如"0.2"、"130"），安全系数 slotW÷1.9
+function calcSlotFsize(slotW) {
+  return {
+    fsize: Math.max(9,  Math.min(16, Math.floor(slotW / 1.9))) + 'px',
+    xsize: Math.max(6,  Math.min(10, Math.floor(slotW / 3.5))) + 'px',
+  };
+}
+
+function slotDisp(val) {
+  return val >= 1000 ? (Math.round(val / 100) / 10 + 'K')
+       : val >= 10   ? Math.round(val)
+       : +val.toFixed(1);
+}
+
 function rebuildSlotDom() {
   const container = document.querySelector('.slots');
-  const slots = selectedRows + 1;  // 第一行3钉 → ROWS+1槽
-  const cfg   = slotConfigs[modeIdx] || [];
-  // 槽宽跟随当前行数的 d（底行外沿 = PAD_SIDE）
-  const d_slot     = (container.offsetWidth - 2 * PAD_SIDE) / slots;
+  const slots  = selectedRows + 1;
+  const cfg    = slotConfigs[modeIdx] || [];
+  const slotW  = (container.offsetWidth - 2 * PAD_SIDE) / slots;
   container.style.padding = `0 ${PAD_SIDE}px 4px`;
-  const slotW  = d_slot;
-  const fsize  = Math.max(8, Math.min(11, Math.floor(slotW * 0.38))) + 'px';
-  const xsize  = Math.max(6, Math.min(9,  Math.floor(slotW * 0.28))) + 'px';
+  const { fsize, xsize } = calcSlotFsize(slotW);
 
   container.innerHTML = '';
   for (let i = 0; i < slots; i++) {
     const div = document.createElement('div');
     const val = cfg[i];
-    div.className = 'slot ' + valToClass(val);
+    div.className    = 'slot ' + valToClass(val);
     div.style.fontSize = fsize;
-    const disp = val >= 1000 ? (Math.round(val / 100) / 10 + 'K')
-               : val >= 10   ? Math.round(val)
-               : +val.toFixed(1);
-    div.innerHTML = val < 100
-      ? `<span>${disp}</span><span class="slot-x" style="font-size:${xsize}">×</span>`
-      : `<span>${disp}</span>`;
+    div.innerHTML = `<span>${slotDisp(val)}</span><span class="slot-x" style="font-size:${xsize}">×</span>`;
     container.appendChild(div);
   }
   slotEls = Array.from(container.querySelectorAll('.slot'));
 }
 
 function updateSlots(idx) {
-  const cfg = slotConfigs[idx] || [];
+  const cfg    = slotConfigs[idx] || [];
+  const container = document.querySelector('.slots');
+  const slotW  = (container.offsetWidth - 2 * PAD_SIDE) / (selectedRows + 1);
+  const { fsize, xsize } = calcSlotFsize(slotW);
+
   slotEls.forEach((slot, i) => {
     const val = cfg[i];
-    slot.className = 'slot ' + valToClass(val);
-    const disp = val >= 1000 ? (Math.round(val / 100) / 10 + 'K')
-               : val >= 10   ? Math.round(val)
-               : +val.toFixed(1);
-    slot.innerHTML = val < 100
-      ? `<span>${disp}</span><span class="slot-x">×</span>`
-      : `<span>${disp}</span>`;
+    slot.className     = 'slot ' + valToClass(val);
+    slot.style.fontSize = fsize;
+    slot.innerHTML = `<span>${slotDisp(val)}</span><span class="slot-x" style="font-size:${xsize}">×</span>`;
   });
 }
 

@@ -453,7 +453,12 @@ body {
   font-family: 'Chakra Petch', sans-serif;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
 }
-.sel-arrow:hover { background: linear-gradient(180deg, #8855dd, #6622bb); }
+.sel-arrow:hover  { background: linear-gradient(180deg, #8855dd, #6622bb); }
+.sel-arrow:disabled {
+  background: linear-gradient(180deg, #221144, #160a2a);
+  opacity: 0.38;
+  cursor: not-allowed;
+}
 .sel-info {
   flex: 1;
   text-align: center;
@@ -1329,6 +1334,7 @@ let modeIdx = 0;
 const modeEl = document.querySelector('.sel-mode');
 document.querySelectorAll('.ctrl-sel')[1].querySelectorAll('.sel-arrow').forEach((btn, dir) => {
   btn.addEventListener('click', () => {
+    if (balls.length > 0 || pendingSettles > 0) return;
     modeIdx = (modeIdx + (dir === 1 ? 1 : -1) + modes.length) % modes.length;
     modeEl.textContent = modes[modeIdx];
     modeEl.style.color = modeColors[modeIdx];
@@ -1336,12 +1342,20 @@ document.querySelectorAll('.ctrl-sel')[1].querySelectorAll('.sel-arrow').forEach
   });
 });
 
+// ── 飞行中锁定控制器（投注/难度/行数不可变更）──
+// 在 launchBall() 时锁定，afterSettle() 时解锁
+const _ctrlArrows = document.querySelectorAll('.ctrl-sel .sel-arrow');
+function lockControls(lock) {
+  _ctrlArrows.forEach(btn => { btn.disabled = lock; });
+}
+
 // 投注切换
 const betValues = [1, 2, 5, 10, 20, 50, 100];
 let betIdx = 2;
 const betEl = document.querySelector('.ctrl-sel:first-child .sel-value');
 document.querySelectorAll('.ctrl-sel')[0].querySelectorAll('.sel-arrow').forEach((btn, dir) => {
   btn.addEventListener('click', () => {
+    if (balls.length > 0 || pendingSettles > 0) return;
     betIdx = Math.max(0, Math.min(betValues.length - 1, betIdx + (dir === 1 ? 1 : -1)));
     betEl.textContent = betValues[betIdx];
   });
@@ -1353,6 +1367,7 @@ let rowIdx = rowValues.indexOf(13); // 默认 13
 const rowEl = document.querySelector('.sel-rows');
 document.querySelectorAll('.ctrl-sel')[2].querySelectorAll('.sel-arrow').forEach((btn, dir) => {
   btn.addEventListener('click', () => {
+    if (balls.length > 0 || pendingSettles > 0) return;
     rowIdx = Math.max(0, Math.min(rowValues.length - 1, rowIdx + (dir === 1 ? 1 : -1)));
     selectedRows = rowValues[rowIdx];
     rowEl.textContent = selectedRows;
@@ -1375,6 +1390,7 @@ function onRowsChanged() {
   balls.length  = 0;
   pendingSettles = 0;
   pendingWin     = 0;
+  lockControls(false); // 清空球后立即恢复控制器
   // 重算倍率 + 重建槽位 + 重绘钉板 + 重启游戏循环
   slotConfigs = calibrateConfigs(selectedRows, buildBaseConfigs(selectedRows));
   rebuildSlotDom();
@@ -1666,6 +1682,7 @@ function initGame() {
     }
 
     startBtn.disabled = false;
+    lockControls(false);
     drawBoard();
 
     if (autoMode) {
@@ -1765,6 +1782,7 @@ function initGame() {
     balance = parseFloat((balance - bet).toFixed(2));
     balEl.textContent = fmtBalance(balance);
     startBtn.disabled = true;
+    lockControls(true);
 
     balls.push({
       x:  cx + (Math.random() - 0.5) * 20,

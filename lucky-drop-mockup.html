@@ -1347,6 +1347,8 @@ document.querySelectorAll('.ctrl-sel')[1].querySelectorAll('.sel-arrow').forEach
 const _ctrlArrows = document.querySelectorAll('.ctrl-sel .sel-arrow');
 function lockControls(lock) {
   _ctrlArrows.forEach(btn => { btn.disabled = lock; });
+  // 解锁时还原行数边界状态（updateRowArrows 在此时已定义）
+  if (!lock && typeof updateRowArrows === 'function') updateRowArrows();
 }
 
 // 投注切换
@@ -1365,12 +1367,21 @@ document.querySelectorAll('.ctrl-sel')[0].querySelectorAll('.sel-arrow').forEach
 const rowValues = [8, 9, 10, 11, 12, 13, 14, 15, 16];
 let rowIdx = rowValues.indexOf(13); // 默认 13
 const rowEl = document.querySelector('.sel-rows');
-document.querySelectorAll('.ctrl-sel')[2].querySelectorAll('.sel-arrow').forEach((btn, dir) => {
+const [rowBtnPrev, rowBtnNext] = document.querySelectorAll('.ctrl-sel')[2].querySelectorAll('.sel-arrow');
+
+function updateRowArrows() {
+  rowBtnPrev.disabled = (rowIdx === 0);
+  rowBtnNext.disabled = (rowIdx === rowValues.length - 1);
+}
+updateRowArrows(); // 初始化时同步一次
+
+[rowBtnPrev, rowBtnNext].forEach((btn, dir) => {
   btn.addEventListener('click', () => {
     if (balls.length > 0 || pendingSettles > 0) return;
     rowIdx = Math.max(0, Math.min(rowValues.length - 1, rowIdx + (dir === 1 ? 1 : -1)));
     selectedRows = rowValues[rowIdx];
     rowEl.textContent = selectedRows;
+    updateRowArrows();
     onRowsChanged();
   });
 });

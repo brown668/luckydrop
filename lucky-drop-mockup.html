@@ -1168,7 +1168,7 @@ function drawBoard(glows = {}) {
 })();
 
 window.addEventListener('load', () => {
-  slotConfigs = calibrateConfigs(selectedRows, buildBaseConfigs(selectedRows));
+  slotConfigs = buildBaseConfigs(selectedRows);
   rebuildSlotDom();
   drawBoard();
   initGame();
@@ -1218,55 +1218,6 @@ function buildBaseConfigs(rows) {
   });
 }
 
-// RTP 校准：蒙特卡洛模拟 → 等比缩放使期望 RTP ≈ 97.5%
-function calibrateConfigs(rows, base) {
-  const SLOTS  = rows + 1;                                // 第一行3钉 → ROWS+1槽
-  const W = document.querySelector('.board-wrap')?.offsetWidth || 390;
-  const d = (W - 2 * PAD_SIDE) / (rows + 1), CX = W / 2;
-  const TRIALS = 50000;
-  const curSplits = getSplits();
-  const pX = (r, c) => CX - ((r + 2) * d) / 2 + c * d; // 第一行3钉公式
-
-  const weighted = new Float64Array(SLOTS);
-  for (let t = 0; t < TRIALS; t++) {
-    const startX = CX + (Math.random() - 0.5) * d * 0.25;
-    const queue  = [{x: startX, w: 1, row: 0, used: 0}];
-    while (queue.length) {
-      const {x: bx, w: bw, row: brow, used: bu} = queue.pop();
-      let x = bx, didSplit = false;
-      for (let r = brow; r < rows; r++) {
-        const nPegs = r + 3;   // 第一行3钉
-        let bc = 0, bd = Infinity;
-        for (let c = 0; c < nPegs; c++) {
-          const dist = Math.abs(x - pX(r, c));
-          if (dist < bd) { bd = dist; bc = c; }
-        }
-        let si = -1;
-        for (let k = 0; k < curSplits.length; k++) {
-          if (curSplits[k][0] === r && curSplits[k][1] === bc && !(bu & (1 << k))) { si = k; break; }
-        }
-        if (si >= 0) {
-          const nu = bu | (1 << si), px2 = pX(r, bc), sw = bw * 0.55;
-          queue.push({x: Math.max(1, px2 - d * 0.5), w: sw, row: r + 1, used: nu});
-          queue.push({x: Math.min(W - 1, px2 + d * 0.5), w: sw, row: r + 1, used: nu});
-          didSplit = true; break;
-        }
-        const px2 = pX(r, bc);
-        x = Math.max(1, Math.min(W - 1, px2 + (Math.random() < 0.5 ? -1 : 1) * d * 0.5));
-      }
-      if (!didSplit) weighted[Math.max(0, Math.min(SLOTS - 1, Math.floor(x / d)))] += bw;
-    }
-  }
-  const total = weighted.reduce((a, b) => a + b, 0);
-  const B     = total / TRIALS;
-  const probs = Array.from(weighted, c => c / total);
-  return base.map(cfg => {
-    const rawRTP = cfg.reduce((s, v, i) => s + probs[i] * v, 0);
-    const scale  = Math.max(0.10, Math.min(1.20, (0.975 / B) / rawRTP));
-    console.log(`[RTP rows=${rows}] B=${B.toFixed(3)} scale=${scale.toFixed(4)}`);
-    return cfg.map(v => parseFloat((v * scale).toFixed(2)));
-  });
-}
 
 let slotConfigs = [];  // 由 onRowsChanged() 动态填充
 
@@ -1403,7 +1354,7 @@ function onRowsChanged() {
   pendingWin     = 0;
   lockControls(false); // 清空球后立即恢复控制器
   // 重算倍率 + 重建槽位 + 重绘钉板 + 重启游戏循环
-  slotConfigs = calibrateConfigs(selectedRows, buildBaseConfigs(selectedRows));
+  slotConfigs = buildBaseConfigs(selectedRows);
   rebuildSlotDom();
   drawBoard();
   initGame();

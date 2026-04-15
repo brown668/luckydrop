@@ -383,20 +383,6 @@ body {
   box-shadow: 0 0 8px rgba(30,200,80,0.35), inset 0 1px 0 rgba(140,255,170,0.15);
 }
 
-/* Mystery 宝箱 — 金色，脉冲 */
-.s-mystery {
-  background: linear-gradient(180deg, #c88020, #8a5008);
-  border: 1px solid rgba(255,200,80,0.6);
-  color: #fff;
-  box-shadow: 0 0 10px rgba(210,150,30,0.5);
-  animation: mystPulseGold 2.5s ease-in-out infinite;
-}
-@keyframes mystPulseGold {
-  0%,100% { box-shadow: 0 0 8px rgba(210,150,30,0.4); }
-  50%      { box-shadow: 0 0 16px rgba(255,200,60,0.8); border-color: rgba(255,220,100,0.8); }
-}
-.s-mystery .slot-icon { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; position: absolute; inset: 0; }
-.s-mystery .slot-icon svg { width: 16px; height: 20px; filter: drop-shadow(0 0 6px rgba(255,200,60,1)); }
 
 /* ─── Controls ─── */
 .controls {
@@ -546,15 +532,7 @@ body {
   box-shadow: 0 4px 20px rgba(255,140,0,0.6);
 }
 
-/* ─── 宝箱揭示数字 ─── */
-.mystery-reveal {
-  font-family: 'Space Mono', monospace;
-  font-size: 13px;
-  font-weight: 700;
-  color: #fff4a0;
-  text-shadow: 0 0 8px rgba(255,220,60,1), 0 0 16px rgba(255,160,0,0.8);
-  line-height: 1;
-}
+
 /* ─── SPLIT! 飘字 ─── */
 .float-split {
   position: absolute;
@@ -669,7 +647,7 @@ body {
   <div class="header">
     <div class="logo-wrap">
       <div class="logo">LUCKY<span>DROP</span></div>
-      <div class="logo-sub">击中幸运宝箱<svg class="sub-chest" viewBox="0 0 22 26" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="11" cy="18" rx="9" ry="7" fill="rgba(255,180,0,0.12)"/><rect x="2.5" y="14" width="17" height="10" rx="2" fill="#2e0e00"/><rect x="1.5" y="13" width="17" height="10" rx="2" fill="#7c3200"/><rect x="1.5" y="13" width="17" height="4" rx="2" fill="rgba(255,140,40,0.18)"/><rect x="15.5" y="13" width="3" height="10" rx="2" fill="rgba(0,0,0,0.18)"/><rect x="1.5" y="19.5" width="17" height="2" fill="#4a1c00"/><rect x="1.5" y="13" width="17" height="10" rx="2" fill="none" stroke="#e8a000" stroke-width="1"/><rect x="1" y="12.5" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/><rect x="18.5" y="12.5" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/><rect x="1" y="20" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/><rect x="18.5" y="20" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/><path d="M2.5,13.5 L2.5,10 Q2.5,5.5 11,5.5 Q19.5,5.5 19.5,10 L19.5,13.5 Z" fill="#2e0e00"/><path d="M1.5,13 L1.5,9.5 Q1.5,5 11,5 Q20.5,5 20.5,9.5 L20.5,13 Z" fill="#a04000"/><ellipse cx="11" cy="8.5" rx="5.5" ry="2" fill="rgba(255,240,180,0.28)"/><path d="M1.5,13 L1.5,9.5 Q1.5,5 11,5 Q20.5,5 20.5,9.5 L20.5,13" fill="none" stroke="#e8a000" stroke-width="1"/><rect x="1" y="12.2" width="20" height="1.8" fill="#4a1c00" stroke="#e8a000" stroke-width="0.6"/><rect x="8.2" y="10.5" width="5.6" height="4.5" rx="1.2" fill="#ffb800" stroke="#ffe060" stroke-width="0.7"/><path d="M9.5,10.5 L9.5,9 Q9.5,7.5 11,7.5 Q12.5,7.5 12.5,9 L12.5,10.5" stroke="#ffdd50" stroke-width="1.2" fill="none" stroke-linecap="round"/><circle cx="11" cy="12.2" r="1.2" fill="#7c3200"/><rect x="10.4" y="12.2" width="1.2" height="1.8" rx="0.4" fill="#7c3200"/></svg> 最高赢取 <em>100倍</em></div>
+      <div class="logo-sub">挑战边缘极限 最高赢取 <em>100×</em></div>
     </div>
     <div class="balance-wrap">
       <span class="bal-label">余额</span>
@@ -724,67 +702,11 @@ body {
     <canvas class="board-canvas" id="board"></canvas>
   </div>
 
-  <!-- Slots (15 — 色阶：红高倍 → 绿低倍) -->
+  <!-- Slots (初始占位，onload 后由 rebuildSlotDom 重建) -->
   <div class="slots">
     <div class="slot s-jackpot"><span>25</span><span class="slot-x">×</span></div>
     <div class="slot s-high"><span>3</span><span class="slot-x">×</span></div>
-    <div class="slot s-mystery"><span class="slot-icon"><svg viewBox="0 0 22 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- ★ glow corona behind chest -->
-  <ellipse cx="11" cy="18" rx="9" ry="7" fill="rgba(255,180,0,0.12)"/>
-  <!-- ── BODY ── -->
-  <!-- body shadow layer (3D depth) -->
-  <rect x="2.5" y="14" width="17" height="10" rx="2" fill="#2e0e00"/>
-  <!-- body main -->
-  <rect x="1.5" y="13" width="17" height="10" rx="2" fill="#7c3200"/>
-  <!-- body face highlight (top-left lit) -->
-  <rect x="1.5" y="13" width="17" height="4" rx="2" fill="rgba(255,140,40,0.18)"/>
-  <!-- body left shadow -->
-  <rect x="1.5" y="13" width="3" height="10" rx="2" fill="rgba(0,0,0,0.22)"/>
-  <!-- body right shadow -->
-  <rect x="15.5" y="13" width="3" height="10" rx="2" fill="rgba(0,0,0,0.18)"/>
-  <!-- bottom decorative band -->
-  <rect x="1.5" y="19.5" width="17" height="2" fill="#4a1c00"/>
-  <!-- body gold border -->
-  <rect x="1.5" y="13" width="17" height="10" rx="2" fill="none" stroke="#e8a000" stroke-width="1"/>
-  <!-- ── CORNER CLASPS ── -->
-  <rect x="1" y="12.5" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/>
-  <rect x="18.5" y="12.5" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/>
-  <rect x="1" y="20" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/>
-  <rect x="18.5" y="20" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/>
-  <!-- ── LID ── -->
-  <!-- lid shadow -->
-  <path d="M2.5,13.5 L2.5,10 Q2.5,5.5 11,5.5 Q19.5,5.5 19.5,10 L19.5,13.5 Z" fill="#2e0e00"/>
-  <!-- lid main fill -->
-  <path d="M1.5,13 L1.5,9.5 Q1.5,5 11,5 Q20.5,5 20.5,9.5 L20.5,13 Z" fill="#a04000"/>
-  <!-- lid left shadow -->
-  <path d="M1.5,13 L1.5,9.5 Q1.5,5 4,5 L4,13 Z" fill="rgba(0,0,0,0.2)"/>
-  <!-- lid right shadow -->
-  <path d="M20.5,13 L20.5,9.5 Q20.5,5 18,5 L18,13 Z" fill="rgba(0,0,0,0.15)"/>
-  <!-- lid glass highlight -->
-  <ellipse cx="11" cy="8.5" rx="5.5" ry="2" fill="rgba(255,240,180,0.28)"/>
-  <ellipse cx="9" cy="7.5" rx="2.5" ry="1" fill="rgba(255,255,220,0.18)"/>
-  <!-- lid gold border -->
-  <path d="M1.5,13 L1.5,9.5 Q1.5,5 11,5 Q20.5,5 20.5,9.5 L20.5,13" fill="none" stroke="#e8a000" stroke-width="1"/>
-  <!-- ── CENTER BAND (lid-body join) ── -->
-  <rect x="1" y="12.2" width="20" height="1.8" fill="#4a1c00" stroke="#e8a000" stroke-width="0.6"/>
-  <!-- ── LOCK ── -->
-  <!-- lock plate -->
-  <rect x="8.2" y="10.5" width="5.6" height="4.5" rx="1.2" fill="#ffb800" stroke="#ffe060" stroke-width="0.7"/>
-  <!-- lock shackle (arc above plate) -->
-  <path d="M9.5,10.5 L9.5,9 Q9.5,7.5 11,7.5 Q12.5,7.5 12.5,9 L12.5,10.5" stroke="#ffdd50" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-  <!-- keyhole circle -->
-  <circle cx="11" cy="12.2" r="1.2" fill="#7c3200"/>
-  <!-- keyhole slot -->
-  <rect x="10.4" y="12.2" width="1.2" height="1.8" rx="0.4" fill="#7c3200"/>
-  <!-- ── SPARKLES ── -->
-  <!-- top center star -->
-  <path d="M11,2.5 L11.4,1.2 L11.8,2.5 L11.4,3.8 Z" fill="#fff4a0"/>
-  <path d="M10.1,2.5 L11.4,2.1 L12.7,2.5 L11.4,2.9 Z" fill="#fff4a0"/>
-  <!-- left sparkle -->
-  <path d="M5,4.5 L5.3,3.5 L5.6,4.5 L5.3,5.5 Z" fill="#ffe060" opacity="0.85"/>
-  <!-- right sparkle -->
-  <path d="M17,4 L17.25,3.1 L17.5,4 L17.25,4.9 Z" fill="#ffe060" opacity="0.8"/>
-</svg></span></div>
+    <div class="slot s-orange"><span>2</span><span class="slot-x">×</span></div>
     <div class="slot s-orange"><span>1.6</span><span class="slot-x">×</span></div>
     <div class="slot s-yellow"><span>1.2</span><span class="slot-x">×</span></div>
     <div class="slot s-warm"><span>1.1</span><span class="slot-x">×</span></div>
@@ -794,63 +716,7 @@ body {
     <div class="slot s-warm"><span>1.1</span><span class="slot-x">×</span></div>
     <div class="slot s-yellow"><span>1.2</span><span class="slot-x">×</span></div>
     <div class="slot s-orange"><span>1.6</span><span class="slot-x">×</span></div>
-    <div class="slot s-mystery"><span class="slot-icon"><svg viewBox="0 0 22 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- ★ glow corona behind chest -->
-  <ellipse cx="11" cy="18" rx="9" ry="7" fill="rgba(255,180,0,0.12)"/>
-  <!-- ── BODY ── -->
-  <!-- body shadow layer (3D depth) -->
-  <rect x="2.5" y="14" width="17" height="10" rx="2" fill="#2e0e00"/>
-  <!-- body main -->
-  <rect x="1.5" y="13" width="17" height="10" rx="2" fill="#7c3200"/>
-  <!-- body face highlight (top-left lit) -->
-  <rect x="1.5" y="13" width="17" height="4" rx="2" fill="rgba(255,140,40,0.18)"/>
-  <!-- body left shadow -->
-  <rect x="1.5" y="13" width="3" height="10" rx="2" fill="rgba(0,0,0,0.22)"/>
-  <!-- body right shadow -->
-  <rect x="15.5" y="13" width="3" height="10" rx="2" fill="rgba(0,0,0,0.18)"/>
-  <!-- bottom decorative band -->
-  <rect x="1.5" y="19.5" width="17" height="2" fill="#4a1c00"/>
-  <!-- body gold border -->
-  <rect x="1.5" y="13" width="17" height="10" rx="2" fill="none" stroke="#e8a000" stroke-width="1"/>
-  <!-- ── CORNER CLASPS ── -->
-  <rect x="1" y="12.5" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/>
-  <rect x="18.5" y="12.5" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/>
-  <rect x="1" y="20" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/>
-  <rect x="18.5" y="20" width="2.5" height="2.5" rx="0.5" fill="#ffcc30" stroke="#cc8800" stroke-width="0.4"/>
-  <!-- ── LID ── -->
-  <!-- lid shadow -->
-  <path d="M2.5,13.5 L2.5,10 Q2.5,5.5 11,5.5 Q19.5,5.5 19.5,10 L19.5,13.5 Z" fill="#2e0e00"/>
-  <!-- lid main fill -->
-  <path d="M1.5,13 L1.5,9.5 Q1.5,5 11,5 Q20.5,5 20.5,9.5 L20.5,13 Z" fill="#a04000"/>
-  <!-- lid left shadow -->
-  <path d="M1.5,13 L1.5,9.5 Q1.5,5 4,5 L4,13 Z" fill="rgba(0,0,0,0.2)"/>
-  <!-- lid right shadow -->
-  <path d="M20.5,13 L20.5,9.5 Q20.5,5 18,5 L18,13 Z" fill="rgba(0,0,0,0.15)"/>
-  <!-- lid glass highlight -->
-  <ellipse cx="11" cy="8.5" rx="5.5" ry="2" fill="rgba(255,240,180,0.28)"/>
-  <ellipse cx="9" cy="7.5" rx="2.5" ry="1" fill="rgba(255,255,220,0.18)"/>
-  <!-- lid gold border -->
-  <path d="M1.5,13 L1.5,9.5 Q1.5,5 11,5 Q20.5,5 20.5,9.5 L20.5,13" fill="none" stroke="#e8a000" stroke-width="1"/>
-  <!-- ── CENTER BAND (lid-body join) ── -->
-  <rect x="1" y="12.2" width="20" height="1.8" fill="#4a1c00" stroke="#e8a000" stroke-width="0.6"/>
-  <!-- ── LOCK ── -->
-  <!-- lock plate -->
-  <rect x="8.2" y="10.5" width="5.6" height="4.5" rx="1.2" fill="#ffb800" stroke="#ffe060" stroke-width="0.7"/>
-  <!-- lock shackle (arc above plate) -->
-  <path d="M9.5,10.5 L9.5,9 Q9.5,7.5 11,7.5 Q12.5,7.5 12.5,9 L12.5,10.5" stroke="#ffdd50" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-  <!-- keyhole circle -->
-  <circle cx="11" cy="12.2" r="1.2" fill="#7c3200"/>
-  <!-- keyhole slot -->
-  <rect x="10.4" y="12.2" width="1.2" height="1.8" rx="0.4" fill="#7c3200"/>
-  <!-- ── SPARKLES ── -->
-  <!-- top center star -->
-  <path d="M11,2.5 L11.4,1.2 L11.8,2.5 L11.4,3.8 Z" fill="#fff4a0"/>
-  <path d="M10.1,2.5 L11.4,2.1 L12.7,2.5 L11.4,2.9 Z" fill="#fff4a0"/>
-  <!-- left sparkle -->
-  <path d="M5,4.5 L5.3,3.5 L5.6,4.5 L5.3,5.5 Z" fill="#ffe060" opacity="0.85"/>
-  <!-- right sparkle -->
-  <path d="M17,4 L17.25,3.1 L17.5,4 L17.25,4.9 Z" fill="#ffe060" opacity="0.8"/>
-</svg></span></div>
+    <div class="slot s-orange"><span>2</span><span class="slot-x">×</span></div>
     <div class="slot s-high"><span>3</span><span class="slot-x">×</span></div>
     <div class="slot s-jackpot"><span>25</span><span class="slot-x">×</span></div>
   </div>
@@ -1280,26 +1146,20 @@ window.addEventListener('load', () => {
 // ── 倍率参考表（从边缘到中心，d=0..9，覆盖 8-16 行/10-18 槽）──
 // d=7 是 13行/15槽 的中心值，与原始配置保持一致
 const SLOT_REF = [
-  [25,  3,  null, 1.6, 1.2, 1.1, 1.0, 0.4, 0.3, 0.2],   // 稳健
-  [50,  5,  null, 2.0, 1.5, 1.2, 0.8, 0.2, 0.15, 0.1],  // 激进
-  [100, 10, null, 3.0, 2.0, 1.5, 0.5, 0.1, 0.08, 0.05], // 暴富
+  [25,  3,  2.0, 1.6, 1.2, 1.1, 1.0, 0.4, 0.3, 0.2],   // 稳健
+  [50,  5,  3.0, 2.0, 1.5, 1.2, 0.8, 0.2, 0.15, 0.1],  // 激进
+  [100, 10, 5.0, 3.0, 2.0, 1.5, 0.5, 0.1, 0.08, 0.05], // 暴富
 ];
-// 行数≤10 时 null 槽位命中概率过高（>4%），mystRTP 会超出 RTP 目标导致 scale 打底
-// 用以下普通倍率替代，保持数值单调性
-const SLOT_REF_NULL_REPLACE = [2.0, 3.0, 5.0]; // 稳健 / 激进 / 暴富
 
 // 根据行数生成基础倍率配置（对称展开）
 function buildBaseConfigs(rows) {
-  return SLOT_REF.map((ref, ri) => {
+  return SLOT_REF.map((ref) => {
     const slots = rows + 1;            // 第一行3钉 → ROWS+1槽
     const half  = Math.floor(slots / 2);
-    // 行数≤10 时 null 槽位命中率过高，替换为普通倍率以确保校准正常
-    const useNull = rows >= 11;
-    const r = useNull ? ref : ref.map(v => v === null ? SLOT_REF_NULL_REPLACE[ri] : v);
-    const left  = r.slice(0, half);
+    const left  = ref.slice(0, half);
     return slots % 2 === 1
-      ? [...left, r[half], ...left.slice().reverse()]
-      : [...left,           ...left.slice().reverse()];
+      ? [...left, ref[half], ...left.slice().reverse()]
+      : [...left,             ...left.slice().reverse()];
   });
 }
 
@@ -1345,14 +1205,11 @@ function calibrateConfigs(rows, base) {
   const total = weighted.reduce((a, b) => a + b, 0);
   const B     = total / TRIALS;
   const probs = Array.from(weighted, c => c / total);
-  const MYSTERY_EV = 10.5;
-
   return base.map(cfg => {
-    const mystRTP    = cfg.reduce((s, v, i) => v === null ? s + probs[i] * MYSTERY_EV : s, 0);
-    const nonMystRTP = cfg.reduce((s, v, i) => v !== null ? s + probs[i] * v : s, 0);
-    const scale = Math.max(0.10, Math.min(1.20, (0.975 / B - mystRTP) / nonMystRTP));
+    const rawRTP = cfg.reduce((s, v, i) => s + probs[i] * v, 0);
+    const scale  = Math.max(0.10, Math.min(1.20, (0.975 / B) / rawRTP));
     console.log(`[RTP rows=${rows}] B=${B.toFixed(3)} scale=${scale.toFixed(4)}`);
-    return cfg.map(v => v === null ? null : parseFloat((v * scale).toFixed(2)));
+    return cfg.map(v => parseFloat((v * scale).toFixed(2)));
   });
 }
 
@@ -1360,7 +1217,6 @@ let slotConfigs = [];  // 由 onRowsChanged() 动态填充
 
 // 倍率 → 颜色 class 映射
 function valToClass(v) {
-  if (v === null) return 's-mystery';
   if (v >= 25)   return 's-jackpot';
   if (v >= 3)    return 's-high';
   if (v >= 1.5)  return 's-orange';
@@ -1369,9 +1225,6 @@ function valToClass(v) {
   if (v >= 0.8)  return 's-neutral';
   return 's-low';
 }
-
-// 一次性提取宝箱 SVG HTML
-const MYSTERY_HTML = document.querySelector('.slot.s-mystery')?.innerHTML || '';
 
 let slotEls = [];
 
@@ -1393,12 +1246,8 @@ function rebuildSlotDom() {
     const val = cfg[i];
     div.className = 'slot ' + valToClass(val);
     div.style.fontSize = fsize;
-    if (val === null) {
-      div.innerHTML = MYSTERY_HTML;
-    } else {
-      const disp = val >= 10 ? Math.round(val) : +val.toFixed(1);
-      div.innerHTML = `<span>${disp}</span><span class="slot-x" style="font-size:${xsize}">×</span>`;
-    }
+    const disp = val >= 10 ? Math.round(val) : +val.toFixed(1);
+    div.innerHTML = `<span>${disp}</span><span class="slot-x" style="font-size:${xsize}">×</span>`;
     container.appendChild(div);
   }
   slotEls = Array.from(container.querySelectorAll('.slot'));
@@ -1409,12 +1258,8 @@ function updateSlots(idx) {
   slotEls.forEach((slot, i) => {
     const val = cfg[i];
     slot.className = 'slot ' + valToClass(val);
-    if (val === null) {
-      slot.innerHTML = MYSTERY_HTML;
-    } else {
-      const disp = val >= 10 ? Math.round(val) : +val.toFixed(1);
-      slot.innerHTML = `<span>${disp}</span><span class="slot-x">×</span>`;
-    }
+    const disp = val >= 10 ? Math.round(val) : +val.toFixed(1);
+    slot.innerHTML = `<span>${disp}</span><span class="slot-x">×</span>`;
   });
 }
 
@@ -1667,54 +1512,13 @@ function initGame() {
     return -1;
   }
 
-  // ── 宝箱加权随机（范围1-100，期望≈10.5）──
-  // 65%→1-5  24%→6-20  9%→21-60  2%→61-100
-  function rollMystery() {
-    const r = Math.random();
-    if (r < 0.65) return 1  + Math.floor(Math.random() * 5);   // 1-5
-    if (r < 0.89) return 6  + Math.floor(Math.random() * 15);  // 6-20
-    if (r < 0.98) return 21 + Math.floor(Math.random() * 40);  // 21-60
-    return            61 + Math.floor(Math.random() * 40);      // 61-100
-  }
-
-  // ── 宝箱揭示动画 ──
-  function revealMystery(slotEl, resolvedMultiplier, done) {
-    const iconEl = slotEl.querySelector('.slot-icon');
-    if (!iconEl) { done(); return; }
-
-    // 快速滚动数字 600ms
-    let rollCount = 0;
-    const rollInterval = setInterval(() => {
-      iconEl.innerHTML = `<span class="mystery-reveal">${Math.floor(Math.random() * 100) + 1}</span>`;
-      rollCount++;
-      if (rollCount >= 12) {
-        clearInterval(rollInterval);
-        // 定格最终倍率
-        iconEl.innerHTML = `<span class="mystery-reveal">${resolvedMultiplier}</span>`;
-        done();
-      }
-    }, 50);
-  }
-
-  // ── 还原宝箱 ──
-  function restoreMystery(slotEl) {
-    slotEl.innerHTML = MYSTERY_HTML;
-  }
-
   // ── 结算 ──
   function settle(slotIdx, weight = 1) {
     const cfg  = slotConfigs[modeIdx];
-    let   val  = cfg[slotIdx];
-    let   multiplier;
+    const val  = cfg[slotIdx];
+    const multiplier = val;
 
     const slotEl = slotEls[slotIdx];
-
-    // 宝箱：加权随机 1~100（期望≈10.5）
-    if (val === null) {
-      multiplier = rollMystery();
-    } else {
-      multiplier = val;
-    }
 
     const bet    = betValues[betIdx];
     const won    = parseFloat((bet * weight * multiplier).toFixed(2));
@@ -1773,16 +1577,8 @@ function initGame() {
       if (balls.length === 0 && pendingSettles === 0) afterSettle();
     }
 
-    if (val === null) {
-      revealMystery(slotEl, multiplier, () => {
-        addHistory(multiplier);
-        setTimeout(() => restoreMystery(slotEl), 1500);
-        done();
-      });
-    } else {
-      addHistory(multiplier);
-      done();
-    }
+    addHistory(multiplier);
+    done();
   }
 
   // ── 结算后处理（所有球都落槽后） ──

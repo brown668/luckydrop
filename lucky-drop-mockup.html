@@ -191,34 +191,56 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(180deg, #2b82cf, #0e4a8a);
   color: #fff;
-  border: 1px solid rgba(120,200,255,0.45);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(200,235,255,0.25);
+  border: 1px solid rgba(255,255,255,0.25);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.3);
 }
+
+/* 历史倍率：与底部槽位共享柔和色阶 */
 .hist-badge.h-low {
-  background: linear-gradient(180deg, #1a5a96, #0a3666);
-  border-color: rgba(80,150,210,0.35);
-  color: rgba(220,235,255,0.85);
+  background: linear-gradient(180deg, #6a7e94, #39495e);
+  border-color: rgba(140,160,185,0.3);
+  color: rgba(220,230,240,0.8);
 }
 .hist-badge.h-mid {
-  background: linear-gradient(180deg, #2b82cf, #105ba0);
+  background: linear-gradient(180deg, #7eb3d8, #426f94);
+  border-color: rgba(160,195,220,0.35);
+}
+.hist-badge.h-good {
+  background: linear-gradient(180deg, #86c8b4, #3d846d);
+  border-color: rgba(160,210,195,0.4);
+  color: #eaf6f1;
+}
+.hist-badge.h-great {
+  background: linear-gradient(180deg, #c0d078, #6f832c);
+  border-color: rgba(210,225,140,0.45);
+  color: #fbffe0;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+}
+.hist-badge.h-orange {
+  background: linear-gradient(180deg, #edbd78, #936a24);
+  border-color: rgba(230,190,130,0.45);
+  color: #fff6dc;
+  box-shadow: 0 1px 4px rgba(200,150,70,0.25), inset 0 1px 0 rgba(255,240,200,0.3);
 }
 .hist-badge.h-high {
-  background: linear-gradient(180deg, #2b82cf, #105ba0);
-  border-color: rgba(255,160,80,0.65);
-  box-shadow: 0 1px 6px rgba(255,130,40,0.4), inset 0 1px 0 rgba(210,235,255,0.25);
+  background: linear-gradient(180deg, #e08a68, #8a3c22);
+  border-color: rgba(220,160,120,0.5);
+  color: #fff0dc;
+  box-shadow: 0 1px 5px rgba(200,100,70,0.3), inset 0 1px 0 rgba(255,220,180,0.3);
 }
 .hist-badge.h-jackpot {
-  background: linear-gradient(180deg, #2e8ddc, #1260a8);
-  border-color: rgba(255,110,130,0.7);
-  box-shadow: 0 1px 8px rgba(255,80,100,0.45), inset 0 1px 0 rgba(210,235,255,0.3);
+  background: linear-gradient(180deg, #d98297, #843150);
+  border-color: rgba(220,160,175,0.5);
+  color: #ffdee4;
+  box-shadow: 0 1px 6px rgba(200,110,135,0.4), inset 0 1px 0 rgba(255,215,225,0.35);
 }
 .hist-badge.h-mega {
-  background: linear-gradient(180deg, #3598e8, #155fae);
-  border-color: rgba(255,220,90,0.85);
-  color: #fffbe0;
-  box-shadow: 0 1px 10px rgba(255,210,80,0.55), inset 0 1px 0 rgba(220,240,255,0.35);
+  background: linear-gradient(180deg, #f0d084, #8e6a20);
+  border-color: rgba(235,205,140,0.6);
+  color: #5a3f00;
+  text-shadow: 0 1px 0 rgba(255,235,180,0.5);
+  box-shadow: 0 1px 7px rgba(215,175,90,0.5), inset 0 1px 0 rgba(255,240,200,0.45);
 }
 
 /* ─── 球门发球区 ─── */
@@ -337,213 +359,237 @@ body {
 }
 
 /* ─── Bottom Slots ─── */
+/* ─── 倍率槽（球场底部赛况条）─── */
 .slots {
   display: flex;
-  background: linear-gradient(180deg, #0c2a48 0%, #071e3a 100%);
-  padding: 6px 2px 4px;
-  gap: 3px;
-  margin-top: 0;
+  /* 草坪延伸到球场侧壁：从草绿渐变到暗绿/黑绿 */
+  background: linear-gradient(180deg, #0f4a22 0%, #0a3418 55%, #041e0c 100%);
+  padding: 8px 10px 10px;
+  gap: 4px;
   position: relative;
 }
-/* 底部槽位顶端的蓝色发光条（参考图的亮蓝边） */
+/* 顶部白色球场底线 */
 .slots::before {
   content: '';
   position: absolute;
-  top: 0; left: 10px; right: 10px;
+  top: 0; left: 0; right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #4ac4ff 15%, #7edcff 50%, #4ac4ff 85%, transparent);
-  box-shadow: 0 0 10px rgba(80,200,255,0.75);
+  background: rgba(255,255,255,0.88);
+  box-shadow: 0 0 6px rgba(255,255,255,0.2);
 }
+
+/* 槽位容器：上下两部分——蓝色灯条 + 白色数字 */
 .slot {
   flex: 1;
-  height: 30px;
-  border-radius: 5px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  gap: 3px;
   line-height: 1;
   font-family: 'Chakra Petch', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  border: 1px solid transparent;
-  position: relative;
-  overflow: hidden;
   cursor: pointer;
-  transition: all 0.12s;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  height: auto;
+  overflow: visible;
+  transition: transform .12s;
+  position: relative;
 }
-/* 槽位顶部的亮蓝色反光条（类似玻璃折射光） */
-.slot::before {
+.slot::before { display: none; }  /* 移除旧反光条 */
+
+/* 灯条通用样式（颜色由每档 class 指定） */
+.slot .slot-bar {
+  width: 100%;
+  height: 18px;
+  border-radius: 3px;
+  border: 1px solid rgba(255,255,255,0.35);
+  position: relative;
+  box-shadow:
+    0 0 var(--slot-glow, 6px) var(--slot-glow-c, rgba(80,200,255,0.45)),
+    inset 0 1px 0 rgba(255,255,255,0.45),
+    inset 0 -1px 0 rgba(0,0,0,0.25);
+}
+/* 灯条中部细高光 */
+.slot .slot-bar::after {
   content: '';
   position: absolute;
-  top: 2px; left: 3px; right: 3px;
-  height: 3px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, rgba(120,210,255,0.15), rgba(160,230,255,0.6) 50%, rgba(120,210,255,0.15));
-  box-shadow: 0 0 4px rgba(100,200,255,0.7);
+  left: 18%; right: 18%;
+  top: 2px;
+  height: 2px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.85), transparent);
 }
-.slot-x  { font-size: 8px; color: rgba(255,255,255,0.9); line-height: 1; margin-top: -1px; }
 
-/* 球场主题：所有槽位统一蓝色玻璃底，仅通过亮度和边框色区分倍率档次 */
-
-/* ≥100× — 最亮蓝+金边，顶级大奖，脉冲 */
-.s-mega {
-  background: linear-gradient(180deg, #2a7dcf 0%, #1a5aa0 50%, #0d4284 100%);
-  border: 1px solid rgba(255,215,80,0.85);
+/* 下方倍率文字 */
+.slot .slot-val {
+  font-size: 11px;
+  font-weight: 700;
   color: #fff;
-  box-shadow: 0 0 14px rgba(255,200,60,0.6), inset 0 1px 0 rgba(180,230,255,0.45);
-  animation: pulseMega 1.5s ease-in-out infinite;
-}
-@keyframes pulseMega {
-  0%,100% { box-shadow: 0 0 12px rgba(255,200,60,0.5), inset 0 1px 0 rgba(180,230,255,0.45); }
-  50%      { box-shadow: 0 0 26px rgba(255,210,80,0.95), 0 0 40px rgba(255,180,40,0.5), inset 0 1px 0 rgba(200,240,255,0.55); }
+  letter-spacing: 0.2px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.75);
+  white-space: nowrap;
 }
 
-/* 25× — 亮蓝+红边，脉冲 */
-.s-jackpot {
-  background: linear-gradient(180deg, #2878c5 0%, #1a5896 50%, #0c4080 100%);
-  border: 1px solid rgba(255,120,130,0.75);
-  color: #fff;
-  box-shadow: 0 0 12px rgba(255,90,100,0.5), inset 0 1px 0 rgba(170,220,255,0.4);
-  animation: pulseRed 2s ease-in-out infinite;
-}
-@keyframes pulseRed {
-  0%,100% { box-shadow: 0 0 10px rgba(255,90,100,0.4); }
-  50%      { box-shadow: 0 0 22px rgba(255,100,110,0.85); }
+/* ─── 7 档色阶（柔和低饱和：从冷到热） ─── */
+
+/* 极低 — 雾蓝灰 */
+.s-low .slot-bar {
+  background: linear-gradient(180deg, #6a7e94 0%, #4e6179 50%, #39495e 100%);
+  --slot-glow: 3px; --slot-glow-c: rgba(120,145,175,0.25);
 }
 
-/* 3× — 蓝+橙边 */
-.s-high {
-  background: linear-gradient(180deg, #2674c0 0%, #175492 50%, #0b3e7e 100%);
-  border: 1px solid rgba(255,160,80,0.6);
-  color: #fff;
-  box-shadow: 0 0 8px rgba(255,130,40,0.35), inset 0 1px 0 rgba(170,220,255,0.35);
+/* 1× 中性 — 淡钢蓝 */
+.s-neutral .slot-bar {
+  background: linear-gradient(180deg, #7eb3d8 0%, #5a92ba 50%, #426f94 100%);
+  --slot-glow: 4px; --slot-glow-c: rgba(130,180,215,0.3);
 }
 
-/* 1.6× — 蓝+亮黄边 */
-.s-orange {
-  background: linear-gradient(180deg, #2370bd 0%, #155290 50%, #0a3c7a 100%);
-  border: 1px solid rgba(255,210,110,0.55);
-  color: #fff;
-  box-shadow: inset 0 1px 0 rgba(160,215,255,0.3);
+/* 稍好 — 薄荷青 */
+.s-warm .slot-bar {
+  background: linear-gradient(180deg, #86c8b4 0%, #5ca790 50%, #3d846d 100%);
+  --slot-glow: 4px; --slot-glow-c: rgba(130,200,180,0.3);
 }
 
-/* 1.2× — 中蓝 */
-.s-yellow {
-  background: linear-gradient(180deg, #216cb8 0%, #13508a 50%, #093a77 100%);
-  border: 1px solid rgba(140,210,255,0.5);
-  color: #fff;
-  box-shadow: inset 0 1px 0 rgba(160,215,255,0.28);
+/* 小赚 — 柔和橄榄绿 */
+.s-yellow .slot-bar {
+  background: linear-gradient(180deg, #c0d078 0%, #98ad48 50%, #6f832c 100%);
+  --slot-glow: 5px; --slot-glow-c: rgba(180,205,100,0.35);
 }
+.s-yellow .slot-val { color: #fbffe0; }
 
-/* 1.1× — 偏深蓝 */
-.s-warm {
-  background: linear-gradient(180deg, #1e68b4 0%, #114c85 50%, #083671 100%);
-  border: 1px solid rgba(120,200,250,0.45);
-  color: #fff;
-  box-shadow: inset 0 1px 0 rgba(150,210,255,0.25);
+/* 中赚 — 琥珀橙 */
+.s-orange .slot-bar {
+  background: linear-gradient(180deg, #edbd78 0%, #c99548 50%, #936a24 100%);
+  --slot-glow: 6px; --slot-glow-c: rgba(225,170,90,0.4);
 }
+.s-orange .slot-val { color: #fff6dc; }
 
-/* 1× — 深蓝 */
-.s-neutral {
-  background: linear-gradient(180deg, #1c64af 0%, #10487f 50%, #07326b 100%);
-  border: 1px solid rgba(100,185,240,0.4);
-  color: #eaf4ff;
-  box-shadow: inset 0 1px 0 rgba(140,205,255,0.22);
+/* 大赚 — 赤陶红 */
+.s-high .slot-bar {
+  background: linear-gradient(180deg, #e08a68 0%, #b8583a 50%, #8a3c22 100%);
+  --slot-glow: 7px; --slot-glow-c: rgba(220,120,80,0.45);
 }
+.s-high .slot-val { color: #fff0dc; }
 
-/* 0.4× — 最深蓝 */
-.s-low {
-  background: linear-gradient(180deg, #175ea6 0%, #0d4178 50%, #052b60 100%);
-  border: 1px solid rgba(90,170,225,0.4);
-  color: #dcebff;
-  box-shadow: inset 0 1px 0 rgba(130,195,250,0.2);
+/* 巨奖 — 哑光玫红（脉冲更柔） */
+.s-jackpot .slot-bar {
+  background: linear-gradient(180deg, #d98297 0%, #b55570 50%, #843150 100%);
+  border-color: rgba(230,180,195,0.55);
+  --slot-glow: 8px; --slot-glow-c: rgba(210,110,140,0.45);
+  animation: slotPulseJack 2.2s ease-in-out infinite;
 }
+@keyframes slotPulseJack {
+  0%,100% { box-shadow: 0 0 6px rgba(200,110,140,0.35), inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -1px 0 rgba(0,0,0,0.2); }
+  50%     { box-shadow: 0 0 14px rgba(220,140,165,0.65), inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -1px 0 rgba(0,0,0,0.2); }
+}
+.s-jackpot .slot-val { color: #ffd8df; text-shadow: 0 0 3px rgba(210,130,150,0.5), 0 1px 2px rgba(0,0,0,0.7); }
+
+/* 超巨奖 — 暖金（脉冲更柔） */
+.s-mega .slot-bar {
+  background: linear-gradient(180deg, #f0d084 0%, #c9a050 50%, #8e6a20 100%);
+  border-color: rgba(240,215,150,0.7);
+  --slot-glow: 9px; --slot-glow-c: rgba(225,185,100,0.5);
+  animation: slotPulseMega 1.8s ease-in-out infinite;
+}
+@keyframes slotPulseMega {
+  0%,100% { box-shadow: 0 0 8px rgba(220,180,100,0.4), inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.2); }
+  50%     { box-shadow: 0 0 18px rgba(235,205,130,0.75), inset 0 1px 0 rgba(255,250,220,0.55), inset 0 -1px 0 rgba(0,0,0,0.2); }
+}
+.s-mega .slot-val { color: #fff2c8; text-shadow: 0 0 4px rgba(225,185,90,0.6), 0 1px 2px rgba(0,0,0,0.65); }
 
 
 /* ─── Controls ─── */
 .controls {
-  flex: 1;                    /* 吸收 canvas 高度变化，保持 device 总高 844px */
-  background: linear-gradient(180deg, #1e7e36 0%, #165a26 55%, #0e3f1c 100%);
+  flex: 1;
+  background: linear-gradient(180deg, #1a7530 0%, #145822 55%, #0d3d1a 100%);
   display: grid;
   grid-template-columns: 1fr auto 1fr;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: auto auto;
   column-gap: 10px;
-  row-gap: 8px;
-  padding: 14px 14px 18px;
-  border-top: 2px solid rgba(255,255,255,0.12);
+  row-gap: 10px;
+  padding: 10px 12px 16px;
+  border-top: 1px solid rgba(255,255,255,0.08);
   align-items: stretch;
+  align-content: center;
   position: relative;
 }
-/* 草坪横纹装饰 */
+/* 草坪横纹 */
 .controls::before {
   content: '';
   position: absolute;
   inset: 0;
   background:
     repeating-linear-gradient(180deg,
-      rgba(255,255,255,0.03) 0,
-      rgba(255,255,255,0.03) 14px,
-      transparent 14px,
-      transparent 28px);
+      rgba(255,255,255,0.025) 0,
+      rgba(255,255,255,0.025) 12px,
+      transparent 12px,
+      transparent 24px);
   pointer-events: none;
 }
 
-/* 通用蓝色圆角面板（控制区 & 右侧浮动） */
+/* ─── 通用面板：磨砂玻璃胶囊 ─── */
 .ctrl-sel {
   display: flex;
   align-items: center;
-  background: linear-gradient(180deg, #2b82cf 0%, #1961a8 50%, #0e4a8a 100%);
-  border-radius: 14px;
-  padding: 0 4px;
-  height: 54px;
+  background: rgba(0,0,0,0.32);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 16px;
+  padding: 0 5px;
+  height: 50px;
   gap: 3px;
-  border: 2px solid #083367;
-  box-shadow:
-    inset 0 1px 0 rgba(180,230,255,0.45),
-    inset 0 -1px 0 rgba(0,0,0,0.25),
-    0 2px 6px rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
   position: relative;
   overflow: hidden;
+  transition: background .2s, border-color .2s, box-shadow .2s;
 }
-.ctrl-sel::before {
-  content: '';
-  position: absolute;
-  top: 2px; left: 6px; right: 6px;
-  height: 30%;
-  background: linear-gradient(180deg, rgba(255,255,255,0.28), transparent);
-  border-radius: 10px 10px 20px 20px;
-  pointer-events: none;
-}
+.ctrl-sel::before { display: none; }
 
 /* grid 布局定位 */
 .ctrl-buy    { grid-column: 1; grid-row: 1; }
 .ctrl-bet    { grid-column: 3; grid-row: 1; }
-.ctrl-balls  { grid-column: 1; grid-row: 2; }
+.ctrl-risk   { grid-column: 1; grid-row: 2; }
 .ctrl-auto   { grid-column: 3; grid-row: 2; }
 
-.sel-arrow {
-  width: 34px; height: 40px;
-  background: linear-gradient(180deg, #3d98e8 0%, #1c70c0 45%, #0e4e96 100%);
-  border: 1.5px solid #062c5c;
-  border-radius: 10px;
-  color: #fff;
-  font-size: 20px;
+/* ─── 难度面板：与其他选择器面板统一 ─── */
+.controls .ctrl-risk .sel-value.sel-risk-label {
+  font-size: 17px;
+  font-family: 'Chakra Petch', 'PingFang SC', sans-serif;
   font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  transition: color .2s;
+}
+
+/* ─── 箭头按钮：圆形半透明 ─── */
+.sel-arrow {
+  width: 30px; height: 30px;
+  background: rgba(255,255,255,0.10);
+  border: none;
+  border-radius: 50%;
+  color: rgba(255,255,255,0.85);
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
   font-family: 'Chakra Petch', sans-serif;
-  box-shadow: inset 0 1px 0 rgba(220,240,255,0.55), inset 0 -1px 0 rgba(0,0,0,0.2);
+  box-shadow: none;
   position: relative;
   z-index: 1;
+  transition: background .15s;
 }
-.sel-arrow:hover  { filter: brightness(1.08); }
+.sel-arrow:hover  { background: rgba(255,255,255,0.20); }
 .sel-arrow:disabled {
-  background: linear-gradient(180deg, #4a6a8a, #2e4462);
-  opacity: 0.45;
+  opacity: 0.25;
   cursor: not-allowed;
+  background: transparent;
 }
+
+/* ─── 中间信息区 ─── */
 .sel-info {
   flex: 1;
   text-align: center;
@@ -554,22 +600,21 @@ body {
 .sel-label {
   display: block;
   font-size: 9px;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 1px;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
-  margin-bottom: 3px;
-  text-transform: uppercase;
+  font-weight: 600;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
   white-space: nowrap;
+  font-family: 'Chakra Petch', 'PingFang SC', sans-serif;
 }
 .sel-value {
   display: block;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: #fff;
   font-family: 'Chakra Petch', sans-serif;
   line-height: 1;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
 }
 .sel-value-row {
   display: flex;
@@ -581,11 +626,11 @@ body {
 .sel-icon-group {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 18px;
+  gap: 5px;
+  font-size: 17px;
 }
 .sel-icon-group span {
-  opacity: 0.35;
+  opacity: 0.3;
   transition: all .18s;
   filter: grayscale(1);
 }
@@ -595,63 +640,54 @@ body {
   text-shadow: 0 0 8px rgba(255,120,40,0.9);
 }
 
-/* 开始按钮：参考图大足球 PLAY */
+/* 开始按钮：真实足球造型（canvas 重绘） */
 .start-btn {
   grid-column: 2;
   grid-row: 1 / 3;
-  width: 112px;
+  width: 106px;
   align-self: center;
   justify-self: center;
-  height: 112px;
-  background: radial-gradient(circle at 35% 30%, #ffffff 0%, #f2f2f2 55%, #bfbfbf 100%);
-  border: 3px solid #1a4a8c;
+  height: 106px;
+  background: #fff center / 100% 100% no-repeat;
+  border: none;
   border-radius: 50%;
-  color: #0a3a78;
-  font-family: 'Chakra Petch', sans-serif;
+  color: #1a3a68;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.55);
+  position: relative;
+  overflow: visible;
+  z-index: 2;
+  transition: transform .1s, filter .15s;
+}
+.start-btn:hover  { filter: brightness(1.08); }
+.start-btn:active { transform: scale(0.96); }
+.start-btn span {
+  /* "开始"/"停止" 文字：深蓝色，与参考图一致 */
+  position: relative;
+  z-index: 2;
+  display: block;
+  text-align: center;
+  color: #1a3a68;
+  font-family: 'Chakra Petch', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   font-size: 24px;
   font-weight: 900;
   letter-spacing: 3px;
-  cursor: pointer;
-  box-shadow:
-    0 6px 18px rgba(0,0,0,0.55),
-    0 0 0 3px rgba(255,255,255,0.15),
-    inset 0 3px 6px rgba(255,255,255,0.7),
-    inset 0 -4px 8px rgba(0,0,0,0.18);
-  position: relative;
-  overflow: hidden;
-  z-index: 2;
-  text-shadow: 0 2px 3px rgba(0,0,0,0.12);
+  padding-left: 3px;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+  pointer-events: none;
 }
-/* 足球黑色五边形装饰（分散在四周） */
-.start-btn::before {
+.start-btn.stopping span { color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+/* 停止态：红色全覆盖（用 ::after 覆盖足球底图，class 切换可逆） */
+.start-btn.stopping::after {
   content: '';
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(circle at 50% 50%, transparent 34%, rgba(0,0,0,0.08) 64%, transparent 66%),
-    radial-gradient(circle at 18% 22%, #222 7px, transparent 8px),
-    radial-gradient(circle at 82% 22%, #222 7px, transparent 8px),
-    radial-gradient(circle at 18% 78%, #222 7px, transparent 8px),
-    radial-gradient(circle at 82% 78%, #222 7px, transparent 8px);
+  background: radial-gradient(circle at 35% 30%, #ff8a8a 0%, #e04040 55%, #a61a1a 100%);
   border-radius: 50%;
-  pointer-events: none;
-  opacity: 0.82;
-}
-.start-btn:hover  { filter: brightness(1.06); }
-.start-btn:active { transform: scale(0.97); }
-.start-btn span {
-  /* PLAY 文字容器：居中显示在足球中心 */
-  position: relative;
   z-index: 1;
-  display: block;
-  text-align: center;
-  color: #0a3a78;
-  font-size: 22px;
-  font-weight: 900;
-  letter-spacing: 2px;
-  text-shadow: 0 2px 3px rgba(255,255,255,0.35), 0 1px 1px rgba(0,0,0,0.18);
   pointer-events: none;
 }
+.start-btn.stopping::before { display: none; }
 
 @keyframes shine {
   0%    { left: -60%; }
@@ -671,122 +707,152 @@ body {
 .f-user { font-size: 9px; color: #1f3a5a; letter-spacing: 1px; }
 .f-demo { font-size: 9px; color: #15293f; letter-spacing: 1px; }
 
-/* ─── 右侧浮动面板（RISK LEVEL + LINES）─── */
+/* ─── 右上角「行数」浮动控件 ─── */
 .side-panel {
   position: absolute;
-  top: 90px;
-  right: 8px;
-  width: 116px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  top: 12px;
+  right: 10px;
   z-index: 15;
   pointer-events: auto;
 }
+/* 磨砂玻璃胶囊 */
 .side-panel .ctrl-sel {
-  height: 52px;
-  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  height: auto;
+  padding: 5px 4px;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  gap: 2px;
+  overflow: visible;
 }
+/* 覆盖通用 ctrl-sel 的反光条 */
+.side-panel .ctrl-sel::before { display: none; }
+/* 紧凑箭头 */
 .side-panel .sel-arrow {
-  width: 28px; height: 36px;
-  font-size: 18px;
-  border-radius: 8px;
+  width: 24px; height: 24px;
+  background: rgba(255,255,255,0.12);
+  border: none;
+  border-radius: 50%;
+  color: rgba(255,255,255,0.85);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: none;
+  transition: background .15s;
+}
+.side-panel .sel-arrow:hover { background: rgba(255,255,255,0.22); }
+.side-panel .sel-arrow:disabled { opacity: 0.3; cursor: not-allowed; background: transparent; }
+/* 中间信息 */
+.side-panel .sel-info {
+  text-align: center;
+  padding: 0 4px;
+  min-width: 36px;
 }
 .side-panel .sel-label {
   font-size: 9px;
-  letter-spacing: 1.2px;
-  margin-bottom: 2px;
+  letter-spacing: 0.3px;
+  margin-bottom: 1px;
+  color: rgba(255,255,255,0.6);
+  font-family: 'Chakra Petch', 'PingFang SC', sans-serif;
+  font-weight: 600;
 }
 .side-panel .sel-value {
-  font-size: 15px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
 }
-.side-panel .ctrl-sel.risk-panel {
-  padding: 6px 8px;
-  height: 52px;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2px;
-}
-/* risk-panel 没有箭头按钮，关闭顶部反光条避免遮挡 label */
-.risk-panel::before { display: none; }
-.risk-panel .sel-label {
-  margin-bottom: 3px;
-}
-/* BUY FEATURES 无箭头面板：sel-info 居中占满 */
-.ctrl-buy .sel-info { padding: 4px 0; }
+/* 购买高倍率 无箭头面板：sel-info 居中占满 */
+.ctrl-buy .sel-info { padding: 2px 0; }
 .ctrl-buy .sel-icon-group { justify-content: center; margin-top: 2px; }
 
-/* 控制区四个面板：label 绝对定位在 ctrl-sel 顶部横跨全宽，避免被 sel-info flex 宽度截断 */
+/* 控制区面板：label 绝对定位在顶部 */
 .controls .ctrl-sel { padding-top: 14px; }
 .controls .ctrl-sel > .sel-label-abs {
   position: absolute;
-  top: 5px;
+  top: 4px;
   left: 3px;
   right: 3px;
   margin: 0;
   z-index: 5;
   text-align: center;
   pointer-events: none;
-  font-size: 9px;
-  letter-spacing: 0.6px;
-  color: #fff;
-  font-weight: 700;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.45);
-  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.3px;
+  color: rgba(255,255,255,0.55);
+  font-weight: 600;
+  font-family: 'Chakra Petch', 'PingFang SC', sans-serif;
   white-space: nowrap;
   display: block;
 }
 .controls .ctrl-sel .sel-info { padding-top: 0; }
-.controls .ctrl-sel .sel-value { font-size: 17px; }
-.ctrl-buy .sel-info { padding: 2px 0 !important; }
-.risk-flames {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  font-size: 18px;
-  line-height: 1;
-}
-.risk-flames .flame {
-  cursor: pointer;
-  filter: grayscale(1) brightness(0.7);
-  opacity: 0.55;
-  transition: all .18s;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.35);
-}
-.risk-flames .flame.active {
-  filter: none;
-  opacity: 1;
-  text-shadow: 0 0 8px rgba(255,140,40,0.95), 0 0 16px rgba(255,100,20,0.5);
-  transform: scale(1.12);
-}
-.risk-flames .flame:hover { opacity: 0.85; }
+.controls .ctrl-sel .sel-value { font-size: 18px; }
 
-/* ─── 槽位高亮 ─── */
-.slot.winning {
-  transform: scaleY(1.15);
-  filter: brightness(1.8);
-  z-index: 10;
-  transition: transform 0.15s, filter 0.15s;
+/* ─── Respin 球衣槽：顶部多一个球衣图标 ─── */
+.slot.is-respin {
+  position: relative;
+}
+.slot.is-respin .slot-bar {
+  /* 在灯条上叠加球衣 */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23fff' d='M16 3l-4 2-4-2-5 2 1 6 3-1v10h10V10l3 1 1-6-5-2z' opacity='0.92'/><path fill='%23ffde55' d='M12 7l-1.2 2.2H8.4l2 1.5-.8 2.3L12 11.6l2.4 1.4-.8-2.3 2-1.5h-2.4L12 7z'/></svg>");
+  background-size: 16px 16px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: transparent;
+}
+.slot.is-respin .slot-bar::after { display: none; }
+.slot.is-respin .slot-val {
+  color: #ffde55;
+  text-shadow: 0 0 5px rgba(255,200,60,0.7), 0 1px 2px rgba(0,0,0,0.75);
+}
+.slot.is-respin .slot-bar {
+  border-color: rgba(255,220,120,0.7);
+  box-shadow: 0 0 8px rgba(255,200,60,0.55), inset 0 1px 0 rgba(255,255,255,0.45);
+}
+
+/* ─── 槽位中奖高亮 ─── */
+.slot.winning .slot-bar {
+  filter: brightness(1.7);
+  transform: scaleY(1.25);
+  box-shadow:
+    0 0 18px rgba(150,230,255,0.95),
+    0 0 26px rgba(80,200,255,0.8),
+    inset 0 1px 0 rgba(255,255,255,0.9);
+  transition: filter .15s, transform .15s, box-shadow .15s;
+}
+.slot.winning .slot-val {
+  filter: brightness(1.2);
+  transition: filter .15s;
 }
 
 /* ─── 开始按钮禁用态 ─── */
 .start-btn:disabled {
-  filter: grayscale(0.5) brightness(0.8);
+  filter: grayscale(0.4) brightness(0.85);
   cursor: not-allowed;
-  opacity: 0.65;
+  opacity: 0.6;
+  box-shadow:
+    0 2px 10px rgba(0,0,0,0.4),
+    inset 0 2px 6px rgba(255,255,255,0.5),
+    inset 0 -3px 6px rgba(0,0,0,0.12);
 }
 
-/* ─── 自动按钮激活态（新：ctrl-auto 高亮）─── */
+/* ─── 自动投注激活态 ─── */
 .ctrl-auto.active {
-  background: linear-gradient(180deg, #ffb03d 0%, #e8820e 50%, #c46400 100%);
-  border-color: #8a4800;
+  background: rgba(255,140,20,0.35);
+  border-color: rgba(255,180,80,0.5);
   box-shadow:
-    inset 0 1px 0 rgba(255,235,170,0.55),
-    inset 0 -1px 0 rgba(0,0,0,0.25),
-    0 0 18px rgba(255,150,40,0.6);
+    0 0 20px rgba(255,140,40,0.3),
+    0 2px 8px rgba(0,0,0,0.25);
 }
-.ctrl-auto.active .sel-value { color: #fff; }
+.ctrl-auto.active .sel-label-abs { color: rgba(255,220,160,0.85); }
+.ctrl-auto.active .sel-value { color: #ffd080; text-shadow: 0 0 10px rgba(255,160,40,0.6); }
 
 
 /* ─── SPLIT! 飘字 ─── */
@@ -932,6 +998,143 @@ body {
 }
 .toggle-switch input:checked + .toggle-track::after { transform: translateX(18px); }
 
+/* ─── 购买高倍率弹窗（参考图样式） ─── */
+.buy-modal {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  opacity: 0;
+  pointer-events: none;
+  width: 320px;
+  max-width: 88%;
+  background: linear-gradient(180deg, #2d7ec5 0%, #1f5ba0 100%);
+  border: 1px solid rgba(180,220,255,0.35);
+  border-radius: 16px;
+  box-shadow: 0 10px 36px rgba(0,0,0,0.55);
+  padding: 22px 20px 18px;
+  z-index: 170;
+  transition: opacity .22s ease, transform .22s cubic-bezier(.22,.85,.35,1);
+}
+.buy-modal.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+}
+.buy-modal-close {
+  position: absolute;
+  top: -12px; right: -12px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: #0a1f3a;
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.45);
+  padding: 0;
+  line-height: 1;
+}
+.buy-modal-close:hover { filter: brightness(1.15); }
+
+.buy-row {
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 0;
+}
+.buy-row + .buy-row {
+  border-top: 1px solid rgba(255,255,255,0.12);
+}
+.buy-row-icon {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.buy-row-icon svg { width: 28px; height: 28px; fill: currentColor; }
+.buy-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.buy-row-title {
+  font-family: 'Chakra Petch', 'PingFang SC', sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.buy-row-cost {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.95);
+}
+/* 胶囊开关（加大款） */
+.buy-toggle {
+  position: relative;
+  width: 56px; height: 28px;
+  flex-shrink: 0;
+}
+.buy-toggle input { display: none; }
+.buy-toggle-track {
+  display: block;
+  width: 56px; height: 28px;
+  border-radius: 14px;
+  background: #0a2644;
+  cursor: pointer;
+  transition: background .22s;
+  position: relative;
+  border: 1px solid rgba(0,0,0,0.4);
+}
+.buy-toggle input:checked + .buy-toggle-track { background: #3ec274; }
+.buy-toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  transition: transform .22s;
+}
+.buy-toggle input:checked + .buy-toggle-track::after { transform: translateX(28px); }
+
+/* 购买高倍率面板激活态（有功能开启时高亮） */
+.ctrl-buy.active {
+  background: rgba(255,140,20,0.30);
+  border-color: rgba(255,180,80,0.5);
+  box-shadow: 0 0 16px rgba(255,140,40,0.28), 0 2px 8px rgba(0,0,0,0.25);
+}
+
+/* 三个 SVG 功能图标（暗 = 未开启，亮 = 开启） */
+.buy-feature-icons {
+  gap: 6px;
+  font-size: 0;
+}
+.bf-icon {
+  width: 16px; height: 16px;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  color: rgba(200,215,230,0.35);
+  transition: color .2s, filter .2s, opacity .2s;
+  filter: none;
+  opacity: 1;
+}
+.bf-icon svg { width: 16px; height: 16px; fill: currentColor; }
+.bf-icon.on {
+  color: #ffd060;
+  filter: drop-shadow(0 0 4px rgba(255,200,80,0.75));
+}
+
 /* ─── Toast ─── */
 .toast {
   position: absolute;
@@ -988,13 +1191,13 @@ body {
   <div class="history-bar">
     <div class="hist-list">
       <div class="hist-badge h-high">3×</div>
-      <div class="hist-badge h-mid">1.2×</div>
+      <div class="hist-badge h-great">1.2×</div>
       <div class="hist-badge h-low">0.4×</div>
-      <div class="hist-badge h-mid">1.1×</div>
+      <div class="hist-badge h-good">1.1×</div>
       <div class="hist-badge h-mid">1×</div>
-      <div class="hist-badge h-mid">1.1×</div>
+      <div class="hist-badge h-good">1.1×</div>
       <div class="hist-badge h-jackpot">25×</div>
-      <div class="hist-badge h-mid">1.6×</div>
+      <div class="hist-badge h-orange">1.6×</div>
     </div>
   </div>
 
@@ -1012,20 +1215,12 @@ body {
   <div class="board-wrap" style="position:relative;">
     <canvas class="board-canvas" id="board"></canvas>
 
-    <!-- 右侧浮动：RISK LEVEL + LINES -->
+    <!-- 右侧浮动：仅保留「行数」 -->
     <div class="side-panel">
-      <div class="ctrl-sel risk-panel ctrl-risk">
-        <span class="sel-label">RISK LEVEL</span>
-        <div class="risk-flames">
-          <span class="flame active" data-risk="0">🔥</span>
-          <span class="flame" data-risk="1">🔥</span>
-          <span class="flame" data-risk="2">🔥</span>
-        </div>
-      </div>
       <div class="ctrl-sel ctrl-rows">
         <button class="sel-arrow">‹</button>
         <div class="sel-info">
-          <span class="sel-label">LINES</span>
+          <span class="sel-label">行数</span>
           <span class="sel-value sel-rows">13</span>
         </div>
         <button class="sel-arrow">›</button>
@@ -1035,38 +1230,46 @@ body {
 
   <!-- Slots (初始占位，onload 后由 rebuildSlotDom 重建) -->
   <div class="slots">
-    <div class="slot s-jackpot"><span>25</span><span class="slot-x">×</span></div>
-    <div class="slot s-high"><span>3</span><span class="slot-x">×</span></div>
-    <div class="slot s-orange"><span>2</span><span class="slot-x">×</span></div>
-    <div class="slot s-orange"><span>1.6</span><span class="slot-x">×</span></div>
-    <div class="slot s-yellow"><span>1.2</span><span class="slot-x">×</span></div>
-    <div class="slot s-warm"><span>1.1</span><span class="slot-x">×</span></div>
-    <div class="slot s-neutral"><span>1</span><span class="slot-x">×</span></div>
-    <div class="slot s-low"><span>0.4</span><span class="slot-x">×</span></div>
-    <div class="slot s-neutral"><span>1</span><span class="slot-x">×</span></div>
-    <div class="slot s-warm"><span>1.1</span><span class="slot-x">×</span></div>
-    <div class="slot s-yellow"><span>1.2</span><span class="slot-x">×</span></div>
-    <div class="slot s-orange"><span>1.6</span><span class="slot-x">×</span></div>
-    <div class="slot s-orange"><span>2</span><span class="slot-x">×</span></div>
-    <div class="slot s-high"><span>3</span><span class="slot-x">×</span></div>
-    <div class="slot s-jackpot"><span>25</span><span class="slot-x">×</span></div>
+    <div class="slot s-jackpot"><div class="slot-bar"></div><div class="slot-val">25×</div></div>
+    <div class="slot s-high"><div class="slot-bar"></div><div class="slot-val">3×</div></div>
+    <div class="slot s-orange"><div class="slot-bar"></div><div class="slot-val">2×</div></div>
+    <div class="slot s-orange"><div class="slot-bar"></div><div class="slot-val">1.6×</div></div>
+    <div class="slot s-yellow"><div class="slot-bar"></div><div class="slot-val">1.2×</div></div>
+    <div class="slot s-warm"><div class="slot-bar"></div><div class="slot-val">1.1×</div></div>
+    <div class="slot s-neutral"><div class="slot-bar"></div><div class="slot-val">1×</div></div>
+    <div class="slot s-low"><div class="slot-bar"></div><div class="slot-val">0.4×</div></div>
+    <div class="slot s-neutral"><div class="slot-bar"></div><div class="slot-val">1×</div></div>
+    <div class="slot s-warm"><div class="slot-bar"></div><div class="slot-val">1.1×</div></div>
+    <div class="slot s-yellow"><div class="slot-bar"></div><div class="slot-val">1.2×</div></div>
+    <div class="slot s-orange"><div class="slot-bar"></div><div class="slot-val">1.6×</div></div>
+    <div class="slot s-orange"><div class="slot-bar"></div><div class="slot-val">2×</div></div>
+    <div class="slot s-high"><div class="slot-bar"></div><div class="slot-val">3×</div></div>
+    <div class="slot s-jackpot"><div class="slot-bar"></div><div class="slot-val">25×</div></div>
   </div>
 
-  <!-- Controls: grid 布局，中心 PLAY 足球按钮 -->
+  <!-- Controls: grid 布局，中心 开始 足球按钮 -->
   <div class="controls">
-    <!-- 左上：BUY FEATURES（装饰/占位按钮） -->
-    <div class="ctrl-sel ctrl-buy" id="btnBuyFeatures" title="购买特色">
-      <span class="sel-label-abs">BUY FEATURES</span>
+    <!-- 左上：购买高倍率（装饰/占位按钮） -->
+    <div class="ctrl-sel ctrl-buy" id="btnBuyFeatures" title="购买高倍率">
+      <span class="sel-label-abs">购买高倍率</span>
       <div class="sel-info">
-        <div class="sel-icon-group">
-          <span>🎯</span><span>⚡</span><span>🎁</span>
+        <div class="sel-icon-group buy-feature-icons">
+          <span class="bf-icon" data-key="split" aria-label="分裂钉">
+            <svg viewBox="0 0 24 24"><path d="M12 2l2.6 5.3 5.9.9-4.25 4.1 1 5.8L12 15.8 6.75 18.1l1-5.8L3.5 8.2l5.9-.9L12 2z"/></svg>
+          </span>
+          <span class="bf-icon" data-key="respin" aria-label="免费旋转">
+            <svg viewBox="0 0 24 24"><path d="M12 4V1L7 6l5 5V7c3.3 0 6 2.7 6 6s-2.7 6-6 6-6-2.7-6-6H4c0 4.4 3.6 8 8 8s8-3.6 8-8-3.6-8-8-8z"/></svg>
+          </span>
+          <span class="bf-icon" data-key="hiMult" aria-label="高倍率球">
+            <svg viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>
+          </span>
         </div>
       </div>
     </div>
 
-    <!-- 右上：BET AMOUNT（投注） -->
+    <!-- 右上：投注 -->
     <div class="ctrl-sel ctrl-bet">
-      <span class="sel-label-abs">BET AMOUNT</span>
+      <span class="sel-label-abs">投注</span>
       <button class="sel-arrow">‹</button>
       <div class="sel-info">
         <span class="sel-value">5</span>
@@ -1074,19 +1277,19 @@ body {
       <button class="sel-arrow">›</button>
     </div>
 
-    <!-- 左下：BALLS AMOUNT（同发球数） -->
-    <div class="ctrl-sel ctrl-balls">
-      <span class="sel-label-abs">BALLS AMOUNT</span>
-      <button class="sel-arrow">‹</button>
+    <!-- 左下：难度（3 档：佛系/激进/疯狂） -->
+    <div class="ctrl-sel ctrl-risk">
+      <span class="sel-label-abs">难度</span>
+      <button class="sel-arrow risk-prev">‹</button>
       <div class="sel-info">
-        <span class="sel-value sel-balls">1</span>
+        <span class="sel-value sel-risk-label">佛系</span>
       </div>
-      <button class="sel-arrow">›</button>
+      <button class="sel-arrow risk-next">›</button>
     </div>
 
-    <!-- 右下：AUTO（自动投注数） -->
+    <!-- 右下：自动投注 -->
     <div class="ctrl-sel ctrl-auto">
-      <span class="sel-label-abs">AUTO</span>
+      <span class="sel-label-abs">自动投注</span>
       <button class="sel-arrow">‹</button>
       <div class="sel-info">
         <span class="sel-value sel-auto">0</span>
@@ -1094,8 +1297,8 @@ body {
       <button class="sel-arrow">›</button>
     </div>
 
-    <!-- 中心 PLAY 足球按钮 -->
-    <button class="start-btn" aria-label="开始"><span>PLAY</span></button>
+    <!-- 中心 开始/停止 足球按钮 -->
+    <button class="start-btn" aria-label="开始"><span>开始</span></button>
   </div>
 
   <!-- 底部余额条 -->
@@ -1153,6 +1356,53 @@ body {
     </div>
   </div>
 
+  <!-- 购买高倍率弹窗 -->
+  <div class="buy-modal" id="buyModal" role="dialog" aria-modal="true" aria-label="购买高倍率">
+    <button class="buy-modal-close" id="buyModalClose" aria-label="关闭">✕</button>
+
+    <div class="buy-row">
+      <div class="buy-row-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 2l2.6 5.3 5.9.9-4.25 4.1 1 5.8L12 15.8 6.75 18.1l1-5.8L3.5 8.2l5.9-.9L12 2z"/></svg>
+      </div>
+      <div class="buy-row-main">
+        <span class="buy-row-title">分裂钉</span>
+        <span class="buy-row-cost" id="costSplit">+0.60</span>
+      </div>
+      <label class="buy-toggle">
+        <input type="checkbox" id="toggleSplit">
+        <span class="buy-toggle-track"></span>
+      </label>
+    </div>
+
+    <div class="buy-row">
+      <div class="buy-row-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 4V1L7 6l5 5V7c3.3 0 6 2.7 6 6s-2.7 6-6 6-6-2.7-6-6H4c0 4.4 3.6 8 8 8s8-3.6 8-8-3.6-8-8-8z"/></svg>
+      </div>
+      <div class="buy-row-main">
+        <span class="buy-row-title">免费旋转</span>
+        <span class="buy-row-cost" id="costRespin">+0.20</span>
+      </div>
+      <label class="buy-toggle">
+        <input type="checkbox" id="toggleRespin">
+        <span class="buy-toggle-track"></span>
+      </label>
+    </div>
+
+    <div class="buy-row">
+      <div class="buy-row-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>
+      </div>
+      <div class="buy-row-main">
+        <span class="buy-row-title">高倍率球</span>
+        <span class="buy-row-cost" id="costHiMult">+0.20</span>
+      </div>
+      <label class="buy-toggle">
+        <input type="checkbox" id="toggleHiMult">
+        <span class="buy-toggle-track"></span>
+      </label>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
@@ -1205,9 +1455,18 @@ const WALL_SLOPE = 0.19;                             // 缓梯形（参考图：
 // d(ROWS) = D_16 * ROWS_MAX / ROWS — 行少则间距大，铺满固定三角形
 // domeR(d) = 3*d/4 — 壁顶开口始终与外沿钉对齐
 
-// 分裂钉：仅 13 行时启用
+// 分裂钉：需开启「购买高倍率 → 分裂钉」，并按当前行数生成布局
 function getSplits() {
-  return selectedRows === 13 ? [[2,2],[6,2],[6,6]] : [];
+  if (!(window.buyFeatures && window.buyFeatures.split)) return [];
+  // 根据行数动态放置 3 个分裂钉（位置大致在中部 + 两侧）
+  const R = selectedRows;
+  if (R < 8) return [];
+  const topRow = Math.max(1, Math.round(R * 0.18));
+  const midRow = Math.max(topRow + 2, Math.round(R * 0.45));
+  const midCol1 = Math.max(1, Math.round(midRow * 0.25));
+  const midCol2 = Math.max(midCol1 + 2, Math.round((midRow + 2) * 0.75));
+  const topCol = Math.max(1, Math.round((topRow + 2) * 0.5));
+  return [[topRow, topCol], [midRow, midCol1], [midRow, midCol2]];
 }
 
 function drawBoard(glows = {}) {
@@ -1545,6 +1804,7 @@ function drawBoard(glows = {}) {
   const BALL_R = 4.5;  // 球更小，适应小球门
 
   // 8 颗足球堆满球门（参考图：球门内塞满 7-9 颗球）
+  // hiMult 开关激活时，其中 1 颗红球 + 1 颗金球
   const N = 8;
   const balls = Array.from({length: N}, (_, i) => {
     return {
@@ -1555,8 +1815,22 @@ function drawBoard(glows = {}) {
       r:  BALL_R,
       rot: Math.random() * Math.PI * 2,
       vrot: (Math.random() - 0.5) * 0.03,
+      color: 'normal',
     };
   });
+
+  function refreshGoalBallColors() {
+    const hi = !!(window.buyFeatures && window.buyFeatures.hiMult);
+    balls.forEach(b => b.color = 'normal');
+    if (hi) {
+      // 最后两颗设置为红 / 金，确保可见
+      if (balls[0]) balls[0].color = 'red';
+      if (balls[1]) balls[1].color = 'gold';
+    }
+  }
+  refreshGoalBallColors();
+  // 供外部 drawDome() 钩子调用
+  window.drawDome = refreshGoalBallColors;
 
   // 绘制单个足球：按截角二十面体正投影精确绘制（与下落足球共用算法）
   function drawMiniFoot(b) {
@@ -1564,6 +1838,18 @@ function drawBoard(glows = {}) {
     dx.translate(b.x, b.y);
     dx.rotate(b.rot);
     drawSoccerGlyph(dx, 0, 0, b.r);
+    // 高倍率色叠加
+    if (b.color === 'red' || b.color === 'gold') {
+      dx.save();
+      dx.globalCompositeOperation = 'multiply';
+      dx.fillStyle = b.color === 'red' ? 'rgba(230,60,60,0.85)' : 'rgba(255,200,40,0.9)';
+      dx.beginPath(); dx.arc(0, 0, b.r, 0, Math.PI * 2); dx.fill();
+      dx.restore();
+      // 轻微发光描边
+      dx.strokeStyle = b.color === 'red' ? 'rgba(255,130,130,0.8)' : 'rgba(255,235,120,0.9)';
+      dx.lineWidth = 0.8;
+      dx.beginPath(); dx.arc(0, 0, b.r + 0.3, 0, Math.PI * 2); dx.stroke();
+    }
     dx.restore();
   }
   // 与 drawSoccerBall 共用同一贴图（ball1.jpg），未加载时回退几何绘制
@@ -1673,7 +1959,130 @@ window.addEventListener('load', () => {
   rebuildSlotDom();
   drawBoard();
   initGame();
+  paintStartBtnBall();
 });
+
+// ── 在开始按钮上绘制参考图风格足球（白底 + 深蓝五边形） ──
+function paintStartBtnBall() {
+  const btn = document.querySelector('.start-btn');
+  if (!btn) return;
+  const DPR = Math.max(2, window.devicePixelRatio || 1);
+  const CSS_SIZE = 106;
+  const size = CSS_SIZE * DPR;
+  const canvas = document.createElement('canvas');
+  canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d');
+
+  const R = size / 2;
+  const cx = R, cy = R;
+
+  const BLUE       = '#2a4b78';      // 五边形填充
+  const BLUE_EDGE  = '#16324f';      // 深色描边
+  const BLUE_RIM   = '#1c3a5c';      // 外圈
+
+  // ── 圆形裁切 ──
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.clip();
+
+  // ── 白色基底 + 径向渐变（立体感）──
+  const baseGrad = ctx.createRadialGradient(cx - R * 0.25, cy - R * 0.3, 0, cx, cy, R * 1.15);
+  baseGrad.addColorStop(0,    '#ffffff');
+  baseGrad.addColorStop(0.55, '#f1f3f6');
+  baseGrad.addColorStop(1,    '#b4bcc7');
+  ctx.fillStyle = baseGrad;
+  ctx.fillRect(0, 0, size, size);
+
+  // ── 几何：参考图布局——中心一个大白六边形(hex)，顶部一个小蓝五边形（可见角），
+  //   两侧各一个大蓝五边形，底部两个蓝五边形。文字居中放在中心白六边形内 ──
+  // 绘制工具
+  function polyPath(cx2, cy2, r, sides, rotation = 0) {
+    ctx.beginPath();
+    for (let i = 0; i < sides; i++) {
+      const ang = rotation + (i * 2 * Math.PI / sides);
+      const vx = cx2 + r * Math.cos(ang);
+      const vy = cy2 + r * Math.sin(ang);
+      i === 0 ? ctx.moveTo(vx, vy) : ctx.lineTo(vx, vy);
+    }
+    ctx.closePath();
+  }
+
+  // 中心白色六边形半径
+  const hexR = R * 0.46;
+
+  // 深蓝五边形参数
+  const pentLargeR = R * 0.30;
+
+  // 参考图分析：六个深蓝斑块
+  // 1. 正上方——小五边形（顶点朝下、一条边在上）
+  // 2. 左上——大五边形（紧贴中心六边形左上边）
+  // 3. 右上——大五边形（紧贴中心六边形右上边）
+  // 4. 左下——大五边形（紧贴中心六边形左下边）
+  // 5. 右下——大五边形（紧贴中心六边形右下边）
+  // 6. 正下方——小五边形（顶点朝上）
+
+  // flat-top 六边形的 6 条边中点朝外的角度：0°, 60°, 120°, 180°, 240°, 300°
+  const edgeAngles = [0, 60, 120, 180, 240, 300].map(d => d * Math.PI / 180);
+  // 每条边中点在径向外的距离 = hexR * cos(30°) = hexR * √3/2
+  const apothem = hexR * Math.sqrt(3) / 2;
+  // 五边形中心沿径向放置在六边形边外
+  const pentDist = apothem + pentLargeR * 0.78;
+
+  edgeAngles.forEach(a => {
+    const px = cx + pentDist * Math.cos(a);
+    const py = cy + pentDist * Math.sin(a);
+    // 顶点方向：径向外（远离中心）
+    polyPath(px, py, pentLargeR, 5, a - Math.PI / 2);
+    ctx.fillStyle = BLUE;
+    ctx.fill();
+  });
+  // 描边五边形
+  ctx.strokeStyle = BLUE_EDGE;
+  ctx.lineWidth = R * 0.03;
+  ctx.lineJoin = 'round';
+  edgeAngles.forEach(a => {
+    const px = cx + pentDist * Math.cos(a);
+    const py = cy + pentDist * Math.sin(a);
+    polyPath(px, py, pentLargeR, 5, a - Math.PI / 2);
+    ctx.stroke();
+  });
+
+  // ── 中心大白色六边形：覆盖在五边形之上，给文字一个干净的白色背景 ──
+  polyPath(cx, cy, hexR, 6, 0);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+  // 描边中心六边形
+  polyPath(cx, cy, hexR, 6, 0);
+  ctx.strokeStyle = BLUE_EDGE;
+  ctx.lineWidth = R * 0.035;
+  ctx.stroke();
+
+  // ── 顶部高光 ──
+  const hi = ctx.createRadialGradient(cx - R * 0.4, cy - R * 0.55, 0, cx - R * 0.4, cy - R * 0.55, R);
+  hi.addColorStop(0,    'rgba(255,255,255,0.5)');
+  hi.addColorStop(0.55, 'rgba(255,255,255,0.1)');
+  hi.addColorStop(1,    'rgba(255,255,255,0)');
+  ctx.fillStyle = hi;
+  ctx.fillRect(0, 0, size, size);
+
+  // ── 底部阴影 ──
+  const sh = ctx.createRadialGradient(cx + R * 0.15, cy + R * 0.55, 0, cx + R * 0.15, cy + R * 0.55, R * 1.1);
+  sh.addColorStop(0,    'rgba(0,0,0,0)');
+  sh.addColorStop(0.5,  'rgba(10,30,55,0.08)');
+  sh.addColorStop(1,    'rgba(10,30,55,0.35)');
+  ctx.fillStyle = sh;
+  ctx.fillRect(0, 0, size, size);
+
+  ctx.restore();
+
+  // ── 外圈深蓝描边（参考图最外围那圈深蓝线） ──
+  ctx.strokeStyle = BLUE_RIM;
+  ctx.lineWidth = R * 0.08;
+  ctx.beginPath();
+  ctx.arc(cx, cy, R - ctx.lineWidth / 2, 0, Math.PI * 2);
+  ctx.stroke();
+
+  btn.style.backgroundImage = `url(${canvas.toDataURL('image/png')})`;
+}
 
 // ── 专业倍率参考表（基于 Stake.com 行业标准，按行数独立配置）──
 // 格式：每行按 [边缘→中心] 列出 ceil((rows+1)/2) 个唯一倍率值
@@ -1735,13 +2144,32 @@ function valToClass(v) {
 }
 
 let slotEls = [];
+let respinSlots = new Set();   // 当前标记为「球衣槽」的 slot 索引
 
-// 根据当前 selectedRows 重建槽位 DOM
-// 根据槽宽计算字号：约束来自3字符数字（如"0.2"、"130"），安全系数 slotW÷1.9
+// 每轮开始随机挑 2 个槽位作球衣槽
+function rollRespinSlots() {
+  respinSlots = new Set();
+  if (!(window.buyFeatures && window.buyFeatures.respin)) return;
+  const total = selectedRows + 1;
+  if (total < 3) return;
+  // 随机选 2 个不同索引，排除中心（倍率最低槽）避免过度触发
+  const centerL = Math.floor(total / 2) - 1;
+  const centerR = Math.floor(total / 2) + 1;
+  const candidates = [];
+  for (let i = 0; i < total; i++) {
+    if (i < centerL - 1 || i > centerR + 1) candidates.push(i);
+  }
+  while (respinSlots.size < 2 && candidates.length > 0) {
+    const pickIdx = Math.floor(Math.random() * candidates.length);
+    respinSlots.add(candidates.splice(pickIdx, 1)[0]);
+  }
+}
+
+// 根据槽宽计算倍率文字字号（窄行数时自动缩小，避免溢出）
 function calcSlotFsize(slotW) {
+  // 倍率文字占据槽宽，最长 "0.3×"/"130×" 约 4 字符
   return {
-    fsize: Math.max(9,  Math.min(16, Math.floor(slotW / 1.9))) + 'px',
-    xsize: Math.max(6,  Math.min(10, Math.floor(slotW / 3.5))) + 'px',
+    fsize: Math.max(8, Math.min(12, Math.floor(slotW / 2.6))) + 'px',
   };
 }
 
@@ -1756,16 +2184,18 @@ function rebuildSlotDom() {
   const slots  = selectedRows + 1;
   const cfg    = slotConfigs[modeIdx] || [];
   const slotW  = (container.offsetWidth - 2 * PAD_SIDE) / slots;
-  container.style.padding = `0 ${PAD_SIDE}px 4px`;
-  const { fsize, xsize } = calcSlotFsize(slotW);
+  container.style.padding = `8px ${PAD_SIDE}px 10px`;
+  const { fsize } = calcSlotFsize(slotW);
+
+  rollRespinSlots();
 
   container.innerHTML = '';
   for (let i = 0; i < slots; i++) {
     const div = document.createElement('div');
     const val = cfg[i];
-    div.className    = 'slot ' + valToClass(val);
-    div.style.fontSize = fsize;
-    div.innerHTML = `<span>${slotDisp(val)}</span><span class="slot-x" style="font-size:${xsize}">×</span>`;
+    const respin = respinSlots.has(i) ? ' is-respin' : '';
+    div.className = 'slot ' + valToClass(val) + respin;
+    div.innerHTML = `<div class="slot-bar"></div><div class="slot-val" style="font-size:${fsize}">${slotDisp(val)}×</div>`;
     container.appendChild(div);
   }
   slotEls = Array.from(container.querySelectorAll('.slot'));
@@ -1775,85 +2205,90 @@ function updateSlots(idx) {
   const cfg    = slotConfigs[idx] || [];
   const container = document.querySelector('.slots');
   const slotW  = (container.offsetWidth - 2 * PAD_SIDE) / (selectedRows + 1);
-  const { fsize, xsize } = calcSlotFsize(slotW);
+  const { fsize } = calcSlotFsize(slotW);
 
   slotEls.forEach((slot, i) => {
     const val = cfg[i];
-    slot.className     = 'slot ' + valToClass(val);
-    slot.style.fontSize = fsize;
-    slot.innerHTML = `<span>${slotDisp(val)}</span><span class="slot-x" style="font-size:${xsize}">×</span>`;
+    const respin = respinSlots.has(i) ? ' is-respin' : '';
+    slot.className = 'slot ' + valToClass(val) + respin;
+    slot.innerHTML = `<div class="slot-bar"></div><div class="slot-val" style="font-size:${fsize}">${slotDisp(val)}×</div>`;
   });
 }
 
 // ═══════════════════════════════════════════════════════════
-//  控制器：RISK LEVEL（难度/火焰）+ LINES + BET + BALLS + AUTO
+//  控制器：难度（火焰）+ 行数 + 投注 + 自动投注
 // ═══════════════════════════════════════════════════════════
 
-// 难度（RISK LEVEL）— 通过 3 个火焰切换
-const modes = ['佛系', '刺激', '疯狂'];
+// 难度 — 左右箭头切换（佛系 / 激进 / 疯狂）
+const modes = ['佛系', '激进', '疯狂'];
 const modeColors = ['#ffd84a', '#ff8833', '#dd44ff'];
 let modeIdx = 0;
-const flameEls = document.querySelectorAll('.risk-flames .flame');
-function renderFlames() {
-  flameEls.forEach((f, i) => {
-    f.classList.toggle('active', i <= modeIdx);
-  });
+const riskLabelEl = document.querySelector('.sel-risk-label');
+const riskPrevBtn = document.querySelector('.risk-prev');
+const riskNextBtn = document.querySelector('.risk-next');
+
+function renderRisk() {
+  if (riskLabelEl) {
+    riskLabelEl.textContent = modes[modeIdx];
+    riskLabelEl.style.color = modeColors[modeIdx];
+  }
 }
-renderFlames();
-flameEls.forEach((f, i) => {
-  f.addEventListener('click', () => {
-    if (balls.length > 0 || pendingSettles > 0) return;
-    modeIdx = i;
-    renderFlames();
-    updateSlots(modeIdx);
-  });
+renderRisk();
+
+// 循环切换：边界自动回绕
+riskPrevBtn?.addEventListener('click', () => {
+  if (autoMode || balls.length > 0 || pendingSettles > 0) return;
+  modeIdx = (modeIdx - 1 + modes.length) % modes.length;
+  renderRisk();
+  updateSlots(modeIdx);
+});
+riskNextBtn?.addEventListener('click', () => {
+  if (autoMode || balls.length > 0 || pendingSettles > 0) return;
+  modeIdx = (modeIdx + 1) % modes.length;
+  renderRisk();
+  updateSlots(modeIdx);
 });
 
-// ── 飞行中锁定控制器（投注/难度/行数/球数/自动不可变更）──
+// ── 飞行中/自动投注锁定控制器 ──
 const _ctrlArrows = document.querySelectorAll(
-  '.ctrl-bet .sel-arrow, .ctrl-rows .sel-arrow, .ctrl-balls .sel-arrow, .ctrl-auto .sel-arrow'
+  '.ctrl-bet .sel-arrow, .ctrl-rows .sel-arrow, .ctrl-auto .sel-arrow, .ctrl-risk .sel-arrow'
 );
 function lockControls(lock) {
   _ctrlArrows.forEach(btn => { btn.disabled = lock; });
-  flameEls.forEach(f => { f.style.pointerEvents = lock ? 'none' : ''; f.style.opacity = lock ? (f.classList.contains('active') ? 0.7 : 0.35) : ''; });
+  // 解锁时还原难度边界状态
+  if (!lock) renderRisk();
+  const buyBtn = document.getElementById('btnBuyFeatures');
+  if (buyBtn) {
+    buyBtn.style.pointerEvents = lock ? 'none' : '';
+    buyBtn.style.opacity = lock ? 0.55 : '';
+  }
   // 解锁时还原行数边界状态
   if (!lock && typeof updateRowArrows === 'function') updateRowArrows();
 }
 
-// 投注切换（BET AMOUNT）
+// 投注切换
 const betValues = [1, 2, 5, 10, 15, 20, 25, 50, 100, 200, 500, 1000];
 let betIdx = 2;
 const betEl = document.querySelector('.ctrl-bet .sel-value');
 document.querySelectorAll('.ctrl-bet .sel-arrow').forEach((btn, dir) => {
   btn.addEventListener('click', () => {
-    if (balls.length > 0 || pendingSettles > 0) return;
+    if (autoMode || balls.length > 0 || pendingSettles > 0) return;
     betIdx = Math.max(0, Math.min(betValues.length - 1, betIdx + (dir === 1 ? 1 : -1)));
     betEl.textContent = betValues[betIdx];
   });
 });
 
-// 球数（BALLS AMOUNT）— 一次发球数，1~5 球
-const ballsPerRound = [1, 2, 3, 4, 5];
-let ballsIdx = 0;
-const ballsEl = document.querySelector('.sel-balls');
-document.querySelectorAll('.ctrl-balls .sel-arrow').forEach((btn, dir) => {
-  btn.addEventListener('click', () => {
-    if (balls.length > 0 || pendingSettles > 0) return;
-    ballsIdx = Math.max(0, Math.min(ballsPerRound.length - 1, ballsIdx + (dir === 1 ? 1 : -1)));
-    ballsEl.textContent = ballsPerRound[ballsIdx];
-  });
-});
-
-// 自动（AUTO）— 自动次数，0 表示关闭；正数表示连发次数
-const autoValues = [0, 10, 25, 50, 100, 250, 500];
+// 自动投注 — 离散值选择器：0/10/25/50/100/250/500/750/1000/∞
+const autoValues = [0, 10, 25, 50, 100, 250, 500, 750, 1000, Infinity];
+function fmtAuto(v) { return v === Infinity ? '∞' : String(v); }
 let autoIdx = 0;
 const autoEl = document.querySelector('.sel-auto');
 document.querySelectorAll('.ctrl-auto .sel-arrow').forEach((btn, dir) => {
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
-    if (balls.length > 0 || pendingSettles > 0) return;
+    if (autoMode || balls.length > 0 || pendingSettles > 0) return;
     autoIdx = Math.max(0, Math.min(autoValues.length - 1, autoIdx + (dir === 1 ? 1 : -1)));
-    autoEl.textContent = autoValues[autoIdx];
+    autoEl.textContent = fmtAuto(autoValues[autoIdx]);
   });
 });
 
@@ -1896,7 +2331,18 @@ function onRowsChanged() {
   balls.length  = 0;
   pendingSettles = 0;
   pendingWin     = 0;
-  lockControls(false); // 清空球后立即恢复控制器
+  // 若在自动模式中切换行数（理论上控件被锁，但保险清理）
+  autoMode = false;
+  autoRemaining = 0;
+  const autoPanel = document.querySelector('.ctrl-auto');
+  if (autoPanel) autoPanel.classList.remove('active');
+  const startBtn = document.querySelector('.start-btn');
+  if (startBtn) {
+    startBtn.classList.remove('stopping');
+    const lbl = startBtn.querySelector('span');
+    if (lbl) lbl.textContent = '开始';
+  }
+  lockControls(false);
   // 重算倍率 + 重建槽位 + 重绘钉板 + 重启游戏循环
   slotConfigs = buildBaseConfigs(selectedRows);
   rebuildSlotDom();
@@ -1957,12 +2403,14 @@ function initGame() {
 
   // ── 历史倍率 class ──
   function histClass(m) {
-    if (m >= 100) return 'h-mega';
-    if (m >= 25)  return 'h-jackpot';
-    if (m >= 3)   return 'h-high';
-    if (m >= 1.5) return 'h-mid';
-    if (m < 1)    return 'h-low';
-    return 'h-mid';
+    if (m >= 100)  return 'h-mega';     // 金
+    if (m >= 25)   return 'h-jackpot';  // 红粉
+    if (m >= 3)    return 'h-high';     // 橙红
+    if (m >= 1.5)  return 'h-orange';   // 橙黄
+    if (m >= 1.2)  return 'h-great';    // 绿
+    if (m >= 1.05) return 'h-good';     // 青绿
+    if (m >= 0.8)  return 'h-mid';      // 青蓝
+    return 'h-low';                     // 深灰蓝
   }
 
   function addHistory(multiplier) {
@@ -1984,11 +2432,27 @@ function initGame() {
     ['#ffdfe5','#880020','#d8a8b0'],   // depth 2：深红足球
   ];
 
-  // ── 绘制单球（足球样式：白底 + 5 个黑色五边形）──
-  function drawBall(x, y, alpha = 1, depth = 0, rot = 0) {
+  // ── 绘制单球（足球样式：白底 + 5 个黑色五边形；可按 color 叠色）──
+  function drawBall(x, y, alpha = 1, depth = 0, rot = 0, color = 'normal') {
     ctx.shadowBlur = 0;
     ctx.globalAlpha = alpha;
     drawSoccerBall(ctx, x, y, ballR, rot);
+    // 高倍率球：红/金色叠加（multiply 保留球面明暗纹理）
+    if (color === 'red' || color === 'gold') {
+      ctx.save();
+      ctx.globalCompositeOperation = 'multiply';
+      ctx.fillStyle = color === 'red' ? 'rgba(230,60,60,0.85)' : 'rgba(255,200,40,0.9)';
+      ctx.beginPath(); ctx.arc(x, y, ballR, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+      // 发光描边
+      ctx.save();
+      ctx.strokeStyle = color === 'red' ? 'rgba(255,120,120,0.8)' : 'rgba(255,235,120,0.9)';
+      ctx.lineWidth = 1.5;
+      ctx.shadowColor = color === 'red' ? 'rgba(255,80,80,0.9)' : 'rgba(255,200,40,0.95)';
+      ctx.shadowBlur = 8;
+      ctx.beginPath(); ctx.arc(x, y, ballR + 0.5, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+    }
     ctx.globalAlpha = 1;
   }
 
@@ -2067,7 +2531,7 @@ function initGame() {
   // ── 绘制球 + 尾部幻影 ──
   function drawBallWithTrail(ball) {
     ctx.globalAlpha = 1;
-    drawBall(ball.x, ball.y, 1, ball.depth || 0, ball.rot || 0);
+    drawBall(ball.x, ball.y, 1, ball.depth || 0, ball.rot || 0, ball.color || 'normal');
   }
 
   // ── 物理更新 ──
@@ -2241,6 +2705,24 @@ function initGame() {
       setTimeout(() => wrapper.remove(), 1500);
     })();
 
+    // Respin：命中球衣槽则触发免费补发一球
+    if (window.buyFeatures && window.buyFeatures.respin && respinSlots.has(slotIdx)) {
+      // 稍作延时，等飘字动画有感知
+      setTimeout(() => { launchBall({ free: true }); }, 700);
+      // 飘字提示
+      setTimeout(() => {
+        const wrap = document.querySelector('.balance-wrap');
+        if (wrap) {
+          const el = document.createElement('div');
+          el.className = 'bal-float';
+          el.style.color = '#ffde55';
+          el.textContent = 'RESPIN';
+          wrap.appendChild(el);
+          setTimeout(() => el.remove(), 1400);
+        }
+      }, 400);
+    }
+
     function done() {
       pendingSettles--;
       if (balls.length === 0 && pendingSettles === 0) afterSettle();
@@ -2271,29 +2753,44 @@ function initGame() {
       pendingWin = 0;
     }
 
-    startBtn.disabled = false;
-    lockControls(false);
     drawBoard();
 
     if (autoMode && autoRemaining > 0) {
+      // 自动模式下保持控件锁定；按钮保持可点（用于点击停止）
+      startBtn.disabled = false;
       setTimeout(() => {
         if (autoMode && autoRemaining > 0) {
           const ok = launchBall();
           if (ok) autoRemaining--;
           else {
+            // 余额不足：退出自动
             autoMode = false;
             autoRemaining = 0;
             autoPanel.classList.remove('active');
+            startBtn.classList.remove('stopping');
+            if (startLbl) startLbl.textContent = '开始';
+            lockControls(false);
           }
         } else if (autoMode) {
           autoMode = false;
           autoPanel.classList.remove('active');
+          startBtn.classList.remove('stopping');
+          if (startLbl) startLbl.textContent = '开始';
+          lockControls(false);
         }
       }, 600);
     } else if (autoMode) {
       // 余数归零，退出自动
       autoMode = false;
       autoPanel.classList.remove('active');
+      startBtn.classList.remove('stopping');
+      if (startLbl) startLbl.textContent = '开始';
+      startBtn.disabled = false;
+      lockControls(false);
+    } else {
+      // 单发完成，解锁
+      startBtn.disabled = false;
+      lockControls(false);
     }
   }
 
@@ -2365,7 +2862,7 @@ function initGame() {
       // 落槽检测
       const idx = checkLanded(ball);
       if (idx >= 0) {
-        const w = ball.weight ?? 1;
+        const w = (ball.weight ?? 1) * (ball.extraMult ?? 1);
         balls.splice(i, 1);
         pendingSettles++;
         settle(idx, w);
@@ -2377,54 +2874,72 @@ function initGame() {
     }
   }
 
-  // ── 一次发球（支持 BALLS AMOUNT 同时多球）──
-  function launchBall() {
+  // ── 一次发球（单球）──
+  function launchBall(opts = {}) {
+    const free = opts.free === true;   // Respin 返还球免费
     const bet       = betValues[betIdx];
-    const ballsCnt  = ballsPerRound[ballsIdx];
-    const totalCost = parseFloat((bet * ballsCnt).toFixed(2));
-    if (balance < totalCost) {
-      if (startLbl) startLbl.textContent = '余额不足';
-      setTimeout(() => { if (startLbl) startLbl.textContent = 'PLAY'; }, 1200);
+    const multiplier = (typeof buyCostMultiplier === 'function') ? buyCostMultiplier() : 1;
+    const totalCost = free ? 0 : parseFloat((bet * multiplier).toFixed(2));
+    if (!free && balance < totalCost) {
+      if (startLbl) {
+        startLbl.textContent = '余额不足';
+        setTimeout(() => {
+          if (startLbl) startLbl.textContent = autoMode ? '停止' : '开始';
+        }, 1200);
+      }
       return false;
     }
 
     balance = parseFloat((balance - totalCost).toFixed(2));
     balEl.textContent = fmtBalance(balance);
-    startBtn.disabled = true;
+    // 自动模式下按钮保持可点（用于"停止"）；单发模式才置灰
+    startBtn.disabled = !autoMode;
     lockControls(true);
 
-    // 同时发射 N 颗球，横向错开避免重叠
-    for (let k = 0; k < ballsCnt; k++) {
-      const spread = (k - (ballsCnt - 1) / 2) * 8;
-      balls.push({
-        x:  cx + spread + (Math.random() - 0.5) * 10,
-        y:  padT - 16 - k * 14,                // 纵向错开，避免首帧重叠
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: 1.6,
-        trail:    [],
-        cooldown: {},
-        isSplit:   false,
-        splitFrom: null,
-        weight:    1.0,
-        rot:       (Math.random() - 0.5) * Math.PI, // 出场随机姿态
-        vrot:      (Math.random() - 0.5) * 0.05,
-      });
+    // 高倍率球抽样：开启后按概率产出红/金球
+    let ballColor = 'normal';
+    let extraMult = 1;
+    if (window.buyFeatures && window.buyFeatures.hiMult && !free) {
+      const r = Math.random();
+      if (r < 0.08)       { ballColor = 'gold'; extraMult = 4; }
+      else if (r < 0.25)  { ballColor = 'red';  extraMult = 2; }
     }
 
-    if (!rafId || balls.length === ballsCnt) {
+    balls.push({
+      x:  cx + (Math.random() - 0.5) * 10,
+      y:  padT - 16,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: 1.6,
+      trail:    [],
+      cooldown: {},
+      isSplit:   false,
+      splitFrom: null,
+      weight:    1.0,
+      rot:       (Math.random() - 0.5) * Math.PI, // 出场随机姿态
+      vrot:      (Math.random() - 0.5) * 0.05,
+      color:     ballColor,
+      extraMult: extraMult,
+    });
+
+    if (!rafId || balls.length === 1) {
       rafId = requestAnimationFrame(gameLoop);
     }
     return true;
   }
 
-  // ── PLAY 足球按钮 ──
-  // 点击：若 AUTO>0 启动连发；再次点击进行中的 PLAY 会停止自动
+  // ── 开始 / 停止 足球按钮 ──
+  // 单发：点击发一颗球，按钮短暂置灰至落槽恢复
+  // 自动：自动投注 > 0 时进入自动模式，按钮变"停止"；点击"停止"可中断
   startBtn.addEventListener('click', () => {
     if (autoMode) {
-      // 停止自动
+      // 停止自动：立即结束（仍在飞的球会自然落下；afterSettle 会补全清理）
       autoMode = false;
       autoRemaining = 0;
       autoPanel.classList.remove('active');
+      startBtn.classList.remove('stopping');
+      if (startLbl) startLbl.textContent = '开始';
+      // 若已无飞行球，立即解锁；否则由 afterSettle 解锁
+      if (balls.length === 0 && pendingSettles === 0) lockControls(false);
       return;
     }
     const autoTotal = autoValues[autoIdx];
@@ -2432,12 +2947,16 @@ function initGame() {
       autoMode      = true;
       autoRemaining = autoTotal;
       autoPanel.classList.add('active');
+      startBtn.classList.add('stopping');
+      if (startLbl) startLbl.textContent = '停止';
     }
     const ok = launchBall();
     if (!ok && autoMode) {
       autoMode = false;
       autoRemaining = 0;
       autoPanel.classList.remove('active');
+      startBtn.classList.remove('stopping');
+      if (startLbl) startLbl.textContent = '开始';
     } else if (autoMode) {
       autoRemaining--;
     }
@@ -2612,6 +3131,107 @@ drawerRules.addEventListener('click', () => {
 drawerExit.addEventListener('click', () => {
   closeDrawer();
   showToast('已退出游戏');
+});
+
+// ═══════════════════════════════════════════════════════════
+//  购买高倍率弹窗：状态 + 交互 + 费用显示
+// ═══════════════════════════════════════════════════════════
+window.buyFeatures = { split: false, respin: false, hiMult: false };
+const BUY_RATES = { split: 0.6, respin: 0.2, hiMult: 0.2 };
+
+const buyModal      = document.getElementById('buyModal');
+const buyModalClose = document.getElementById('buyModalClose');
+const buyBtnPanel   = document.getElementById('btnBuyFeatures');
+const tglSplit      = document.getElementById('toggleSplit');
+const tglRespin     = document.getElementById('toggleRespin');
+const tglHiMult     = document.getElementById('toggleHiMult');
+const costSplitEl   = document.getElementById('costSplit');
+const costRespinEl  = document.getElementById('costRespin');
+const costHiMultEl  = document.getElementById('costHiMult');
+
+function currentBet() { return betValues[betIdx]; }
+
+// 按当前投注额刷新弹窗里展示的附加费用
+function refreshBuyCosts() {
+  const bet = currentBet();
+  const fmt = (rate) => (bet * rate).toFixed(2).replace(/\.?0+$/, '') || '0';
+  if (costSplitEl)  costSplitEl.textContent  = '+' + fmt(BUY_RATES.split);
+  if (costRespinEl) costRespinEl.textContent = '+' + fmt(BUY_RATES.respin);
+  if (costHiMultEl) costHiMultEl.textContent = '+' + fmt(BUY_RATES.hiMult);
+}
+refreshBuyCosts();
+
+// 总投注乘数（基础 1 + 勾选的附加项）
+function buyCostMultiplier() {
+  const f = window.buyFeatures;
+  return 1 + (f.split ? BUY_RATES.split : 0)
+           + (f.respin ? BUY_RATES.respin : 0)
+           + (f.hiMult ? BUY_RATES.hiMult : 0);
+}
+
+function refreshBuyBtnBadge() {
+  const f = window.buyFeatures;
+  const any = f.split || f.respin || f.hiMult;
+  buyBtnPanel?.classList.toggle('active', any);
+  // 按 key 同步每个小图标的亮/暗
+  document.querySelectorAll('#btnBuyFeatures .bf-icon').forEach(el => {
+    const k = el.dataset.key;
+    el.classList.toggle('on', !!f[k]);
+  });
+}
+refreshBuyBtnBadge();
+
+function openBuyModal() {
+  if (autoMode || balls.length > 0 || pendingSettles > 0) {
+    showToast('投注进行中，暂不可修改');
+    return;
+  }
+  refreshBuyCosts();
+  buyModal.classList.add('open');
+  drawerBackdrop.classList.add('show');
+}
+function closeBuyModal() {
+  buyModal.classList.remove('open');
+  // 只在设置抽屉未打开时才关闭遮罩
+  if (!settingsPanel.classList.contains('open')) {
+    drawerBackdrop.classList.remove('show');
+  }
+}
+
+buyBtnPanel?.addEventListener('click', openBuyModal);
+buyModalClose?.addEventListener('click', closeBuyModal);
+// 复用设置抽屉的遮罩 click（下方已有 drawerBackdrop click 关抽屉，这里补上关弹窗）
+drawerBackdrop.addEventListener('click', closeBuyModal);
+
+function bindBuyToggle(el, key, sideEffect) {
+  el.addEventListener('change', () => {
+    if (autoMode || balls.length > 0 || pendingSettles > 0) {
+      // 投注中不允许修改，回滚开关
+      el.checked = window.buyFeatures[key];
+      showToast('投注进行中，暂不可修改');
+      return;
+    }
+    window.buyFeatures[key] = el.checked;
+    refreshBuyBtnBadge();
+    if (sideEffect) sideEffect();
+  });
+}
+bindBuyToggle(tglSplit, 'split', () => {
+  // 分裂钉启停：重绘钉板
+  if (typeof drawBoard === 'function') drawBoard();
+});
+bindBuyToggle(tglRespin, 'respin', () => {
+  // 重建槽位以刷新球衣标记
+  if (typeof rebuildSlotDom === 'function') { rebuildSlotDom(); }
+});
+bindBuyToggle(tglHiMult, 'hiMult', () => {
+  // 重绘球门以显示/隐藏高倍率球
+  if (typeof drawDome === 'function') drawDome();
+});
+
+// 投注切换时同步弹窗费用
+document.querySelectorAll('.ctrl-bet .sel-arrow').forEach(btn => {
+  btn.addEventListener('click', () => setTimeout(refreshBuyCosts, 0));
 });
 
 // 音乐开关

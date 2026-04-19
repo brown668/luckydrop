@@ -266,51 +266,70 @@ body {
   box-shadow: 0 1px 4px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.3);
 }
 
-/* 历史倍率：与底部槽位共享柔和色阶 */
+/* 历史倍率：与底部槽位共享色阶（每档 h-* 与对应的 .s-* .slot-bar 保持同一渐变） */
+
+/* h-low ↔ s-low — 粉蓝白 */
 .hist-badge.h-low {
-  background: linear-gradient(180deg, #6a7e94, #39495e);
-  border-color: rgba(140,160,185,0.3);
-  color: rgba(220,230,240,0.8);
+  background: linear-gradient(180deg, #b0c9d8 0%, #7a98b0 45%, #4d6a85 100%);
+  border-color: rgba(180,210,230,0.5);
+  color: #f0f6fb;
+  text-shadow: 0 1px 1px rgba(0,20,40,0.35);
 }
+/* h-mid ↔ s-neutral — 淡青 */
 .hist-badge.h-mid {
-  background: linear-gradient(180deg, #7eb3d8, #426f94);
-  border-color: rgba(160,195,220,0.35);
+  background: linear-gradient(180deg, #9fe5ef 0%, #5bc4d6 45%, #2a8a9c 100%);
+  border-color: rgba(150,220,230,0.55);
+  color: #eafaff;
+  text-shadow: 0 1px 1px rgba(0,40,55,0.4);
+  box-shadow: 0 1px 4px rgba(90,200,220,0.25), inset 0 1px 0 rgba(255,255,255,0.35);
 }
+/* h-good ↔ s-warm — 标准 cyan */
 .hist-badge.h-good {
-  background: linear-gradient(180deg, #86c8b4, #3d846d);
-  border-color: rgba(160,210,195,0.4);
-  color: #eaf6f1;
+  background: linear-gradient(180deg, var(--accent-cyan-g) 0%, var(--accent-cyan) 45%, var(--accent-cyan-d) 100%);
+  border-color: rgba(180,235,245,0.6);
+  color: #ebfeff;
+  text-shadow: 0 1px 1px rgba(0,40,55,0.45);
+  box-shadow: 0 1px 5px rgba(77,208,225,0.35), inset 0 1px 0 rgba(255,255,255,0.4);
 }
+/* h-great ↔ s-yellow — 青黄 */
 .hist-badge.h-great {
-  background: linear-gradient(180deg, #c0d078, #6f832c);
-  border-color: rgba(210,225,140,0.45);
+  background: linear-gradient(180deg, #d8f080 0%, #a8d850 45%, #6fa028 100%);
+  border-color: rgba(220,240,160,0.65);
   color: #fbffe0;
-  text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+  text-shadow: 0 1px 1px rgba(45,60,0,0.45);
+  box-shadow: 0 1px 5px rgba(190,230,100,0.3), inset 0 1px 0 rgba(255,255,220,0.4);
 }
+/* h-orange ↔ s-orange — 琥珀橙 */
 .hist-badge.h-orange {
-  background: linear-gradient(180deg, #edbd78, #936a24);
-  border-color: rgba(230,190,130,0.45);
-  color: #fff6dc;
-  box-shadow: 0 1px 4px rgba(200,150,70,0.25), inset 0 1px 0 rgba(255,240,200,0.3);
+  background: linear-gradient(180deg, #ffd080 0%, #ffa840 45%, #c27000 100%);
+  border-color: rgba(255,215,140,0.7);
+  color: #fff8e4;
+  text-shadow: 0 1px 1px rgba(90,45,0,0.5);
+  box-shadow: 0 1px 5px rgba(255,170,70,0.35), inset 0 1px 0 rgba(255,240,200,0.4);
 }
+/* h-high ↔ s-high — 亮红 */
 .hist-badge.h-high {
-  background: linear-gradient(180deg, #e08a68, #8a3c22);
-  border-color: rgba(220,160,120,0.5);
-  color: #fff0dc;
-  box-shadow: 0 1px 5px rgba(200,100,70,0.3), inset 0 1px 0 rgba(255,220,180,0.3);
+  background: linear-gradient(180deg, #ff9080 0%, #ff5030 45%, #b02810 100%);
+  border-color: rgba(255,170,150,0.7);
+  color: #fff2ec;
+  text-shadow: 0 1px 1px rgba(80,10,0,0.5);
+  box-shadow: 0 1px 6px rgba(255,100,80,0.4), inset 0 1px 0 rgba(255,220,205,0.4);
 }
+/* h-jackpot ↔ s-jackpot — 洋红紫 */
 .hist-badge.h-jackpot {
-  background: linear-gradient(180deg, #d98297, #843150);
-  border-color: rgba(220,160,175,0.5);
-  color: #ffdee4;
-  box-shadow: 0 1px 6px rgba(200,110,135,0.4), inset 0 1px 0 rgba(255,215,225,0.35);
+  background: linear-gradient(180deg, #ff95d0 0%, #e040a0 45%, #8a1066 100%);
+  border-color: rgba(255,190,225,0.8);
+  color: #fff0f7;
+  text-shadow: 0 1px 1px rgba(70,5,40,0.5);
+  box-shadow: 0 1px 7px rgba(240,80,170,0.45), inset 0 1px 0 rgba(255,225,240,0.45);
 }
+/* h-mega ↔ s-mega — 暖金 */
 .hist-badge.h-mega {
-  background: linear-gradient(180deg, #f0d084, #8e6a20);
-  border-color: rgba(235,205,140,0.6);
-  color: #5a3f00;
-  text-shadow: 0 1px 0 rgba(255,235,180,0.5);
-  box-shadow: 0 1px 7px rgba(215,175,90,0.5), inset 0 1px 0 rgba(255,240,200,0.45);
+  background: linear-gradient(180deg, #fff2a0 0%, #ffc838 45%, #c78810 100%);
+  border-color: rgba(255,235,150,0.85);
+  color: #4a2f00;
+  text-shadow: 0 1px 0 rgba(255,240,180,0.6);
+  box-shadow: 0 1px 8px rgba(255,200,60,0.5), inset 0 1px 0 rgba(255,245,200,0.5);
 }
 
 /* ─── 球门发球区 ─── */
@@ -427,6 +446,81 @@ body {
 .board-canvas {
   display: block;
   width: 100%;
+}
+
+/* ─── 高倍率球图例（左上角说明条，仅 hiMult 打开时显示）─── */
+.mult-legend {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 12;
+  display: none;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px 4px 8px;
+  background: linear-gradient(180deg,
+    rgba(10,35,72,0.72) 0%,
+    rgba(6,24,54,0.78) 100%);
+  border: 1px solid rgba(180,210,240,0.38);
+  border-radius: 999px;
+  box-shadow:
+    0 2px 5px rgba(0,10,30,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.16);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  font-family: 'Chakra Petch', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  color: #fff;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 2px rgba(0,15,40,0.7);
+  pointer-events: none;
+  user-select: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity .28s ease, transform .28s ease;
+}
+.mult-legend.show {
+  display: inline-flex;
+  opacity: 1;
+  transform: translateY(0);
+}
+.ml-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.ml-ball {
+  position: relative;
+  display: inline-block;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: #fff url('ball1.jpg') center/cover no-repeat;
+  border: 1px solid rgba(0,15,40,0.45);
+  box-shadow:
+    0 1px 2px rgba(0,10,30,0.55),
+    inset 0 1px 1px rgba(255,255,255,0.3);
+}
+/* 红/金色球：用半透明色层叠加在贴图上，保留六边形纹理 */
+.ml-b-red::after,
+.ml-b-gold::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.ml-b-red::after {
+  background: rgba(230,60,60,0.72);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,130,130,0.6),
+    0 0 5px rgba(255,60,60,0.55);
+}
+.ml-b-gold::after {
+  background: rgba(255,200,40,0.70);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,235,120,0.7),
+    0 0 5px rgba(255,200,60,0.65);
 }
 
 /* ─── Bottom Slots ─── */
@@ -584,7 +678,7 @@ body {
   display: grid;
   /* 三列：左 114 | 中 110（开始）| 右 114；总 350px = 378 内宽 - 28 padding */
   grid-template-columns: 114px 110px 114px;
-  grid-template-rows: 42px 50px 50px;   /* row1 固定（特色功能），row2/row3 固定 50 */
+  grid-template-rows: 50px 50px 50px;   /* 三行等高，特色功能与下方控件一致 */
   column-gap: 6px;
   row-gap: 10px;
   padding: 12px 14px 14px;
@@ -631,15 +725,12 @@ body {
 .ctrl-auto   { grid-column: 3; grid-row: 3; }
 .start-btn   { grid-column: 2; grid-row: 2 / 4; }
 
-/* ─── 难度面板：与其他面板统一 ─── */
+/* ─── 难度面板：与自动投注等高同字号 ─── */
 .controls .ctrl-risk .sel-value.sel-risk-label {
-  font-size: 14px;
-  font-family: 'Chakra Petch', 'PingFang SC', sans-serif;
-  font-weight: 700;
+  font-size: 18px;        /* 比自动投注 sel-value (19px) 小 1px */
   letter-spacing: 0.04em;
-  white-space: nowrap;
   transition: color .2s;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  /* font-weight/family/text-shadow/line-height/white-space 继承基础 .sel-value */
 }
 
 /* ─── 箭头按钮：扁平雪佛龙（不再是独立小球） ─── */
@@ -889,12 +980,12 @@ body {
 .feature-buy-btn {
   width: 100%;
   justify-self: stretch;
-  height: 42px;
-  display: grid;
-  grid-template-columns: 1fr 1px 1fr;
+  height: 50px;
+  display: flex;
   align-items: center;
-  padding: 0 16px;
-  border-radius: 12px;
+  justify-content: space-between;
+  padding: 0 18px;
+  border-radius: 14px;
   cursor: pointer;
   position: relative;
   font-family: 'Chakra Petch', 'PingFang SC', sans-serif;
@@ -917,12 +1008,12 @@ body {
 .fb-left {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding-right: 12px;
+  gap: 12px;
+  padding-right: 14px;
   min-width: 0;
 }
 .fb-label {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 800;
   color: #fff;
   letter-spacing: 0.5px;
@@ -932,10 +1023,10 @@ body {
 .fb-icons {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
 }
 .feature-buy-btn .bf-icon {
-  width: 24px; height: 24px;
+  width: 28px; height: 28px;
   border-radius: 50%;
   background: rgba(7,42,90,0.5);
   border: 1px solid rgba(200,230,255,0.35);
@@ -944,7 +1035,7 @@ body {
   align-items: center; justify-content: center;
   transition: all .18s;
 }
-.feature-buy-btn .bf-icon svg { width: 14px; height: 14px; fill: currentColor; }
+.feature-buy-btn .bf-icon svg { width: 16px; height: 16px; fill: currentColor; }
 .feature-buy-btn .bf-icon.on {
   background: linear-gradient(180deg, #ffe27a 0%, #e3a63a 100%);
   border-color: rgba(255,230,130,0.95);
@@ -955,7 +1046,7 @@ body {
 /* 中缝分隔线 */
 .fb-divider {
   width: 1px;
-  height: 26px;
+  height: 32px;
   background: linear-gradient(180deg,
     transparent 0%,
     rgba(255,255,255,0.55) 30%,
@@ -968,12 +1059,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
-  padding-left: 12px;
+  gap: 10px;
+  padding-left: 14px;
   min-width: 0;
 }
 .fb-total-label {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   color: rgba(220,240,255,0.85);
   letter-spacing: 0.3px;
@@ -982,7 +1073,7 @@ body {
 }
 .fb-total-val {
   font-family: 'Chakra Petch', sans-serif;
-  font-size: 17px;
+  font-size: 20px;
   font-weight: 900;
   color: var(--text-gold);
   letter-spacing: 0.02em;
@@ -997,6 +1088,17 @@ body {
 .feature-buy-btn.active .fb-total-val {
   color: #ffe89a;
   text-shadow: 0 1px 2px rgba(0,0,0,0.6), 0 0 10px rgba(255,215,100,0.5);
+}
+
+/* 未激活任何特色功能：只显示左侧（特色功能 + 图标），隐藏竖线与总投注 */
+.feature-buy-btn:not(.active) .fb-divider,
+.feature-buy-btn:not(.active) .fb-right {
+  display: none;
+}
+/* 激活态：竖线紧贴在左右两组之间（flex 已处理对齐） */
+.feature-buy-btn.active .fb-divider {
+  margin: 0 2px;
+  flex: 0 0 1px;
 }
 
 /* 控制区面板：标题嵌入面板内部（与行数胶囊一致） */
@@ -1048,26 +1150,191 @@ body {
   letter-spacing: 0.02em;
 }
 
-/* ─── Respin 球衣槽：顶部多一个球衣图标 ─── */
-.slot.is-respin {
-  position: relative;
-}
+/* ─── Respin 槽：槽位上方展示红色足球旋转图标 ─── */
+/* z-index:10 让图标能从 .slots 顶部抬升到 .board-wrap(z:1) 之上，避免被 canvas 底边遮挡 */
+.slot.is-respin { position: relative; z-index: 10; }
+
+/* 灯条本体隐形，只留占位（维持与普通槽等高对齐） */
 .slot.is-respin .slot-bar {
-  /* 在灯条上叠加球衣 */
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23fff' d='M16 3l-4 2-4-2-5 2 1 6 3-1v10h10V10l3 1 1-6-5-2z' opacity='0.92'/><path fill='%23ffde55' d='M12 7l-1.2 2.2H8.4l2 1.5-.8 2.3L12 11.6l2.4 1.4-.8-2.3 2-1.5h-2.4L12 7z'/></svg>");
-  background-size: 16px 16px;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-color: transparent;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  overflow: visible;
 }
 .slot.is-respin .slot-bar::after { display: none; }
-.slot.is-respin .slot-val {
-  color: #ffde55;
-  text-shadow: 0 0 5px rgba(255,200,60,0.7), 0 1px 2px rgba(0,0,0,0.75);
+
+/* Respin 图标 —— 红色足球 + 旋转光环 */
+.slot.is-respin .slot-bar::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -11px;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 22px;
+  background-image: url('respin.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter:
+    drop-shadow(0 0 6px rgba(255,90,90,0.75))
+    drop-shadow(0 1px 2px rgba(0,20,40,0.55));
+  pointer-events: none;
+  z-index: 2;
+  animation: jerseyShine 2.6s ease-in-out infinite;
 }
-.slot.is-respin .slot-bar {
-  border-color: rgba(255,220,120,0.7);
-  box-shadow: 0 0 8px rgba(255,200,60,0.55), inset 0 1px 0 rgba(255,255,255,0.45);
+
+/* Respin 图标微微呼吸发光 */
+@keyframes jerseyShine {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 6px rgba(255,90,90,0.65))
+      drop-shadow(0 1px 2px rgba(0,20,40,0.55));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 10px rgba(255,120,120,0.95))
+      drop-shadow(0 0 16px rgba(255,180,60,0.5))
+      drop-shadow(0 1px 2px rgba(0,20,40,0.55));
+  }
+}
+
+/* 下方倍率数字：金色调与球衣呼应 */
+.slot.is-respin .slot-val {
+  color: #ffd84a;
+  text-shadow:
+    -1px 0 rgba(90,45,0,0.95),
+    1px 0 rgba(90,45,0,0.95),
+    0 -1px rgba(90,45,0,0.95),
+    0 1px rgba(90,45,0,0.95),
+    0 0 6px rgba(255,200,60,0.55);
+}
+
+/* ─── Respin 命中特效：红球旋转 + 把小球吸进去 ─── */
+
+/* 图标本身命中时：自转两圈 + 放大脉冲发光 */
+.slot.is-respin.jersey-hit .slot-bar::before {
+  animation:
+    jerseyShine 2.6s ease-in-out infinite,
+    respinSpinHit 1s cubic-bezier(.25,.8,.3,1.05);
+}
+@keyframes respinSpinHit {
+  0% {
+    transform: translateX(-50%) rotate(0deg) scale(1);
+    filter:
+      drop-shadow(0 0 6px rgba(255,90,90,0.75))
+      drop-shadow(0 1px 2px rgba(0,20,40,0.55));
+  }
+  35% {
+    transform: translateX(-50%) rotate(420deg) scale(1.35);
+    filter:
+      drop-shadow(0 0 12px #ff6060)
+      drop-shadow(0 0 22px rgba(255,100,60,0.8))
+      drop-shadow(0 0 32px rgba(255,160,80,0.55))
+      brightness(1.3);
+  }
+  70% {
+    transform: translateX(-50%) rotate(640deg) scale(0.95);
+    filter:
+      drop-shadow(0 0 10px rgba(255,120,80,0.85))
+      drop-shadow(0 1px 2px rgba(0,20,40,0.55));
+  }
+  100% {
+    transform: translateX(-50%) rotate(720deg) scale(1);
+    filter:
+      drop-shadow(0 0 6px rgba(255,90,90,0.75))
+      drop-shadow(0 1px 2px rgba(0,20,40,0.55));
+  }
+}
+
+/* 被吸上来的小白球：从槽位中心升起并缩入红球中心 */
+.respin-suck-ball {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffffff 0%, #e6eaf0 55%, #8591a3 100%);
+  box-shadow:
+    0 0 6px rgba(255,255,255,0.85),
+    0 0 12px rgba(255,180,140,0.55);
+  pointer-events: none;
+  z-index: 14;
+  transform: translate(-50%, -50%);
+  animation: respinSuckBall 0.6s cubic-bezier(.55,0,.7,.2) forwards;
+}
+@keyframes respinSuckBall {
+  0%   {
+    transform: translate(-50%, -50%) translate(0, 0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  55%  { opacity: 1; }
+  100% {
+    transform: translate(-50%, -50%) translate(0, -18px) scale(0.15) rotate(300deg);
+    opacity: 0;
+  }
+}
+
+/* 向心粒子：从外围飞入红球中心（吸附感） */
+.respin-suck-spark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px; height: 6px;
+  background: radial-gradient(circle, #ffe0c0 0%, #ff5050 55%, rgba(200,30,30,0) 85%);
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(255,100,80,0.9);
+  pointer-events: none;
+  z-index: 12;
+  transform: translate(-50%, -50%);
+  animation: respinSuckSpark 0.7s cubic-bezier(.4,.05,.65,.3) forwards;
+}
+@keyframes respinSuckSpark {
+  0% {
+    transform:
+      translate(-50%, -50%)
+      translate(var(--sx, 0), var(--sy, 0))
+      scale(0.55);
+    opacity: 0;
+  }
+  25% { opacity: 1; }
+  100% {
+    transform:
+      translate(-50%, -50%)
+      translate(0, -18px)
+      scale(0.2);
+    opacity: 0;
+  }
+}
+
+/* "+1 免费球" 大号金色飘字 */
+.jersey-respin-text {
+  position: absolute;
+  font-family: 'Chakra Petch', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-weight: 900;
+  font-size: 15px;
+  color: #fff;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  text-shadow:
+    -1px 0 #6b3000, 1px 0 #6b3000, 0 -1px #6b3000, 0 1px #6b3000,
+    0 0 8px #ffd84a,
+    0 0 14px rgba(255,170,30,0.8);
+  pointer-events: none;
+  z-index: 22;
+  transform: translate(-50%, 0);
+  animation: jerseyRespinText 1.5s cubic-bezier(.2,1.3,.4,1) forwards;
+}
+.jersey-respin-text::before {
+  content: '⚽ ';
+  font-size: 14px;
+  filter: drop-shadow(0 0 4px #ffd84a);
+}
+@keyframes jerseyRespinText {
+  0%   { transform: translate(-50%, 0)     scale(0.4); opacity: 0; }
+  18%  { transform: translate(-50%, -6px)  scale(1.35); opacity: 1; }
+  45%  { transform: translate(-50%, -24px) scale(1.05); opacity: 1; }
+  100% { transform: translate(-50%, -64px) scale(0.95); opacity: 0; }
 }
 
 /* ─── 槽位中奖高亮 ─── */
@@ -1251,17 +1518,17 @@ body {
     inset 0 -1px 2px rgba(0,20,50,0.3);
 }
 .toggle-switch input:checked + .toggle-track {
-  background: linear-gradient(180deg, var(--ui-blue-top) 0%, var(--ui-blue-mid) 55%, var(--ui-blue-bot) 100%);
-  border-color: var(--ui-blue-edge);
+  background: linear-gradient(180deg, var(--pitch-light) 0%, var(--pitch-mid) 55%, var(--pitch-dark) 100%);
+  border-color: var(--pitch-deeper);
   box-shadow:
-    0 0 8px rgba(77,168,245,0.55),
-    inset 0 1px 0 var(--ui-highlight),
-    inset 0 -1px 2px rgba(7,42,90,0.4);
+    0 0 8px rgba(95,179,68,0.55),
+    inset 0 1px 0 rgba(255,255,255,0.35),
+    inset 0 -1px 2px rgba(35,82,28,0.45);
 }
 .toggle-track::after {
   content: '';
   position: absolute;
-  top: 2px; left: 2px;
+  top: 50%; left: 0;
   width: 16px; height: 16px;
   border-radius: 50%;
   background: #fff url('ball1.jpg') center/cover no-repeat;
@@ -1269,9 +1536,11 @@ body {
   box-shadow:
     0 2px 3px rgba(0,20,50,0.45),
     0 0 0 0.5px rgba(0,20,50,0.22);
+  transform: translateY(-50%);   /* 严格垂直居中 */
   transition: transform .3s cubic-bezier(.4, 1.4, .6, 1);
 }
-.toggle-switch input:checked + .toggle-track::after { transform: translateX(18px); }
+/* OFF: 紧贴左边不留空隙 / ON: 紧贴右边（轨道内宽 38 - 球 16 = 22 位移） */
+.toggle-switch input:checked + .toggle-track::after { transform: translate(22px, -50%); }
 
 /* ─── 购买高倍率弹窗（参考图样式） ─── */
 .buy-modal {
@@ -1389,17 +1658,17 @@ body {
     inset 0 -1px 2px rgba(0,20,50,0.3);
 }
 .buy-toggle input:checked + .buy-toggle-track {
-  background: linear-gradient(180deg, var(--ui-blue-top) 0%, var(--ui-blue-mid) 55%, var(--ui-blue-bot) 100%);
-  border-color: var(--ui-blue-edge);
+  background: linear-gradient(180deg, var(--pitch-light) 0%, var(--pitch-mid) 55%, var(--pitch-dark) 100%);
+  border-color: var(--pitch-deeper);
   box-shadow:
-    0 0 10px rgba(77,168,245,0.6),
-    inset 0 1px 0 var(--ui-highlight),
-    inset 0 -1px 2px rgba(7,42,90,0.4);
+    0 0 10px rgba(95,179,68,0.6),
+    inset 0 1px 0 rgba(255,255,255,0.35),
+    inset 0 -1px 2px rgba(35,82,28,0.45);
 }
 .buy-toggle-track::after {
   content: '';
   position: absolute;
-  top: 2px; left: 2px;
+  top: 50%; left: 0;
   width: 22px; height: 22px;
   border-radius: 50%;
   background: #fff url('ball1.jpg') center/cover no-repeat;
@@ -1407,9 +1676,10 @@ body {
   box-shadow:
     0 2px 5px rgba(0,20,50,0.55),
     0 0 0 0.5px rgba(0,20,50,0.22);
+  transform: translateY(-50%);   /* 严格垂直居中 */
   transition: transform .3s cubic-bezier(.4, 1.4, .6, 1);
 }
-.buy-toggle input:checked + .buy-toggle-track::after { transform: translateX(28px); }
+.buy-toggle input:checked + .buy-toggle-track::after { transform: translate(32px, -50%); }
 
 
 /* 三个 SVG 功能图标（暗 = 未开启，亮 = 开启） */
@@ -1510,6 +1780,12 @@ body {
   <div class="board-wrap" style="position:relative;">
     <canvas class="board-canvas" id="board"></canvas>
 
+    <!-- 高倍率球图例（hiMult 开启时显示在左上） -->
+    <div class="mult-legend" id="multLegend" aria-hidden="true">
+      <span class="ml-item"><span class="ml-ball ml-b-normal"></span>1×</span>
+      <span class="ml-item"><span class="ml-ball ml-b-red"></span>2×</span>
+      <span class="ml-item"><span class="ml-ball ml-b-gold"></span>4×</span>
+    </div>
   </div>
 
   <!-- Slots (初始占位，onload 后由 rebuildSlotDom 重建) -->
@@ -1551,8 +1827,8 @@ body {
       </span>
       <span class="fb-divider" aria-hidden="true"></span>
       <span class="fb-right">
-        <span class="fb-total-label">单球总投注</span>
-        <span class="fb-total-val" id="fbTotalBet">$5.00</span>
+        <span class="fb-total-label">总投注</span>
+        <span class="fb-total-val" id="fbTotalBet">5.0</span>
       </span>
     </button>
 
@@ -1666,7 +1942,7 @@ body {
       <div class="buy-row-main">
         <span class="buy-row-title">分裂钉</span>
         <span class="buy-row-desc">足球触碰后会分裂 ×2</span>
-        <span class="buy-row-cost">花费 <span id="costSplit">+$0.60</span></span>
+        <span class="buy-row-cost">花费 <span id="costSplit">+0.6</span></span>
       </div>
       <label class="buy-toggle">
         <input type="checkbox" id="toggleSplit">
@@ -1680,8 +1956,8 @@ body {
       </div>
       <div class="buy-row-main">
         <span class="buy-row-title">免费足球</span>
-        <span class="buy-row-desc">击中球衣区域赠送足球</span>
-        <span class="buy-row-cost">花费 <span id="costRespin">+$0.20</span></span>
+        <span class="buy-row-desc">击中红球位置，免费发球一次</span>
+        <span class="buy-row-cost">花费 <span id="costRespin">+0.2</span></span>
       </div>
       <label class="buy-toggle">
         <input type="checkbox" id="toggleRespin">
@@ -1696,7 +1972,7 @@ body {
       <div class="buy-row-main">
         <span class="buy-row-title">高倍率球</span>
         <span class="buy-row-desc">发球时随机触发高倍率足球</span>
-        <span class="buy-row-cost">花费 <span id="costHiMult">+$0.20</span></span>
+        <span class="buy-row-cost">花费 <span id="costHiMult">+0.2</span></span>
       </div>
       <label class="buy-toggle">
         <input type="checkbox" id="toggleHiMult">
@@ -1757,18 +2033,53 @@ const WALL_SLOPE = 0.19;                             // 缓梯形（参考图：
 // d(ROWS) = D_16 * ROWS_MAX / ROWS — 行少则间距大，铺满固定三角形
 // domeR(d) = 3*d/4 — 壁顶开口始终与外沿钉对齐
 
-// 分裂钉：需开启「购买高倍率 → 分裂钉」，并按当前行数生成布局
+// ═══════════════════════════════════════════════════════════════════════════
+//  分裂钉布局：基于严密数学推导的预设表
+// ═══════════════════════════════════════════════════════════════════════════
+//  记号：(r, c) 表示第 r 行（0-indexed）、第 c 列钉子（该行路径可达 col ∈ [1, r+1]）
+//
+//  数学模型：
+//    - Plinko 梯形板，第 r 行有 r+3 个钉、R+1 个底槽
+//    - 球每撞钉 50/50 向左/右偏移 d/2
+//    - 命中概率  P_hit(r, c) = C(r, c-1) / 2^r
+//    - 分裂后子球：左 (r+1, c)、右 (r+1, c+1)，weight = 0.55 × 父
+//    - 子球期望倍率：E_child = Σ C(R-r-1, k)/2^(R-r-1) × M[offset+k]
+//    - 单球分裂增益：gain(r,c) = P_hit × (E_L + E_R) × 0.05
+//                   (推导：0.55×(E_L+E_R) - 0.5×(E_L+E_R) = 0.05×(E_L+E_R))
+//    - 分裂分离度：sep = |E_R − E_L|，衡量"左右子球走向不同"的可感知程度
+//
+//  优化目标：composite = gain × (1 + α × sep/(E_L+E_R))，α=2.5
+//  设计约束：左右严格对称、同行最多 2 钉、双层分布（浅+深）、避 sep=0 中心钉
+//
+//  推导结果（见 /tmp/split_peg_v3.py，mode=刺激，RTP 基准）：
+//    R=8   K=2  (4,2)(4,4)              p_hit_sum=50%   sep̄=0.51  gain̄=0.023
+//    R=9   K=2  (5,2)(5,5)              p_hit_sum=31%   sep̄=0.74  gain̄=0.018
+//    R=10  K=4  (3,2)(3,3)(6,3)(6,5)    p_hit_sum=122%  sep̄=0.32  gain̄=0.026
+//    R=11  K=4  (3,2)(3,3)(6,3)(6,5)    p_hit_sum=122%  sep̄=0.32  gain̄=0.026
+//    R=12  K=4  (3,2)(3,3)(6,3)(6,5)    p_hit_sum=122%  sep̄=0.31  gain̄=0.026
+//    R=13  K=4  (3,2)(3,3)(7,3)(7,6)    p_hit_sum=108%  sep̄=0.43  gain̄=0.025
+//    R=14  K=4  (3,2)(3,3)(7,3)(7,6)    p_hit_sum=108%  sep̄=0.36  gain̄=0.018
+//    R=15  K=4  (3,2)(3,3)(8,3)(8,7)    p_hit_sum=97%   sep̄=0.33  gain̄=0.013
+//    R=16  K=4  (4,2)(4,4)(8,3)(8,7)    p_hit_sum=72%   sep̄=0.44  gain̄=0.010
+//  (p_hit_sum > 100% 表示存在链式触发：子球仍可经过深层分裂钉)
+// ═══════════════════════════════════════════════════════════════════════════
+const SPLIT_PRESETS = {
+  8:  [[4,2],[4,4]],
+  9:  [[5,2],[5,5]],
+  10: [[3,2],[3,3],[6,3],[6,5]],
+  11: [[3,2],[3,3],[6,3],[6,5]],
+  12: [[3,2],[3,3],[6,3],[6,5]],
+  13: [[3,2],[3,3],[7,3],[7,6]],
+  14: [[3,2],[3,3],[7,3],[7,6]],
+  15: [[3,2],[3,3],[8,3],[8,7]],
+  16: [[4,2],[4,4],[8,3],[8,7]],
+};
+
 function getSplits() {
   if (!(window.buyFeatures && window.buyFeatures.split)) return [];
-  // 根据行数动态放置 3 个分裂钉（位置大致在中部 + 两侧）
-  const R = selectedRows;
-  if (R < 8) return [];
-  const topRow = Math.max(1, Math.round(R * 0.18));
-  const midRow = Math.max(topRow + 2, Math.round(R * 0.45));
-  const midCol1 = Math.max(1, Math.round(midRow * 0.25));
-  const midCol2 = Math.max(midCol1 + 2, Math.round((midRow + 2) * 0.75));
-  const topCol = Math.max(1, Math.round((topRow + 2) * 0.5));
-  return [[topRow, topCol], [midRow, midCol1], [midRow, midCol2]];
+  const preset = SPLIT_PRESETS[selectedRows];
+  if (!preset) return [];
+  return preset.map(([r, c]) => [r, c]);
 }
 
 function drawBoard(glows = {}) {
@@ -2103,9 +2414,9 @@ function drawBoard(glows = {}) {
   const FRIC = 0.88;
   const BALL_R = 4.5;  // 球更小，适应小球门
 
-  // 8 颗足球堆满球门（参考图：球门内塞满 7-9 颗球）
-  // hiMult 开关激活时，其中 1 颗红球 + 1 颗金球
-  const N = 8;
+  // 10 颗足球堆满球门
+  // hiMult 关闭：10 白球；打开：7 白 + 2 红 + 1 金
+  const N = 10;
   const balls = Array.from({length: N}, (_, i) => {
     return {
       x:  12 + Math.random() * (W_L - 24),
@@ -2123,9 +2434,16 @@ function drawBoard(glows = {}) {
     const hi = !!(window.buyFeatures && window.buyFeatures.hiMult);
     balls.forEach(b => b.color = 'normal');
     if (hi) {
-      // 最后两颗设置为红 / 金，确保可见
+      // 2 红 + 1 金 + 7 白（总 10 颗）
       if (balls[0]) balls[0].color = 'red';
-      if (balls[1]) balls[1].color = 'gold';
+      if (balls[1]) balls[1].color = 'red';
+      if (balls[2]) balls[2].color = 'gold';
+      // 打开瞬间：给所有球一次强冲量，立刻形成翻滚态
+      for (const b of balls) {
+        b.vx += (Math.random() - 0.5) * 3.5;
+        b.vy -= Math.random() * 2.2 + 0.8;
+        b.vrot += (Math.random() - 0.5) * 0.4;
+      }
     }
   }
   refreshGoalBallColors();
@@ -2206,21 +2524,33 @@ function drawBoard(glows = {}) {
     dx.save();
     dx.scale(2, 2);
 
+    // hiMult 打开时：随机翻滚态（持续小冲量 + 更低摩擦/阻尼，防止沉底静止）
+    const hiActive = !!(window.buyFeatures && window.buyFeatures.hiMult);
+    const fric = hiActive ? 0.965 : FRIC;
+    const damp = hiActive ? 0.62  : DAMP;
+
     // 物理：重力+摩擦+底面/侧壁碰撞
     for (const b of balls) {
       b.vy += GRAV;
-      b.vx *= FRIC;
+      b.vx *= fric;
       b.x  += b.vx;
       b.y  += b.vy;
       b.rot += b.vrot;
 
+      // hiMult 打开时：每帧小概率给该球一次随机扰动，营造"煮沸"感
+      if (hiActive && Math.random() < 0.04) {
+        b.vx += (Math.random() - 0.5) * 2.2;
+        b.vy -= Math.random() * 1.8 + 0.4;
+        b.vrot += (Math.random() - 0.5) * 0.25;
+      }
+
       // 左右墙
-      if (b.x - b.r < 2)       { b.x = 2 + b.r;       b.vx =  Math.abs(b.vx) * DAMP; }
-      if (b.x + b.r > W_L - 2) { b.x = W_L - 2 - b.r; b.vx = -Math.abs(b.vx) * DAMP; }
+      if (b.x - b.r < 2)       { b.x = 2 + b.r;       b.vx =  Math.abs(b.vx) * damp; }
+      if (b.x + b.r > W_L - 2) { b.x = W_L - 2 - b.r; b.vx = -Math.abs(b.vx) * damp; }
       // 底面
-      if (b.y + b.r > H_L - 1) { b.y = H_L - 1 - b.r; b.vy = -Math.abs(b.vy) * DAMP; b.vrot *= 0.9; }
+      if (b.y + b.r > H_L - 1) { b.y = H_L - 1 - b.r; b.vy = -Math.abs(b.vy) * damp; b.vrot *= 0.9; }
       // 顶部（球门横梁内侧）
-      if (b.y - b.r < 2)       { b.y = 2 + b.r;       b.vy =  Math.abs(b.vy) * DAMP; }
+      if (b.y - b.r < 2)       { b.y = 2 + b.r;       b.vy =  Math.abs(b.vy) * damp; }
     }
     // 球碰球
     for (let i = 0; i < balls.length; i++) {
@@ -2528,23 +2858,27 @@ function valToClass(v) {
 let slotEls = [];
 let respinSlots = new Set();   // 当前标记为「球衣槽」的 slot 索引
 
-// 每轮开始随机挑 2 个槽位作球衣槽
+// 按行数固定的球衣槽位（1-based，与用户规格对齐）
+const RESPIN_PRESETS = {
+  8:  [3, 7],
+  9:  [2, 3, 8, 9],
+  10: [4, 8],
+  11: [3, 4, 9, 10],
+  12: [5, 9],
+  13: [4, 5, 10, 11],
+  14: [3, 4, 5, 11, 12, 13],
+  15: [4, 6, 11, 13],
+  16: [7, 11],
+};
+
+// 按当前行数填充球衣槽（无随机：同一行数永远同一组位置）
 function rollRespinSlots() {
   respinSlots = new Set();
   if (!(window.buyFeatures && window.buyFeatures.respin)) return;
-  const total = selectedRows + 1;
-  if (total < 3) return;
-  // 随机选 2 个不同索引，排除中心（倍率最低槽）避免过度触发
-  const centerL = Math.floor(total / 2) - 1;
-  const centerR = Math.floor(total / 2) + 1;
-  const candidates = [];
-  for (let i = 0; i < total; i++) {
-    if (i < centerL - 1 || i > centerR + 1) candidates.push(i);
-  }
-  while (respinSlots.size < 2 && candidates.length > 0) {
-    const pickIdx = Math.floor(Math.random() * candidates.length);
-    respinSlots.add(candidates.splice(pickIdx, 1)[0]);
-  }
+  const preset = RESPIN_PRESETS[selectedRows];
+  if (!preset) return;
+  // 规格为 1-based，存储为 0-based slot 索引
+  preset.forEach(pos1 => respinSlots.add(pos1 - 1));
 }
 
 // 根据槽宽计算倍率文字字号（窄行数时自动缩小，避免溢出）
@@ -3129,22 +3463,50 @@ function initGame() {
       setTimeout(() => wrapper.remove(), 1500);
     })();
 
-    // Respin：命中球衣槽则触发免费补发一球
+    // Respin：命中 respin 槽则触发免费补发一球 + 红球旋转吸附特效
     if (window.buyFeatures && window.buyFeatures.respin && respinSlots.has(slotIdx)) {
-      // 稍作延时，等飘字动画有感知
-      setTimeout(() => { launchBall({ free: true }); }, 700);
-      // 飘字提示
-      setTimeout(() => {
-        const wrap = document.querySelector('.balance-wrap');
-        if (wrap) {
-          const el = document.createElement('div');
-          el.className = 'bal-float';
-          el.style.color = '#ffde55';
-          el.textContent = 'RESPIN';
-          wrap.appendChild(el);
-          setTimeout(() => el.remove(), 1400);
+      const slotEl = slotEls[slotIdx];
+      const barEl = slotEl && slotEl.querySelector('.slot-bar');
+      if (slotEl && barEl) {
+        // 1) 红球自转 + 发光脉冲
+        slotEl.classList.remove('jersey-hit');
+        void slotEl.offsetWidth; // reflow 重启动画
+        slotEl.classList.add('jersey-hit');
+        setTimeout(() => slotEl.classList.remove('jersey-hit'), 1050);
+
+        // 2) 被吸的小白球：从 slot-bar 中心升起、缩入红球中心
+        const suck = document.createElement('div');
+        suck.className = 'respin-suck-ball';
+        barEl.appendChild(suck);
+        setTimeout(() => suck.remove(), 700);
+
+        // 3) 6 颗向心粒子：从外围以不同角度飞入红球中心
+        for (let k = 0; k < 6; k++) {
+          const angle = (k / 6) * Math.PI * 2 + Math.random() * 0.5;
+          const dist = 22 + Math.random() * 10;
+          const sp = document.createElement('div');
+          sp.className = 'respin-suck-spark';
+          sp.style.setProperty('--sx', `${Math.cos(angle) * dist}px`);
+          sp.style.setProperty('--sy', `${Math.sin(angle) * dist - 6}px`);
+          sp.style.animationDelay = `${k * 45}ms`;
+          barEl.appendChild(sp);
+          setTimeout(() => sp.remove(), 850 + k * 45);
         }
-      }, 400);
+
+        // 4) "+1 免费球" 飘字 —— 吸附完成后再出现
+        setTimeout(() => {
+          const tx = document.createElement('div');
+          tx.className = 'jersey-respin-text';
+          tx.style.left = '50%';
+          tx.style.top = '-8px';
+          tx.textContent = '+1 免费球';
+          slotEl.appendChild(tx);
+          setTimeout(() => tx.remove(), 1600);
+        }, 480);
+      }
+
+      // 稍作延时后真正补发一球（等旋转吸附的视觉先走完）
+      setTimeout(() => { launchBall({ free: true }); }, 1050);
     }
 
     function done() {
@@ -3601,7 +3963,7 @@ function currentBet() { return betValues[betIdx]; }
 // 按当前投注额刷新弹窗里展示的附加费用
 function refreshBuyCosts() {
   const bet = currentBet();
-  const fmt = (rate) => '+$' + (bet * rate).toFixed(2);
+  const fmt = (rate) => '+' + (bet * rate).toFixed(1);
   if (costSplitEl)  costSplitEl.textContent  = fmt(BUY_RATES.split);
   if (costRespinEl) costRespinEl.textContent = fmt(BUY_RATES.respin);
   if (costHiMultEl) costHiMultEl.textContent = fmt(BUY_RATES.hiMult);
@@ -3630,7 +3992,7 @@ function refreshBuyBtnBadge() {
   if (totalEl) {
     const bet = currentBet();
     const total = bet * buyCostMultiplier();
-    totalEl.textContent = '$' + total.toFixed(2);
+    totalEl.textContent = total.toFixed(1);
   }
 }
 refreshBuyBtnBadge();
@@ -3681,6 +4043,13 @@ bindBuyToggle(tglRespin, 'respin', () => {
 bindBuyToggle(tglHiMult, 'hiMult', () => {
   // 重绘球门以显示/隐藏高倍率球
   if (typeof drawDome === 'function') drawDome();
+  // 左上角倍率图例同步显隐
+  const legend = document.getElementById('multLegend');
+  if (legend) {
+    const on = !!(window.buyFeatures && window.buyFeatures.hiMult);
+    legend.classList.toggle('show', on);
+    legend.setAttribute('aria-hidden', on ? 'false' : 'true');
+  }
 });
 
 // 投注切换时同步弹窗费用 + 按钮费用

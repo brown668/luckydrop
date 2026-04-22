@@ -2474,9 +2474,8 @@ function drawBoard(glows = {}) {
         // 呼吸脉冲：0~1 正弦，每颗钉相位略有偏移增加层次感
         const phase   = (row * 7 + col * 3) * 0.8;
         const pulse   = 0.5 + 0.5 * Math.sin(Date.now() / 700 + phase);
-        // 星芒外尖必须 ≤ 碰撞圆边界（pegR × 2.1，见 updateBall line 3457），
-        // 否则脉动峰值时球视觉擦过星尖却未入碰撞圆 → 用户看到"碰到但不分裂"（13 行等密集布局尤其明显）。
-        // 视觉 peak = pegR × 2.1 = 碰撞 ball-edge 位置，做到"看到即触发"。
+        // 星芒外尖不应大于钉子碰撞圆（视觉上与触发逻辑对齐）；
+        // 视觉 peak = pegR × 2.1，即大致等于 ball-edge 位置，做到"看到即触发"。
         const outerR  = pegR * (1.75 + pulse * 0.35); // 1.75~2.1：峰值与碰撞圆对齐
         const innerR  = pegR * 0.72;
         // glowR 仅在星尖外极薄一层（0.3~0.5px），继续保留呼吸光晕但不越界
@@ -2996,6 +2995,375 @@ function buildBaseConfigs(rows) {
 }
 
 
+// ============================================================
+// PlinkoEngine —— Stake 风格的 Provably Fair 算法层
+// ------------------------------------------------------------
+// 职责：给定 rows/risk 返回 {path, slotIdx, multiplier, seed}
+// 架构：**结果 100% 由算法决定，客户端物理不参与。**
+//   path[i] ∈ {0, 1}  // 0=Left, 1=Right
+//   slotIdx = ΣR      // 落槽索引 = 向右次数
+//   multiplier = slotConfigs[modeIdx][slotIdx]
+// ------------------------------------------------------------
+// 算法（与 Stake 官方 Provably Fair 一致）:
+//   1. HMAC-SHA256(serverSeed, `${clientSeed}:${nonce}:${cursor}`) → 32 bytes
+//   2. 每 4 bytes 压成 [0, 1) 浮点：f = b0/256 + b1/256² + b2/256³ + b3/256⁴
+//   3. Math.floor(f * 2) → 0 (Left) or 1 (Right)
+//   4. rows > 8 时 cursor++ 再算一轮
+// ------------------------------------------------------------
+// 本地 mock：serverSeed / clientSeed / nonce 存 localStorage。
+// 上线时：placeBet() 改为 fetch('/api/bet')，服务端返回相同结构。
+// ============================================================
+const PlinkoEngine = (function () {
+  const STORAGE_KEY = 'plinko_pf_v1';
+
+  // localStorage 存状态：{ serverSeed, clientSeed, nonce, serverSeedHash }
+  // 首次访问随机生成，serverSeed 轮换时旧 seed hash 公开供玩家验证。
+  function randomHex(bytes) {
+    const arr = new Uint8Array(bytes);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  async function sha256Hex(str) {
+    const data = new TextEncoder().encode(str);
+    const buf  = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(buf), b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  let state = null;
+  async function loadState() {
+    if (state) return state;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) { state = JSON.parse(raw); return state; }
+    } catch (_) {}
+    // 首次：生成新 seed 对
+    const serverSeed = randomHex(32);
+    const clientSeed = randomHex(16);
+    const serverSeedHash = await sha256Hex(serverSeed);
+    state = { serverSeed, clientSeed, nonce: 0, serverSeedHash };
+    saveState();
+    return state;
+  }
+  function saveState() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+  }
+
+  // HMAC-SHA256(key, message) → Uint8Array(32)
+  async function hmacSha256(key, message) {
+    const enc = new TextEncoder();
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw', enc.encode(key),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false, ['sign']
+    );
+    const sig = await crypto.subtle.sign('HMAC', cryptoKey, enc.encode(message));
+    return new Uint8Array(sig);
+  }
+
+  // 核心：Stake 算法生成 path[]
+  async function generatePath(rows, serverSeed, clientSeed, nonce) {
+    const path = [];
+    let cursor = 0;
+    while (path.length < rows) {
+      const bytes = await hmacSha256(serverSeed, `${clientSeed}:${nonce}:${cursor}`);
+      for (let i = 0; i < 8 && path.length < rows; i++) {
+        const f = bytes[i * 4]     / 256
+                + bytes[i * 4 + 1] / 65536
+                + bytes[i * 4 + 2] / 16777216
+                + bytes[i * 4 + 3] / 4294967296;
+        path.push(Math.floor(f * 2));  // 0 or 1
+      }
+      cursor++;
+    }
+    return path;
+  }
+
+  // 公共 API：下注
+  // opts: { rows, modeIdx }  —— modeIdx 对应难度（佛系/刺激/疯狂 = 0/1/2）
+  // 返回: { path, slotIdx, multiplier, seed }
+  async function placeBet(opts) {
+    const { rows, modeIdx } = opts;
+    const s = await loadState();
+    s.nonce++;
+    const path = await generatePath(rows, s.serverSeed, s.clientSeed, s.nonce);
+    const slotIdx = path.reduce((sum, d) => sum + d, 0);
+    const cfg = slotConfigs[modeIdx] || [];
+    const multiplier = cfg[slotIdx] ?? 0;
+    saveState();
+    return {
+      path,
+      slotIdx,
+      multiplier,
+      seed: {
+        serverSeedHash: s.serverSeedHash,
+        clientSeed:     s.clientSeed,
+        nonce:          s.nonce,
+      },
+    };
+  }
+
+  // ── 分裂钉分叉：为副球生成独立 path（仍是 provably fair） ──
+  // opts:
+  //   forkPathLen: 副球 path 长度 = totalRows - forkRow - 1
+  //   startCol:    副球在 (forkRow+1) 行的起始列
+  //   modeIdx:     难度索引（用于查倍率）
+  //   nonce:       复用父球的 nonce（一次下注 = 一个 nonce，父子球共享）
+  //   forkRow/forkCol: 触发分裂的钉子坐标，作为 HMAC salt 保证每个分裂点
+  //                    生成的副球 path 互不相同且可审计。
+  // HMAC message: `${clientSeed}:${nonce}:fork:${forkRow}:${forkCol}:${cursor}`
+  // slotIdx = startCol + Σpath - 1（Pascal 三角映射）
+  async function placeForkBet(opts) {
+    const { forkPathLen, startCol, modeIdx, nonce, forkRow, forkCol } = opts;
+    const s = await loadState();
+
+    // 退化：forkPathLen = 0（父球在最后一行分裂）→ 副球直接落 startCol-1 槽
+    const path = [];
+    if (forkPathLen > 0) {
+      let cursor = 0;
+      while (path.length < forkPathLen) {
+        const msg = `${s.clientSeed}:${nonce}:fork:${forkRow}:${forkCol}:${cursor}`;
+        const bytes = await hmacSha256(s.serverSeed, msg);
+        for (let i = 0; i < 8 && path.length < forkPathLen; i++) {
+          const f = bytes[i * 4]     / 256
+                  + bytes[i * 4 + 1] / 65536
+                  + bytes[i * 4 + 2] / 16777216
+                  + bytes[i * 4 + 3] / 4294967296;
+          path.push(Math.floor(f * 2));
+        }
+        cursor++;
+      }
+    }
+
+    const cfg       = slotConfigs[modeIdx] || [];
+    const maxSlot   = Math.max(0, (cfg.length || 1) - 1);
+    const sumPath   = path.reduce((a, b) => a + b, 0);
+    const rawSlot   = startCol + sumPath - 1;
+    const slotIdx   = Math.max(0, Math.min(maxSlot, rawSlot));
+
+    return {
+      path,
+      slotIdx,
+      multiplier: cfg[slotIdx] ?? 0,
+    };
+  }
+
+  // 供调试/审计：暴露当前 seed 状态（不含 serverSeed 明文，与生产一致）
+  async function getPublicState() {
+    const s = await loadState();
+    return {
+      serverSeedHash: s.serverSeedHash,
+      clientSeed:     s.clientSeed,
+      nonce:          s.nonce,
+    };
+  }
+
+  // 玩家轮换 seed（翻牌旧 serverSeed，换一套新 seed）
+  async function rotateSeeds(newClientSeed) {
+    const s = await loadState();
+    const revealedServerSeed = s.serverSeed;  // 可公开供玩家验证历史
+    const newServerSeed = randomHex(32);
+    state = {
+      serverSeed:     newServerSeed,
+      clientSeed:     newClientSeed || randomHex(16),
+      nonce:          0,
+      serverSeedHash: await sha256Hex(newServerSeed),
+    };
+    saveState();
+    return { revealedServerSeed };
+  }
+
+  return { placeBet, placeForkBet, generatePath, getPublicState, rotateSeeds, hmacSha256 };
+})();
+
+
+// ============================================================
+// BallAnimator —— Stake 风格的路径播放动画
+// ------------------------------------------------------------
+// 职责：给定 PlinkoEngine 预算出的 path[] + slotIdx，按抛物线分段
+//       驱动一颗球从发射点走到目标槽，途中触发 peg 发光 / land 事件。
+// 架构：**纯动画层，绝不改变结果。**
+//   path 由 HMAC-SHA256 确定性算出，客户端只负责可视化。
+// ------------------------------------------------------------
+// 分段模型（共 ROWS + 1 段）：
+//   段 0        : 起点 (cx, padT-16) → 第 0 行核心钉的撞后位置
+//   段 k (1..R-1): 第 k-1 行撞后位置 → 第 k 行撞后位置
+//   段 ROWS     : 最后一行撞后位置 → 槽中心 (slotCenterX, H - ballR)
+//
+// 每段解析抛物线：y = y0 + vy0·t + 0.5·g·t²，x = x0 + vx·t
+//   tFall = (-vy0 + √(vy0² + 2g·Δy)) / g
+//   vx    = Δx / tFall
+// 段末（即撞钉瞬间）纵向速度 vy_end = vy0 + g·tFall，再 ×damping 作为下一段 vy0。
+// ------------------------------------------------------------
+// Pascal 三角映射（核心钉列跟踪）：
+//   第 0 行撞的中心钉固定 col=1（pegX(0,1) == cx）
+//   下一行的列 = 当前列 + path[i]  (path=0 向左, path=1 向右)
+//   最终: slotIdx = (col_at_row[R-1] + path[R-1]) - 1 = Σpath  ✓
+//
+// 接触偏向（让撞钉看起来不是机械正碰）：
+//   撞第 row 行钉时，球**即将**往 path[row] 方向走 → 撞后位置偏在该侧。
+//     path=1 (下一步右行) → 撞后点在钉子右上 (+offX, -offY)
+//     path=0 (下一步左行) → 撞后点在钉子左上 (-offX, -offY)
+//   offX = (ballR+pegR)·sin30°, offY = (ballR+pegR)·cos30°
+// ============================================================
+function createBallAnimator(ball, path, slotIdx, ctx, opts = {}) {
+  const {
+    ROWS, SLOTS,
+    pegX, pegY,
+    cx, d, padT, H, rowH,
+    ballR, pegR,
+  } = ctx;
+
+  // ── opts：支持主球（默认）和副球（分裂球） ──
+  //   startRow:  核心钉序列的起始行（主球=0，副球=forkRow+1）
+  //   startCol:  起始行的核心钉列（主球=1，副球=父球列 + (1 - path[forkRow])）
+  //   startPos:  段 0 的起点坐标（主球=发射位，副球=分裂钉接触位置）
+  //   initVy:    段 0 的初始 vy（主球=1.6，副球=父球撞 split peg 后的 vy × 0.85）
+  //   pathOffset: path 数组对应的首个核心钉索引（副球 path 长度 = ROWS - startRow）
+  const startRow    = opts.startRow  ?? 0;
+  const startCol    = opts.startCol  ?? 1;
+  const startPos    = opts.startPos  ?? { x: cx, y: padT - 16 };
+  const initVy      = opts.initVy    ?? 1.6;
+
+  // ── 物理常量（与游戏节奏感一致：g=0.032，撞钉后 vy 衰减 50%） ──
+  const G         = 0.032;     // 重力加速度
+  const DAMPING   = 0.5;       // 撞钉后 vy 衰减（视觉上球会明显"慢一拍"）
+  const CONTACT_OFF_X = (ballR + pegR) * 0.5;    // sin(30°)
+  const CONTACT_OFF_Y = (ballR + pegR) * 0.866;  // cos(30°)
+
+  // ── 1. 核心钉序列（Pascal 三角逐层追踪） ──
+  // 主球：从 (0, 1) 走到第 ROWS-1 行，path 长度 = ROWS
+  // 副球：从 (startRow, startCol) 走到第 ROWS-1 行，path 长度 = ROWS - startRow
+  const coreArr = [];
+  let col = startCol;
+  for (let row = startRow; row < ROWS; row++) {
+    coreArr.push({ row, col });
+    col += path[row - startRow];              // 0→左（列不变），1→右（列+1）
+  }
+
+  // ── 2. 关键点数组（起点 + 每个撞钉位置 + 槽中心） ──
+  const points = [];
+  points.push({ x: startPos.x, y: startPos.y });
+
+  for (let i = 0; i < coreArr.length; i++) {
+    const { row, col: c } = coreArr[i];
+    const side = path[i] === 1 ? +1 : -1;      // 撞后朝哪边落
+    points.push({
+      x: pegX(row, c) + side * CONTACT_OFF_X,
+      y: pegY(row)     - CONTACT_OFF_Y,
+    });
+  }
+
+  // 终点：目标槽中心（底部内缩 ballR）
+  const slotLeft    = cx - SLOTS * d / 2;
+  const slotCenterX = slotLeft + (slotIdx + 0.5) * d;
+  points.push({ x: slotCenterX, y: H - ballR });
+
+  // ── 3. 为每段求解抛物线参数（tFall, vx, vy0） ──
+  const segments = [];
+  let vy = initVy;
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[i], p1 = points[i + 1];
+    const dx = p1.x - p0.x;
+    const dy = p1.y - p0.y;
+
+    // 自由落体时间：vy0·t + 0.5g·t² = dy  →  t = (-vy0 + √(vy0² + 2g·dy)) / g
+    // 若 disc < 0（理论上不应出现，兜底为 1 步）
+    const disc  = vy * vy + 2 * G * dy;
+    const tFall = disc > 0 ? (-vy + Math.sqrt(disc)) / G : 1;
+    const tF    = Math.max(tFall, 1);   // 防除零
+    const vx    = dx / tF;
+
+    segments.push({
+      x0: p0.x, y0: p0.y,
+      vx, vy0: vy, g: G,
+      tFall: tF,
+      // 段 i 的 pegHit = 第 i 个核心钉（段末触发 peg 事件）；最后一段为 null
+      pegHit: i < coreArr.length ? coreArr[i] : null,
+      isLast: i === points.length - 2,
+    });
+
+    // 下一段 vy0 = 本段末端 vy × damping
+    vy = (vy + G * tF) * DAMPING;
+  }
+
+  // ── 4. 动画状态 ──
+  let segIdx = 0;
+  let segT   = 0;
+
+  // ── 5. step(dt)：推进 dt 个物理步，返回事件数组 ──
+  // 事件类型：
+  //   { type: 'peg',  row, col, pegKey }  撞核心钉（触发发光）
+  //   { type: 'land', slotIdx }           到达槽（触发 settle）
+  // 跨段逻辑：一个 dt 可能连续完成多段，循环消耗 remaining。
+  function step(dt) {
+    const events = [];
+    let remaining = dt;
+
+    while (remaining > 0 && segIdx < segments.length) {
+      const seg  = segments[segIdx];
+      const tRem = seg.tFall - segT;
+
+      if (remaining >= tRem) {
+        // 本段走完：推进到段末，触发事件
+        const tEnd = seg.tFall;
+        ball.x = seg.x0 + seg.vx * tEnd;
+        ball.y = seg.y0 + seg.vy0 * tEnd + 0.5 * seg.g * tEnd * tEnd;
+
+        if (seg.pegHit) {
+          const { row, col } = seg.pegHit;
+          // vyEnd = 段末纵向速度（含本段重力加速）——副球分裂时继承为初 vy
+          const vyEnd = seg.vy0 + seg.g * seg.tFall;
+          events.push({
+            type:   'peg',
+            row, col,
+            pegKey: row * 20 + col,
+            vyEnd,
+            contactX: ball.x,
+            contactY: ball.y,
+          });
+        }
+        if (seg.isLast) {
+          events.push({ type: 'land', slotIdx });
+          segIdx++;
+          segT = 0;
+          break;                          // land 后不再推进
+        }
+
+        remaining -= tRem;
+        segIdx++;
+        segT = 0;
+      } else {
+        // 本段内推进 remaining
+        segT += remaining;
+        ball.x = seg.x0 + seg.vx * segT;
+        ball.y = seg.y0 + seg.vy0 * segT + 0.5 * seg.g * segT * segT;
+        remaining = 0;
+      }
+    }
+
+    // 旋转：根据当前段 vx 换算角速度（v/R），积分到 ball.rot
+    if (segIdx < segments.length) {
+      ball.vrot = segments[segIdx].vx / ballR * 0.6;
+    } else {
+      ball.vrot = 0;
+    }
+    ball.rot = (ball.rot || 0) + ball.vrot * dt;
+
+    return events;
+  }
+
+  return {
+    step,
+    get finished() { return segIdx >= segments.length; },
+    // 调试/诊断用（不参与逻辑）
+    segments,
+    points,
+    coreArr,
+  };
+}
+
+
 let slotConfigs = [];  // 由 onRowsChanged() 动态填充
 
 // 倍率 → 颜色 class 映射
@@ -3288,6 +3656,8 @@ function initGame() {
   const pegR       = Math.min(rowH, d) * 0.17;
   const ballR      = Math.max(4, Math.min(9, pegR * 1.75));
   const splits = getSplits();
+  // 分裂钉的 pegKey 集合（一次 initGame 定下来，供 Engine animator 分支 O(1) 查询）
+  const splitKeys = new Set(splits.map(([r, c]) => r * 20 + c));
 
   // 底行钉子中心固定在 canvas 底部上方 15px（与 drawBoard 一致）
   const pegShift   = (H - padB - 15) - (padT + (ROWS - 0.5) * rowH);
@@ -3448,193 +3818,8 @@ function initGame() {
     drawBall(ball.x, ball.y, 1, ball.depth || 0, ball.rot || 0, ball.color || 'normal');
   }
 
-  // ── 物理更新：CCD（连续碰撞检测）+ Galton 50/50 瞄准 ──
-  // 主流 Plinko 物理：球精确停在接触钉子的瞬间，永不穿透、无视觉重叠。
-  //   ① 重力 + 空气阻尼 + 旋转积分
-  //   ② CCD：对所有未冷却钉子解二次方程 |P0 + V·t − C|² = R²，
-  //       求最小正根 t_hit ∈ [0, 1] → 球移到 P0 + V·t_hit（接触点）
-  //   ③ Galton 50/50：随机选边 → 解析 vx 精确瞄准下一行目标钉
-  //   ④ cooldown=18 步防止同一钉本次飞离前反复触发响应
-  //   ⑤ 边界墙（CCD 未撞钉才会走满整步，可能撞墙）
-  function updateBall(ball, dt = 1) {
-    // ── ① 重力 + 阻尼 + 旋转积分 ──
-    ball.vy += 0.032;
-    if (ball.vy > 1.8) ball.vy = 1.8;
-    ball.vx *= 0.98;
-
-    if (ball.rot  == null) ball.rot  = 0;
-    if (ball.vrot == null) ball.vrot = 0;
-    ball.rot  += ball.vrot * dt;
-    ball.vrot *= 0.995;
-
-    if (!ball.cooldown) ball.cooldown = {};
-    // 物理步开始：所有钉 cooldown 自减一次（字面含义：距上次响应过了 1 步）
-    for (const k in ball.cooldown) {
-      if (ball.cooldown[k] > 0) ball.cooldown[k]--;
-    }
-
-    const minDist      = ballR + pegR;
-    const minDistSplit = ballR + pegR * 2.1;
-    const splitKeys    = new Set(splits.map(([r, c]) => r * 20 + c));
-
-    // ── ② CCD：求球沿直线 P0 + V·t 最早撞到的钉子 ──
-    // 解 A·t² + B·t + C = 0  (A=|V|², B=2·V·(P0−C), C=|P0−C|²−R²)
-    // 有效范围：t ∈ [0, 1]，取最小正根
-    // 关键：**不跳过 cooldown 钉子**——CCD 必须始终保护物理体积，否则球会穿透。
-    //      cooldown 只改变"响应方式"（下面分叉处理），不改变"是否检测"。
-    const vx = ball.vx, vy = ball.vy;
-    const A  = vx * vx + vy * vy;
-
-    let bestT   = 2;            // 哨兵：> 1 表示本步无碰撞
-    let bestHit = null;         // { row, col, pegKey, px, py, isSplitPeg, useMinDist }
-
-    if (A > 1e-9) {
-      for (let row = 0; row < ROWS; row++) {
-        const numPegs = row + 3;
-        for (let col = 0; col < numPegs; col++) {
-          const pegKey = row * 20 + col;
-
-          const px = pegX(row, col);
-          const py = pegY(row);
-          const isSplitPeg = splitKeys.has(pegKey);
-          const useMinDist = isSplitPeg ? minDistSplit : minDist;
-
-          const dx0 = ball.x - px;
-          const dy0 = ball.y - py;
-          const C   = dx0 * dx0 + dy0 * dy0 - useMinDist * useMinDist;
-
-          let tHit;
-          if (C <= 0) {
-            // 球已嵌入钉子（浮点/分裂球兜底），立即触发 t=0
-            tHit = 0;
-          } else {
-            const B = 2 * (dx0 * vx + dy0 * vy);
-            if (B >= 0) continue;                        // 速度方向远离钉子
-            const disc = B * B - 4 * A * C;
-            if (disc < 0) continue;                      // 判别式 < 0，轨迹不相交
-            tHit = (-B - Math.sqrt(disc)) / (2 * A);
-            if (tHit < 0 || tHit > 1) continue;          // 本步时间外
-          }
-
-          if (tHit < bestT) {
-            bestT   = tHit;
-            bestHit = { row, col, pegKey, px, py, isSplitPeg, useMinDist };
-          }
-        }
-      }
-    }
-
-    let splitHit  = null;
-    let normalHit = null;
-
-    if (bestHit) {
-      // ── 有碰撞：球精确停在接触瞬间（CCD 保证无穿透）──
-      ball.x += vx * bestT;
-      ball.y += vy * bestT;
-
-      const { row, col, pegKey, px, py, isSplitPeg, useMinDist: useMinDistHit } = bestHit;
-
-      // 法向量（钉心→球心，即接触点方向的单位向量）
-      const dx   = ball.x - px;
-      const dy   = ball.y - py;
-      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-      const nx   = dx / dist;
-      const ny   = dy / dist;
-
-      const isCoolingDown = ball.cooldown[pegKey] > 0;
-
-      if (isCoolingDown) {
-        // ── cooldown 期间 re-contact：纯物理反射 ──
-        // 不重新触发 Galton、不刷新 cooldown、不触发 settle/split，仅保证球不穿透。
-        // 法线反弹 + 切线保留，整体衰减到 35%（视觉柔和，弹起幅度小于 1px）。
-        const vn = vx * nx + vy * ny;
-        if (vn < 0) {
-          ball.vx = (vx - 2 * vn * nx) * 0.35;
-          ball.vy = (vy - 2 * vn * ny) * 0.35;
-        }
-        // 推出钉子表面（+ 0.3 px 防浮点残留）
-        ball.x = px + nx * (useMinDistHit + 0.3);
-        ball.y = py + ny * (useMinDistHit + 0.3);
-        ball.prevX = ball.x;
-        ball.prevY = ball.y;
-        // 不设 splitHit / normalHit —— 不产生击中事件
-      } else {
-        // ── ③ 首次撞钉：Galton 50/50 响应（瞄准下一行目标钉）──
-        const chosenSide = Math.random() < 0.5 ? -1 : 1;       // 真 50/50 二分
-        const targetCol  = col + (chosenSide > 0 ? 1 : 0);
-        const vy0        = Math.max(Math.abs(ball.vy) * 0.65, 0.35) - 0.08;
-        const g          = 0.032;
-        const tFall      = (-vy0 + Math.sqrt(vy0 * vy0 + 2 * g * rowH)) / g;
-        const travelF    = (1 - Math.pow(0.98, tFall)) / 0.02;
-
-        if (row + 1 < ROWS) {
-          // vx = (下一行目标钉 x − 当前接触点 x) / 水平衰减因子
-          const targetX  = pegX(row + 1, targetCol);
-          const dxNeeded = targetX - ball.x;
-          ball.vx = (dxNeeded / travelF) * (0.94 + Math.random() * 0.12);
-        } else {
-          // 最后一行：无下一钉，常规横移 d/2 落槽
-          const vxBase = (d / 2) / travelF;
-          ball.vx = chosenSide * vxBase * (0.90 + Math.random() * 0.20);
-        }
-        ball.vy = vy0;
-        ball.cooldown[pegKey] = 18;
-
-        // 切向旋转：接触点切向速度 → ω = v_tangent / R
-        const tx = -ny, ty = nx;
-        const vT = ball.vx * tx + ball.vy * ty;
-        ball.vrot = vT / ballR * 0.85 + (Math.random() - 0.5) * 0.08;
-
-        pegGlows[pegKey] = 1;
-
-        // 推出钉子表面（+ 0.3 px 防浮点），之后 cooldown 内若再接触由上面物理反射兜底
-        ball.x = px + nx * (useMinDistHit + 0.3);
-        ball.y = py + ny * (useMinDistHit + 0.3);
-        ball.prevX = ball.x;
-        ball.prevY = ball.y;
-
-        // 命中分类
-        if (isSplitPeg && !ball.usedSplits?.[pegKey]) {
-          splitHit = { pegKey, isSplit: true };
-        } else {
-          normalHit = { pegKey, isSplit: false };
-        }
-      }
-    } else {
-      // ── 无碰撞：整步自由移动 ──
-      ball.x += vx;
-      ball.y += vy;
-    }
-
-    // ── ⑤ 边界墙（瞬移同步 prev）──
-    if (ball.x < ballR) {
-      ball.x = ballR;
-      ball.vx = Math.abs(ball.vx) * 0.5;
-      ball.vrot += ball.vy / ballR * 0.4;
-      ball.prevX = ball.x;
-    }
-    if (ball.x > W - ballR) {
-      ball.x = W - ballR;
-      ball.vx = -Math.abs(ball.vx) * 0.5;
-      ball.vrot -= ball.vy / ballR * 0.4;
-      ball.prevX = ball.x;
-    }
-
-    return splitHit || normalHit;
-  }
-
-  // ── 检测落槽 ──
-  function checkLanded(ball) {
-    const landY = H - ballR;
-    if (ball.y >= landY) {
-      // 槽居中，左边界由当前行数的 d 决定
-      const slotLeft = cx - SLOTS * d / 2;
-      let idx = Math.floor((ball.x - slotLeft) / d);
-      idx = Math.max(0, Math.min(SLOTS - 1, idx));
-      return idx;
-    }
-    return -1;
-  }
+  // 注：结果由 PlinkoEngine（HMAC-SHA256）确定；BallAnimator 播放路径动画。
+  //     旧客户端物理（CCD + Galton 50/50）已完全移除。
 
   // ── 结算 ──
   function settle(slotIdx, weight = 1, recordIdx = null) {
@@ -3746,7 +3931,10 @@ function initGame() {
       }
 
       // 稍作延时后真正补发一球（等旋转吸附的视觉先走完）
-      setTimeout(() => { launchBall({ free: true }); }, 1050);
+      // launchBall 现在是 async；respin 返还球 fire-and-forget，catch 防 unhandled rejection
+      setTimeout(() => {
+        launchBall({ free: true }).catch(err => console.error('[respin] launchBall failed:', err));
+      }, 1050);
     }
 
     function done() {
@@ -3803,8 +3991,8 @@ function initGame() {
   }
 
   // ── 动画循环：Fixed Timestep + Interpolation（Glenn Fiedler 2006 经典方案）──
-  // 问题：updateBall 内部按"每帧 1 步"硬编码（`vy += 0.032`、cooldown--），
-  //   不同刷新率屏幕（60Hz / 120Hz ProMotion / Chrome 降频 30Hz）下物理速度差异巨大。
+  // 问题：animator.step(1) 按"每帧 1 步"推进，不同刷新率屏幕（60Hz/120Hz/30Hz）下
+  //   球速视觉差异巨大，且 peg 事件触发时机偏移会导致音效和发光不同步。
   // 方案：物理锁定 60Hz，渲染按显示刷新率（RAF），帧间用 alpha 线性插值。
   //   → Chrome、Safari、Preview、60Hz、120Hz 下视觉完全一致，且任何刷新率都丝滑。
   //
@@ -3821,6 +4009,103 @@ function initGame() {
   let   physAccum       = 0;
 
   function lerp(a, b, t) { return a + (b - a) * t; }
+
+  // ============================================================
+  // spawnForkBall —— 主球撞 split peg → 派生一颗副球（仍是 provably fair）
+  // ------------------------------------------------------------
+  // 数据流：physicsStep 检测到 peg 事件的 pegKey ∈ splitKeys
+  //   → spawnForkBall(parent, row, col, vyEnd, cx, cy)（fire-and-forget）
+  //   → PlinkoEngine.placeForkBet（HMAC + fork salt，nonce 复用父球）
+  //   → createBallAnimator(fork, forkPath, forkSlot, ctx, opts)
+  //
+  // 关键点：
+  //   1. nonce 复用父球：一次下注 = 一个 nonce；(forkRow, forkCol) 作为 HMAC salt
+  //      保证每个分裂点生成的副球 path 独立可审计
+  //   2. forkStartCol = col + (1 - parentStep)：副球走父球"没选"的那侧
+  //      parentStep=1（父球右）→ 副球列不变；parentStep=0（父球左）→ 副球列 +1
+  //   3. ball.usedSplits[pegKey] 防止同一球在同一分裂点重复触发
+  //   4. balls.length ≥ 8 硬截断（await 前后各检查一次，防竞态）
+  //   5. weight 父子各继承父球的 ×0.55（与旧物理版本一致）
+  //   6. startPos = 父球撞钉接触点；initVy = 父球段末 vyEnd × 0.85（碰撞阻尼）
+  //   7. engineNonce 继承到副球上，使二级副球（副球再撞 split peg）也能复用同 nonce
+  // ============================================================
+  async function spawnForkBall(parentBall, forkRow, forkCol, vyEnd, contactX, contactY) {
+    if (balls.length >= 8) return;
+    const pegKey = forkRow * 20 + forkCol;
+    if (parentBall.usedSplits && parentBall.usedSplits[pegKey]) return;
+
+    // 立即标记 usedSplits（即使后续 HMAC 失败，也不让同一钉二次触发）
+    parentBall.usedSplits = parentBall.usedSplits || {};
+    parentBall.usedSplits[pegKey] = true;
+
+    // 父球在 forkRow 的路径决策：0=左，1=右 → 副球走相反侧
+    const parentStep   = parentBall.enginePath[forkRow];
+    const forkStartCol = forkCol + (1 - parentStep);
+    const forkPathLen  = ROWS - forkRow - 1;
+
+    // 调 PlinkoEngine 生成副球 path（HMAC + fork salt）
+    let forkResult = null;
+    try {
+      forkResult = await PlinkoEngine.placeForkBet({
+        forkPathLen,
+        startCol: forkStartCol,
+        modeIdx,
+        nonce:    parentBall.engineNonce,
+        forkRow,
+        forkCol,
+      });
+    } catch (e) {
+      console.warn('[PlinkoEngine] placeForkBet failed:', e);
+      return;
+    }
+
+    // await 期间 balls 可能被 push 到上限，再次确认
+    if (balls.length >= 8) return;
+
+    // 父球分裂后自身减重；depth 自增（视觉更暗/更小）
+    const splitW = (parentBall.weight ?? 1) * 0.55;
+    parentBall.weight = splitW;
+    parentBall.depth  = (parentBall.depth || 0) + 1;
+
+    const forkBall = {
+      x:       contactX,
+      y:       contactY,
+      prevX:   contactX,
+      prevY:   contactY,
+      prevRot: parentBall.rot || 0,
+      trail:    [],
+      weight:   splitW,
+      depth:    parentBall.depth,
+      rot:      parentBall.rot || 0,
+      vrot:     -(parentBall.vrot || 0) * 0.7,
+      // 继承 usedSplits（包含刚标记的 pegKey），避免副球折返时重触发
+      usedSplits:  { ...parentBall.usedSplits },
+      color:       parentBall.color || 'normal',
+      extraMult:   parentBall.extraMult || 1,
+      primary:     false,
+      recordIdx:   parentBall.recordIdx,
+      // 继承 nonce：支持二级分裂链（副球再撞 split peg → 三级副球用同一 nonce）
+      engineNonce: parentBall.engineNonce,
+      enginePath:  forkResult.path,
+      engineSlot:  forkResult.slotIdx,
+    };
+
+    forkBall.animator = createBallAnimator(
+      forkBall,
+      forkResult.path,
+      forkResult.slotIdx,
+      { ROWS, SLOTS, pegX, pegY, cx, d, padT, H, rowH, ballR, pegR },
+      {
+        startRow: forkRow + 1,
+        startCol: forkStartCol,
+        startPos: { x: contactX, y: contactY },
+        initVy:   vyEnd * 0.85,
+      },
+    );
+
+    balls.push(forkBall);
+    if (window._onSplit) window._onSplit(contactX, contactY);
+  }
 
   function physicsStep() {
     // 衰减钉子发光（每物理步 0.08 → 60Hz 下 ~1.25s 归零，与旧版一致）
@@ -3842,56 +4127,34 @@ function initGame() {
       ball.trail.push({ x: ball.x, y: ball.y });
       if (ball.trail.length > 7) ball.trail.shift();
 
-      // 物理更新（dt=1 保持原 updateBall 的"每帧 1 步"语义）
-      const hit = updateBall(ball, 1);
-      if (hit) {
-        pegGlows[hit.pegKey] = 1.0;
-        const canSplitNow = hit.isSplit &&
-          (ball.splitFrom == null || ball.splitFrom !== hit.pegKey) &&
-          balls.length < 8;
-        if (canSplitNow) {
-          if (!ball.usedSplits) ball.usedSplits = {};
-          ball.usedSplits[hit.pegKey] = true;
-          ball.splitFrom = hit.pegKey;
-          const splitW = (ball.weight ?? 1) * 0.55;
-          ball.weight = splitW;
-          ball.depth  = (ball.depth || 0) + 1;
-          balls.push({
-            x:  ball.x,
-            y:  ball.y,
-            prevX: ball.x,
-            prevY: ball.y,
-            prevRot: ball.rot || 0,
-            vx: -(ball.vx) + (Math.random() - 0.5) * 0.4,
-            vy:  ball.vy  * 0.85,
-            trail:    [],
-            cooldown: {},
-            isSplit:  true,
-            splitFrom: hit.pegKey,
-            weight:   splitW,
-            depth:    ball.depth,
-            rot:      ball.rot || 0,
-            vrot:     -(ball.vrot || 0) * 0.7 + (Math.random() - 0.5) * 0.2,
-            usedSplits: { ...(ball.usedSplits || {}) },
-            color:     ball.color || 'normal',
-            extraMult: ball.extraMult || 1,
-            primary:   false,
-            recordIdx: ball.recordIdx,
-          });
-          if (window._onSplit) window._onSplit(ball.x, ball.y);
-        } else if (!hit.isSplit) {
+      // ── Engine 驱动：animator.step(1) 返回事件数组 ──
+      // 事件：'peg' 触发钉发光/击中音效（含分裂钉派生副球）；'land' 触发结算。
+      // 分裂钉门槛：(a) pegKey ∈ splitKeys  (b) 本球未用过此钉  (c) balls<8 硬截断
+      //   spawnForkBall fire-and-forget（await PlinkoEngine HMAC → 入 balls[]）。
+      const events = ball.animator.step(1);
+      let landedSlot = -1;
+      for (const e of events) {
+        if (e.type === 'peg') {
+          pegGlows[e.pegKey] = 1.0;
+          if (
+            splitKeys.has(e.pegKey) &&
+            !(ball.usedSplits && ball.usedSplits[e.pegKey]) &&
+            balls.length < 8
+          ) {
+            spawnForkBall(ball, e.row, e.col, e.vyEnd, e.contactX, e.contactY)
+              .catch(err => console.error('[fork] spawnForkBall failed:', err));
+          }
           if (window._onHit) window._onHit();
+        } else if (e.type === 'land') {
+          landedSlot = e.slotIdx;
         }
       }
-
-      // 落槽检测（基于物理位置）
-      const idx = checkLanded(ball);
-      if (idx >= 0) {
+      if (landedSlot >= 0) {
         const w = (ball.weight ?? 1) * (ball.extraMult ?? 1);
         const wasPrimary = ball.primary === true;
         balls.splice(i, 1);
         pendingSettles++;
-        settle(idx, w, ball.recordIdx);
+        settle(landedSlot, w, ball.recordIdx);
         if (autoMode && wasPrimary && autoTotalAtStart !== Infinity) {
           autoLanded++;
           const remain = Math.max(0, autoTotalAtStart - autoLanded);
@@ -3961,7 +4224,9 @@ function initGame() {
   });
 
   // ── 一次发球（单球）──
-  function launchBall(opts = {}) {
+  // 全流程：await PlinkoEngine.placeBet（HMAC-SHA256 确定结果） → 挂 BallAnimator → 入 balls[]。
+  // async 返回 Promise<boolean>：true = 成功发起；false = 余额不足或下注被取消。
+  async function launchBall(opts = {}) {
     const free = opts.free === true;   // Respin 返还球免费
     const bet       = betValues[betIdx];
     const multiplier = (typeof buyCostMultiplier === 'function') ? buyCostMultiplier() : 1;
@@ -4015,33 +4280,58 @@ function initGame() {
     }
     const myRecordIdx = betHistory.length - 1;   // 刚 push 的这条
 
+    // ── PlinkoEngine.placeBet：HMAC-SHA256 生成 path + slotIdx（通常几毫秒） ──
+    // await 期间 signal 可能被 abort（用户切 row/难度），此时 ctx 已失效，放弃挂 ball。
+    // nonce 保存到 ballObj：分裂钉副球与主球共享 nonce（一次下注一个 nonce，fork salt 区分）。
+    let result;
+    try {
+      result = await PlinkoEngine.placeBet({ rows: ROWS, modeIdx });
+    } catch (e) {
+      console.error('[PlinkoEngine] placeBet failed:', e);
+      // 失败时退还扣款，让用户重试
+      balance = parseFloat((balance + totalCost).toFixed(2));
+      balEl.textContent = fmtBalance(balance);
+      lockControls(false);
+      return false;
+    }
+    if (signal.aborted) return false;
+
+    const enginePath  = result.path;
+    const engineSlot  = result.slotIdx;
+    const engineNonce = result.seed.nonce;
+
     {
       const initX = cx + (Math.random() - 0.5) * 10;
       const initY = padT - 16;
       const initRot = (Math.random() - 0.5) * Math.PI;
-      balls.push({
+      const ballObj = {
         x:  initX,
         y:  initY,
         // 插值渲染用：上一个物理步的位置/旋转（初始等于当前，避免首帧闪现）
         prevX: initX,
         prevY: initY,
         prevRot: initRot,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: 1.6,
-        trail:    [],
-        cooldown: {},
-        isSplit:   false,
-        splitFrom: null,
+        trail:     [],
         weight:    1.0,
         rot:       initRot, // 出场随机姿态
-        vrot:      (Math.random() - 0.5) * 0.05,
+        vrot:      0,       // animator 会每帧覆写
         color:     ballColor,
         extraMult: extraMult,
         // 主体球：付费发出的常规球；免费球（respin 返还）不占自动投注额度
         primary:   !free,
         // 绑定投注记录索引（分裂子球继承同一 recordIdx，共同计入总赢利）
         recordIdx: myRecordIdx,
+        // Engine 状态：enginePath 驱动 animator；engineNonce 供 spawnForkBall 生成副球 HMAC
+        enginePath,
+        engineSlot,
+        engineNonce,
+      };
+
+      ballObj.animator = createBallAnimator(ballObj, enginePath, engineSlot, {
+        ROWS, SLOTS, pegX, pegY, cx, d, padT, H, rowH, ballR, pegR,
       });
+
+      balls.push(ballObj);
     }
 
     if (!rafId || balls.length === 1) {
@@ -4053,7 +4343,8 @@ function initGame() {
   // ── 开始 / 停止 足球按钮 ──
   // 单发：点击发一颗球，按钮短暂置灰至落槽恢复
   // 自动：自动投注 > 0 时进入自动模式，按钮变"停止"；点击"停止"可中断
-  startBtn.addEventListener('click', () => {
+  // async：launchBall 现在是 async（await PlinkoEngine HMAC 路径），调用方需 await。
+  startBtn.addEventListener('click', async () => {
     if (autoMode) {
       // 停止自动：立即结束（仍在飞的球会自然落下；afterSettle 会补全清理）
       autoMode = false;
@@ -4078,7 +4369,7 @@ function initGame() {
       startBtn.classList.add('stopping');
       if (startLbl) startLbl.textContent = '停止';
     }
-    const ok = launchBall();
+    const ok = await launchBall();
     if (!ok && autoMode) {
       autoMode = false;
       autoRemaining = 0;
@@ -4090,12 +4381,12 @@ function initGame() {
       autoRemaining--;
       // 启动独立定时器：每 AUTO_INTERVAL_MS 发一球，不等上一球落槽
       stopAutoTimer();
-      autoTimerId = setInterval(() => {
+      autoTimerId = setInterval(async () => {
         if (!autoMode || autoRemaining <= 0) {
           stopAutoTimer();
           return;
         }
-        const fired = launchBall();
+        const fired = await launchBall();
         if (fired) {
           autoRemaining--;
         } else {

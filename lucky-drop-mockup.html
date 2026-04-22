@@ -501,8 +501,8 @@ body {
     0 1px 2px rgba(0,10,30,0.55),
     inset 0 1px 1px rgba(255,255,255,0.3);
 }
-/* 红/金色球：用半透明色层叠加在贴图上，保留六边形纹理 */
-.ml-b-red::after,
+/* 蓝/金色球：用半透明色层叠加在贴图上，保留六边形纹理 */
+.ml-b-blue::after,
 .ml-b-gold::after {
   content: '';
   position: absolute;
@@ -510,11 +510,11 @@ body {
   border-radius: 50%;
   pointer-events: none;
 }
-.ml-b-red::after {
-  background: rgba(230,60,60,0.72);
+.ml-b-blue::after {
+  background: rgba(60,130,240,0.72);
   box-shadow:
-    inset 0 0 0 1px rgba(255,130,130,0.6),
-    0 0 5px rgba(255,60,60,0.55);
+    inset 0 0 0 1px rgba(140,200,255,0.65),
+    0 0 5px rgba(80,160,255,0.6);
 }
 .ml-b-gold::after {
   background: rgba(255,200,40,0.70);
@@ -1700,6 +1700,127 @@ body {
   filter: drop-shadow(0 0 5px rgba(255,190,70,0.8));
 }
 
+/* ─── 投注记录弹窗 ─── */
+.history-modal {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  opacity: 0;
+  pointer-events: none;
+  width: 340px;
+  max-width: 92%;
+  max-height: 72vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, var(--ui-blue-bot) 0%, var(--ui-blue-deep) 100%);
+  border: 1.5px solid rgba(150,200,255,0.5);
+  border-radius: 16px;
+  box-shadow: 0 10px 36px rgba(0,20,60,0.65);
+  padding: 18px 16px 14px;
+  z-index: 170;
+  transition: opacity .22s ease, transform .22s cubic-bezier(.22,.85,.35,1);
+}
+.history-modal.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+}
+.history-title {
+  font-family: 'Chakra Petch', 'PingFang SC', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(220,235,255,0.98);
+  letter-spacing: 0.06em;
+  text-align: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(150,200,255,0.18);
+  margin-bottom: 8px;
+}
+.history-list {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(150,200,255,0.35) transparent;
+  padding-right: 4px;
+}
+.history-list::-webkit-scrollbar { width: 4px; }
+.history-list::-webkit-scrollbar-thumb {
+  background: rgba(150,200,255,0.35);
+  border-radius: 2px;
+}
+.history-empty {
+  text-align: center;
+  color: rgba(200,220,240,0.5);
+  padding: 34px 0;
+  font-size: 13px;
+  font-family: 'Chakra Petch', 'PingFang SC', sans-serif;
+}
+.history-row {
+  display: grid;
+  grid-template-columns: 26% 24% 22% 28%;
+  align-items: center;
+  padding: 9px 2px;
+  font-family: 'Chakra Petch', 'PingFang SC', sans-serif;
+  font-size: 12px;
+}
+.history-head {
+  position: sticky;
+  top: 0;
+  background: linear-gradient(180deg, var(--ui-blue-bot) 0%, var(--ui-blue-bot) 100%);
+  color: rgba(170,200,230,0.72);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  padding: 6px 2px 8px;
+  border-bottom: 1px solid rgba(150,200,255,0.22);
+  z-index: 1;
+}
+.history-head > div:last-child,
+.history-item > div:last-child { text-align: right; }
+.history-item {
+  border-bottom: 1px solid rgba(150,200,255,0.12);
+  color: rgba(220,235,250,0.92);
+}
+.history-item:last-child { border-bottom: none; }
+.history-item .hi-time {
+  font-size: 11.5px;
+  color: rgba(180,210,240,0.75);
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.history-item .hi-bet {
+  font-variant-numeric: tabular-nums;
+}
+.history-item .hi-mult {
+  color: #a9d8ff;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.history-item .hi-profit {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.history-item .hi-profit.win {
+  color: #ffd86b;
+  text-shadow: 0 0 6px rgba(255,200,60,0.4);
+}
+.history-item .hi-profit.loss { color: #ff7a88; }
+.history-item .hi-profit.even { color: rgba(210,225,245,0.85); }
+.history-item .hi-free {
+  display: inline-block;
+  background: linear-gradient(90deg, rgba(255,200,60,0.22), rgba(255,140,40,0.22));
+  color: #ffd86b;
+  border: 1px solid rgba(255,200,60,0.45);
+  border-radius: 6px;
+  padding: 1px 7px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
 /* ─── Toast ─── */
 .toast {
   position: absolute;
@@ -1783,7 +1904,7 @@ body {
     <!-- 高倍率球图例（hiMult 开启时显示在左上） -->
     <div class="mult-legend" id="multLegend" aria-hidden="true">
       <span class="ml-item"><span class="ml-ball ml-b-normal"></span>1×</span>
-      <span class="ml-item"><span class="ml-ball ml-b-red"></span>2×</span>
+      <span class="ml-item"><span class="ml-ball ml-b-blue"></span>2×</span>
       <span class="ml-item"><span class="ml-ball ml-b-gold"></span>4×</span>
     </div>
   </div>
@@ -1880,7 +2001,7 @@ body {
   <div class="footer-balance">
     <div class="balance-wrap">
       <span class="bal-label">余额</span>
-      <span class="bal-value">$1,730.50</span>
+      <span class="bal-value">1,730.50</span>
     </div>
   </div>
 
@@ -1897,6 +2018,14 @@ body {
         <svg viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM7 4h5v8l-2.5-1.5L7 12V4z"/></svg>
       </span>
       <span class="drawer-label">游戏规则</span>
+      <span class="drawer-arrow">›</span>
+    </div>
+
+    <div class="drawer-row" id="drawerHistory">
+      <span class="drawer-icon">
+        <svg viewBox="0 0 24 24"><path d="M13 3a9 9 0 00-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0013 21a9 9 0 000-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+      </span>
+      <span class="drawer-label">投注记录</span>
       <span class="drawer-arrow">›</span>
     </div>
 
@@ -1981,6 +2110,18 @@ body {
     </div>
   </div>
 
+  <!-- 投注记录弹窗 -->
+  <div class="history-modal" id="historyModal" role="dialog" aria-modal="true" aria-label="投注记录">
+    <button class="buy-modal-close" id="historyModalClose" aria-label="关闭">✕</button>
+    <div class="history-title">投注记录</div>
+    <div class="history-list" id="historyList">
+      <div class="history-row history-head">
+        <div>时间</div><div>总投注</div><div>总倍率</div><div>盈亏额</div>
+      </div>
+      <div class="history-empty">暂无投注记录</div>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
@@ -2051,28 +2192,36 @@ const WALL_SLOPE = 0.19;                             // 缓梯形（参考图：
 //  优化目标：composite = gain × (1 + α × sep/(E_L+E_R))，α=2.5
 //  设计约束：左右严格对称、同行最多 2 钉、双层分布（浅+深）、避 sep=0 中心钉
 //
-//  推导结果（见 /tmp/split_peg_v3.py，mode=刺激，RTP 基准）：
-//    R=8   K=2  (4,2)(4,4)              p_hit_sum=50%   sep̄=0.51  gain̄=0.023
-//    R=9   K=2  (5,2)(5,5)              p_hit_sum=31%   sep̄=0.74  gain̄=0.018
-//    R=10  K=4  (3,2)(3,3)(6,3)(6,5)    p_hit_sum=122%  sep̄=0.32  gain̄=0.026
-//    R=11  K=4  (3,2)(3,3)(6,3)(6,5)    p_hit_sum=122%  sep̄=0.32  gain̄=0.026
-//    R=12  K=4  (3,2)(3,3)(6,3)(6,5)    p_hit_sum=122%  sep̄=0.31  gain̄=0.026
-//    R=13  K=4  (3,2)(3,3)(7,3)(7,6)    p_hit_sum=108%  sep̄=0.43  gain̄=0.025
-//    R=14  K=4  (3,2)(3,3)(7,3)(7,6)    p_hit_sum=108%  sep̄=0.36  gain̄=0.018
-//    R=15  K=4  (3,2)(3,3)(8,3)(8,7)    p_hit_sum=97%   sep̄=0.33  gain̄=0.013
-//    R=16  K=4  (4,2)(4,4)(8,3)(8,7)    p_hit_sum=72%   sep̄=0.44  gain̄=0.010
-//  (p_hit_sum > 100% 表示存在链式触发：子球仍可经过深层分裂钉)
+//  V4 重设计（2026-04，考虑 split 开启 +60% 成本，目标每球期望命中 ≥ 85%）：
+//  设计原则：
+//    1. 每行 K=4 双层布局（浅锚 r=4 + 深层按行数缩放），保证触发密度
+//    2. 仅用 "偶数行 + 中心±1 列" 对称组合，该 2 钉列距=2 不相邻（避免相邻钉的乒乓反弹）
+//    3. 浅层 r=4 提供即时分裂刺激；深层位置随 R 上移至 R/2 附近，让子球仍有足够下落空间
+//    4. P_hit 为单钉命中概率，sum 表示每球期望命中的分裂钉次数（含链式）
+//
+//  推导结果（Monte Carlo 200k 样本/行数）：
+//    R=8   K=4  (4,2)(4,4)(6,3)(6,5)    p_hit_sum=96.8%
+//    R=9   K=4  (4,2)(4,4)(6,3)(6,5)    p_hit_sum=96.8%
+//    R=10  K=4  (4,2)(4,4)(8,4)(8,6)    p_hit_sum=93.8%
+//    R=11  K=4  (4,2)(4,4)(8,4)(8,6)    p_hit_sum=93.8%
+//    R=12  K=4  (4,2)(4,4)(8,4)(8,6)    p_hit_sum=93.8%
+//    R=13  K=4  (4,2)(4,4)(10,5)(10,7)  p_hit_sum=91.1%
+//    R=14  K=4  (4,2)(4,4)(10,5)(10,7)  p_hit_sum=91.1%
+//    R=15  K=4  (4,2)(4,4)(12,6)(12,8)  p_hit_sum=88.7%
+//    R=16  K=4  (4,2)(4,4)(14,7)(14,9)  p_hit_sum=86.5%
+//  相较 V3：R=9 从 31% → 96.8% 彻底解决高行数无分裂问题；R=10-12 从 122% 收敛到 94%
+//  与 60% 成本加成更匹配（玩家花钱即有高概率体验分裂效果）。
 // ═══════════════════════════════════════════════════════════════════════════
 const SPLIT_PRESETS = {
-  8:  [[4,2],[4,4]],
-  9:  [[5,2],[5,5]],
-  10: [[3,2],[3,3],[6,3],[6,5]],
-  11: [[3,2],[3,3],[6,3],[6,5]],
-  12: [[3,2],[3,3],[6,3],[6,5]],
-  13: [[3,2],[3,3],[7,3],[7,6]],
-  14: [[3,2],[3,3],[7,3],[7,6]],
-  15: [[3,2],[3,3],[8,3],[8,7]],
-  16: [[4,2],[4,4],[8,3],[8,7]],
+  8:  [[4,2],[4,4],[6,3],[6,5]],
+  9:  [[4,2],[4,4],[6,3],[6,5]],
+  10: [[4,2],[4,4],[8,4],[8,6]],
+  11: [[4,2],[4,4],[8,4],[8,6]],
+  12: [[4,2],[4,4],[8,4],[8,6]],
+  13: [[4,2],[4,4],[10,5],[10,7]],
+  14: [[4,2],[4,4],[10,5],[10,7]],
+  15: [[4,2],[4,4],[12,6],[12,8]],
+  16: [[4,2],[4,4],[14,7],[14,9]],
 };
 
 function getSplits() {
@@ -2323,9 +2472,13 @@ function drawBoard(glows = {}) {
         // 呼吸脉冲：0~1 正弦，每颗钉相位略有偏移增加层次感
         const phase   = (row * 7 + col * 3) * 0.8;
         const pulse   = 0.5 + 0.5 * Math.sin(Date.now() / 700 + phase);
-        const outerR  = pegR * (1.9 + pulse * 0.5);   // 9.5~12px 呼吸
+        // 星芒外尖必须 ≤ 碰撞圆边界（pegR × 2.1，见 updateBall line 3457），
+        // 否则脉动峰值时球视觉擦过星尖却未入碰撞圆 → 用户看到"碰到但不分裂"（13 行等密集布局尤其明显）。
+        // 视觉 peak = pegR × 2.1 = 碰撞 ball-edge 位置，做到"看到即触发"。
+        const outerR  = pegR * (1.75 + pulse * 0.35); // 1.75~2.1：峰值与碰撞圆对齐
         const innerR  = pegR * 0.72;
-        const glowR   = outerR + 5 + pulse * 5;
+        // glowR 仅在星尖外极薄一层（0.3~0.5px），继续保留呼吸光晕但不越界
+        const glowR   = outerR + 0.3 + pulse * 0.2;
 
         // Outer breathing glow（金色）
         const ga = ctx.createRadialGradient(x, y, 0, x, y, glowR);
@@ -2434,9 +2587,9 @@ function drawBoard(glows = {}) {
     const hi = !!(window.buyFeatures && window.buyFeatures.hiMult);
     balls.forEach(b => b.color = 'normal');
     if (hi) {
-      // 2 红 + 1 金 + 7 白（总 10 颗）
-      if (balls[0]) balls[0].color = 'red';
-      if (balls[1]) balls[1].color = 'red';
+      // 2 蓝 + 1 金 + 7 白（总 10 颗）
+      if (balls[0]) balls[0].color = 'blue';
+      if (balls[1]) balls[1].color = 'blue';
       if (balls[2]) balls[2].color = 'gold';
       // 打开瞬间：给所有球一次强冲量，立刻形成翻滚态
       for (const b of balls) {
@@ -2457,14 +2610,14 @@ function drawBoard(glows = {}) {
     dx.rotate(b.rot);
     drawSoccerGlyph(dx, 0, 0, b.r);
     // 高倍率色叠加
-    if (b.color === 'red' || b.color === 'gold') {
+    if (b.color === 'blue' || b.color === 'gold') {
       dx.save();
       dx.globalCompositeOperation = 'multiply';
-      dx.fillStyle = b.color === 'red' ? 'rgba(230,60,60,0.85)' : 'rgba(255,200,40,0.9)';
+      dx.fillStyle = b.color === 'blue' ? 'rgba(60,130,240,0.85)' : 'rgba(255,200,40,0.9)';
       dx.beginPath(); dx.arc(0, 0, b.r, 0, Math.PI * 2); dx.fill();
       dx.restore();
       // 轻微发光描边
-      dx.strokeStyle = b.color === 'red' ? 'rgba(255,130,130,0.8)' : 'rgba(255,235,120,0.9)';
+      dx.strokeStyle = b.color === 'blue' ? 'rgba(140,200,255,0.85)' : 'rgba(255,235,120,0.9)';
       dx.lineWidth = 0.8;
       dx.beginPath(); dx.arc(0, 0, b.r + 0.3, 0, Math.PI * 2); dx.stroke();
     }
@@ -3058,6 +3211,12 @@ let pendingSettles = 0;
 let pendingWin     = 0;
 let _gameCtrl      = null;  // AbortController，控制当前 initGame 实例的事件监听
 
+// ── 投注记录 ──
+// 每次 launchBall 产生一条记录；记录绑定在 ball.recordIdx 上，分裂子球继承 recordIdx，
+// 落槽结算时累加到对应记录的 totalWon。
+const betHistory = [];        // { time, bet, totalCost, free, totalWon }
+const BET_HISTORY_MAX = 100;  // 最多保留 100 条，滚动淘汰
+
 function onRowsChanged() {
   // 中断当前游戏实例（清理监听器 + 呼吸动画）
   if (_gameCtrl) _gameCtrl.abort();
@@ -3104,7 +3263,9 @@ function initGame() {
   const cx         = W / 2;
   const d          = (W - 2 * PAD_SIDE) / (ROWS + 1); // 底行外沿贴安全边缘，行少钉大
   const rowH       = d * Math.sqrt(3) / 2;
-  const H          = padT + ROW_H16 * ROWS_MAX + padB; // 固定高度
+  // ⚠ 必须与 drawBoard（line 2103）完全一致，否则物理钉中心 ≠ 视觉钉中心，
+  //   导致球穿过视觉钉后才触发碰撞位移。
+  const H          = padT + ROW_H16 * ROWS_MAX + padB - 14;
   const pegR       = Math.min(rowH, d) * 0.17;
   const ballR      = Math.max(4, Math.min(9, pegR * 1.75));
   const splits = getSplits();
@@ -3131,7 +3292,7 @@ function initGame() {
 
   // 余额格式化
   function fmtBalance(v) {
-    return '$' + v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
   balEl.textContent = fmtBalance(balance);
 
@@ -3171,18 +3332,18 @@ function initGame() {
     ctx.shadowBlur = 0;
     ctx.globalAlpha = alpha;
     drawSoccerBall(ctx, x, y, ballR, rot);
-    // 高倍率球：红/金色叠加（multiply 保留球面明暗纹理）
-    if (color === 'red' || color === 'gold') {
+    // 高倍率球：蓝/金色叠加（multiply 保留球面明暗纹理）
+    if (color === 'blue' || color === 'gold') {
       ctx.save();
       ctx.globalCompositeOperation = 'multiply';
-      ctx.fillStyle = color === 'red' ? 'rgba(230,60,60,0.85)' : 'rgba(255,200,40,0.9)';
+      ctx.fillStyle = color === 'blue' ? 'rgba(60,130,240,0.85)' : 'rgba(255,200,40,0.9)';
       ctx.beginPath(); ctx.arc(x, y, ballR, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
       // 发光描边
       ctx.save();
-      ctx.strokeStyle = color === 'red' ? 'rgba(255,120,120,0.8)' : 'rgba(255,235,120,0.9)';
+      ctx.strokeStyle = color === 'blue' ? 'rgba(140,200,255,0.85)' : 'rgba(255,235,120,0.9)';
       ctx.lineWidth = 1.5;
-      ctx.shadowColor = color === 'red' ? 'rgba(255,80,80,0.9)' : 'rgba(255,200,40,0.95)';
+      ctx.shadowColor = color === 'blue' ? 'rgba(80,160,255,0.95)' : 'rgba(255,200,40,0.95)';
       ctx.shadowBlur = 8;
       ctx.beginPath(); ctx.arc(x, y, ballR + 0.5, 0, Math.PI * 2); ctx.stroke();
       ctx.restore();
@@ -3268,25 +3429,6 @@ function initGame() {
     drawBall(ball.x, ball.y, 1, ball.depth || 0, ball.rot || 0, ball.color || 'normal');
   }
 
-  // ── 线段 (x1,y1)→(x2,y2) 是否与圆心 (cxC,cyC) 半径 r 的圆相交 ──
-  // 用于 swept collision：捕获高速球"擦过"分裂钉检测圆的情况
-  function segHitsCircle(x1, y1, x2, y2, cxC, cyC, r) {
-    const fx = x1 - cxC, fy = y1 - cyC;
-    if (fx * fx + fy * fy <= r * r) return true;  // 起点已在圆内
-    const dx = x2 - x1, dy = y2 - y1;
-    const a = dx * dx + dy * dy;
-    if (a === 0) return false;
-    const b = 2 * (fx * dx + fy * dy);
-    const c = fx * fx + fy * fy - r * r;
-    const disc = b * b - 4 * a * c;
-    if (disc < 0) return false;
-    const sq = Math.sqrt(disc);
-    const t1 = (-b - sq) / (2 * a);
-    const t2 = (-b + sq) / (2 * a);
-    // 任一交点在 [0,1] 内即线段穿越圆
-    return (t1 >= 0 && t1 <= 1) || (t2 >= 0 && t2 <= 1);
-  }
-
   // ── 物理更新 ──
   function updateBall(ball, dt = 1) {
     // 重力（按 dt 缩放）
@@ -3294,10 +3436,6 @@ function initGame() {
     if (ball.vy > 1.8) ball.vy = 1.8;
 
     ball.vx *= 0.98;
-
-    // 记录移动前位置，用于 swept 检测分裂钉
-    const prevX = ball.x;
-    const prevY = ball.y;
 
     ball.x += ball.vx;
     ball.y += ball.vy;
@@ -3321,25 +3459,23 @@ function initGame() {
     }
 
     if (!ball.cooldown) ball.cooldown = {};
-    let hitResult = null;
     const minDist = ballR + pegR;
+    // 分裂钉碰撞半径：pegR × 2.1（贴合星芒外尖 outerR）
+    // 不能更大：相邻普通钉中心距 d ≈ 32px，若 minDistSplit + minDist > d 则碰撞圆重叠，
+    // 球进入重叠区会被两颗钉 push-out 互相挤回，陷入速度被反复覆盖的卡住循环。
+    // 为让视觉与物理一致，已同步收紧 drawBoard 里的 glowR 光环外沿（见 line 2469）。
+    const pegR_split  = pegR * 2.1;
+    const minDistSplit = ballR + pegR_split;
+    // 预计算分裂钉 key 集合，碰撞循环里 O(1) 判定
+    const splitKeys = new Set(splits.map(([r, c]) => r * 20 + c));
 
-    // ── 分裂钉 swept 检测：捕获球在一帧内"穿过"或"擦过"分裂钉检测圆的所有情况 ──
-    // 视觉 glowR_max ≈ pegR*2.4 + 10；取 splitR = ballR + pegR*4 ≈ 21.6px（略大于视觉）
-    const splitR = ballR + pegR * 4;
-    for (const [sr, sc] of splits) {
-      const spk = sr * 20 + sc;
-      if (ball.usedSplits?.[spk]) continue;
-      const spx = pegX(sr, sc), spy = pegY(sr);
-      // swept: 检测 (prevX,prevY) → (ball.x,ball.y) 线段是否与 splitR 圆相交
-      if (segHitsCircle(prevX, prevY, ball.x, ball.y, spx, spy, splitR)) {
-        if (!ball.usedSplits) ball.usedSplits = {};
-        ball.usedSplits[spk] = true;
-        hitResult = { pegKey: spk, isSplit: true };
-        pegGlows[spk] = 1;
-        break;
-      }
-    }
+    // ── 碰撞 + 分裂检测合并为同一遍循环 ──
+    // 设计：分裂必须发生在"球真正进入钉碰撞圆"之内（距离 < minDistSplit）。
+    //   这样可以保证：碰撞响应（line ↓ side*0.45~1.0 的侧向 vx）先于分裂 spawn 执行，
+    //   父球水平速度一定充分 → 子球反向 vx 一定可见 → 视觉"分裂"成立。
+    //   最大球速 ≈ 2 px/frame ≪ minDistSplit ≈ 20 px，不存在穿隧风险。
+    let splitHit  = null;  // 分裂钉命中（优先级最高）
+    let normalHit = null;  // 普通钉命中
 
     for (let row = 0; row < ROWS; row++) {
       const numPegs = row + 3;   // 第一行固定 3 钉，底行 = 槽数+1
@@ -3351,18 +3487,21 @@ function initGame() {
         const dy = ball.y - py;
         const distSq = dx * dx + dy * dy;
 
-        if (distSq >= minDist * minDist) continue; // 不在碰撞范围，跳过
+        // 分裂钉视觉外沿 ≈ pegR × 2.1，碰撞半径随之放大，避免"球盖住星芒才反弹"
+        const isSplitPeg  = splitKeys.has(pegKey);
+        const useMinDist  = isSplitPeg ? minDistSplit : minDist;
+        if (distSq >= useMinDist * useMinDist) continue; // 不在碰撞范围，跳过
 
         const dist = Math.sqrt(distSq);
         const nx = dx / dist;
         const ny = dy / dist;
 
         // ── 始终推出，确保无视觉重叠 ──
-        ball.x = px + nx * (minDist + 2);
-        ball.y = py + ny * (minDist + 2);
+        ball.x = px + nx * (useMinDist + 2);
+        ball.y = py + ny * (useMinDist + 2);
 
         if (ball.cooldown[pegKey] > 0) {
-          // 冷却中：仅推出，不改速度
+          // 冷却中：仅推出，不改速度，不计为命中（避免重复触发分裂/音效）
           ball.cooldown[pegKey]--;
           continue;
         }
@@ -3382,12 +3521,16 @@ function initGame() {
         ball.vrot = vT / ballR * 0.85 + (Math.random() - 0.5) * 0.08;
 
         pegGlows[pegKey] = 1;
-        if (!hitResult) {
-          hitResult = { pegKey, isSplit: false };
+
+        // 命中分类：分裂钉（未用过）优先；否则记为普通命中
+        if (isSplitPeg && !ball.usedSplits?.[pegKey]) {
+          if (!splitHit) splitHit = { pegKey, isSplit: true };
+        } else if (!normalHit) {
+          normalHit = { pegKey, isSplit: false };
         }
       }
     }
-    return hitResult;
+    return splitHit || normalHit;
   }
 
   // ── 检测落槽 ──
@@ -3404,7 +3547,7 @@ function initGame() {
   }
 
   // ── 结算 ──
-  function settle(slotIdx, weight = 1) {
+  function settle(slotIdx, weight = 1, recordIdx = null) {
     const cfg  = slotConfigs[modeIdx];
     const val  = cfg[slotIdx];
     const multiplier = val;
@@ -3414,6 +3557,13 @@ function initGame() {
     const bet    = betValues[betIdx];
     const won    = parseFloat((bet * weight * multiplier).toFixed(2));
     pendingWin   = parseFloat((pendingWin + won).toFixed(2));
+
+    // 累计到投注记录
+    if (typeof recordIdx === 'number' && betHistory[recordIdx]) {
+      betHistory[recordIdx].totalWon = parseFloat(
+        (betHistory[recordIdx].totalWon + won).toFixed(2)
+      );
+    }
 
     // 得分音效
     if (window._onWin) window._onWin(multiplier);
@@ -3431,7 +3581,7 @@ function initGame() {
 
       const el = document.createElement('div');
       el.className = 'float-win' + (multiplier >= 100 ? ' mega' : multiplier >= 25 ? ' jackpot' : '');
-      el.textContent = '+$' + won.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      el.textContent = '+' + won.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
       // 槽居中，CSS 像素下按当前行数 d 缩放（canvasRect.width == W，scale 恒为 1）
       const d_css       = d;           // d 已用实际 W 计算，无需再乘 scale
@@ -3531,7 +3681,7 @@ function initGame() {
         const wrap = document.querySelector('.balance-wrap');
         const el = document.createElement('div');
         el.className = 'bal-float';
-        el.textContent = '+$' + totalWon.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        el.textContent = '+' + totalWon.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         wrap.appendChild(el);
         setTimeout(() => el.remove(), 2200);
       }, 500);
@@ -3619,6 +3769,9 @@ function initGame() {
           (ball.splitFrom == null || ball.splitFrom !== hit.pegKey) &&
           balls.length < 8;
         if (canSplitNow) {
+          // 分裂成功后再标记 usedSplits，避免"误耗"分裂机会
+          if (!ball.usedSplits) ball.usedSplits = {};
+          ball.usedSplits[hit.pegKey] = true;
           ball.splitFrom = hit.pegKey;
           const splitW = (ball.weight ?? 1) * 0.55;
           ball.weight = splitW;
@@ -3642,11 +3795,14 @@ function initGame() {
             extraMult: ball.extraMult || 1,
             // 分裂子球不算主体球，不占自动投注额度
             primary:   false,
+            // 继承父球的投注记录索引，使其赢利计入同一条记录
+            recordIdx: ball.recordIdx,
           });
           // 分裂特效：粒子 + 飘字 + 音效
           if (window._onSplit) window._onSplit(ball.x, ball.y);
-        } else if (hit && !hit.isSplit) {
-          // 普通碰钉音效
+        } else if (!hit.isSplit) {
+          // 仅普通碰钉走普通音效。分裂钉但 canSplitNow 失败（如 balls.length 达上限）
+          // 时视觉有 pegGlows 高亮反馈，不额外播普通音效避免语义混淆。
           if (window._onHit) window._onHit();
         }
       }
@@ -3661,7 +3817,7 @@ function initGame() {
         const wasPrimary = ball.primary === true;
         balls.splice(i, 1);
         pendingSettles++;
-        settle(idx, w);
+        settle(idx, w, ball.recordIdx);
         // 自动投注倒计时：每有一颗主体球落地，显示数字 -1（∞ 除外）
         if (autoMode && wasPrimary && autoTotalAtStart !== Infinity) {
           autoLanded++;
@@ -3704,8 +3860,26 @@ function initGame() {
     if (window.buyFeatures && window.buyFeatures.hiMult && !free) {
       const r = Math.random();
       if (r < 0.08)       { ballColor = 'gold'; extraMult = 4; }
-      else if (r < 0.25)  { ballColor = 'red';  extraMult = 2; }
+      else if (r < 0.25)  { ballColor = 'blue'; extraMult = 2; }
     }
+
+    // ── 创建投注记录（每次发球一条，免费球总投注=0）──
+    betHistory.push({
+      time:      Date.now(),
+      bet:       bet,                    // 基础投注额快照
+      totalCost: free ? 0 : totalCost,   // 免费球展示 0
+      free:      free,
+      totalWon:  0,                      // 本轮所有球累加的赢利金额
+    });
+    // 超出上限则淘汰最早的，现役球引用的 recordIdx 一并前移校正
+    if (betHistory.length > BET_HISTORY_MAX) {
+      const overflow = betHistory.length - BET_HISTORY_MAX;
+      betHistory.splice(0, overflow);
+      for (const b of balls) {
+        if (typeof b.recordIdx === 'number') b.recordIdx -= overflow;
+      }
+    }
+    const myRecordIdx = betHistory.length - 1;   // 刚 push 的这条
 
     balls.push({
       x:  cx + (Math.random() - 0.5) * 10,
@@ -3723,6 +3897,8 @@ function initGame() {
       extraMult: extraMult,
       // 主体球：付费发出的常规球；免费球（respin 返还）不占自动投注额度
       primary:   !free,
+      // 绑定投注记录索引（分裂子球继承同一 recordIdx，共同计入总赢利）
+      recordIdx: myRecordIdx,
     });
 
     if (!rafId || balls.length === 1) {
@@ -4018,6 +4194,83 @@ buyBtnPanel?.addEventListener('click', openBuyModal);
 buyModalClose?.addEventListener('click', closeBuyModal);
 // 复用设置抽屉的遮罩 click（下方已有 drawerBackdrop click 关抽屉，这里补上关弹窗）
 drawerBackdrop.addEventListener('click', closeBuyModal);
+
+// ── 投注记录 ──
+const historyModal      = document.getElementById('historyModal');
+const historyModalClose = document.getElementById('historyModalClose');
+const drawerHistory     = document.getElementById('drawerHistory');
+const historyList       = document.getElementById('historyList');
+
+function formatHistoryTime(ts) {
+  const d = new Date(ts);
+  const pad = n => String(n).padStart(2, '0');
+  return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+}
+
+function renderHistoryList() {
+  if (!historyList) return;
+  // 清空除表头以外的内容
+  const head = historyList.querySelector('.history-head');
+  historyList.innerHTML = '';
+  if (head) historyList.appendChild(head);
+
+  if (betHistory.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'history-empty';
+    empty.textContent = '暂无投注记录';
+    historyList.appendChild(empty);
+    return;
+  }
+
+  const fmtMoney = v => Number(v).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const frag = document.createDocumentFragment();
+  // 最新在上
+  for (let i = betHistory.length - 1; i >= 0; i--) {
+    const rec = betHistory[i];
+    // 倍率 = 总赢利 / 本金投注（bet），免费球也按 bet 计算倍率（体现分裂收益）
+    const baseBet = rec.bet > 0 ? rec.bet : 1;
+    const mult = rec.totalWon / baseBet;
+    // 盈亏 = 总赢利 − 总成本
+    const profit = parseFloat((rec.totalWon - rec.totalCost).toFixed(2));
+    let cls = 'even', sign = '';
+    if (profit > 0.001)       { cls = 'win';  sign = '+'; }
+    else if (profit < -0.001) { cls = 'loss'; sign = '−'; }
+    const profitAbs = Math.abs(profit).toFixed(2);
+
+    const betCell = rec.free
+      ? '<span class="hi-free">免费</span>'
+      : fmtMoney(rec.totalCost);
+
+    const item = document.createElement('div');
+    item.className = 'history-row history-item';
+    item.innerHTML =
+      `<div class="hi-time">${formatHistoryTime(rec.time)}</div>` +
+      `<div class="hi-bet">${betCell}</div>` +
+      `<div class="hi-mult">×${mult.toFixed(2)}</div>` +
+      `<div class="hi-profit ${cls}">${sign}${fmtMoney(profitAbs)}</div>`;
+    frag.appendChild(item);
+  }
+  historyList.appendChild(frag);
+}
+
+function openHistoryModal() {
+  renderHistoryList();
+  historyModal.classList.add('open');
+  drawerBackdrop.classList.add('show');
+}
+function closeHistoryModal() {
+  historyModal.classList.remove('open');
+  if (!settingsPanel.classList.contains('open')) {
+    drawerBackdrop.classList.remove('show');
+  }
+}
+
+drawerHistory?.addEventListener('click', () => {
+  closeDrawer();
+  openHistoryModal();
+});
+historyModalClose?.addEventListener('click', closeHistoryModal);
+drawerBackdrop.addEventListener('click', closeHistoryModal);
 
 function bindBuyToggle(el, key, sideEffect) {
   el.addEventListener('change', () => {

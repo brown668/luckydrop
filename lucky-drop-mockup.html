@@ -541,7 +541,8 @@ body {
 
 /* 槽位容器：上下两部分——蓝色灯条 + 白色数字 */
 .slot {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;           /* 防止 "2.5K×" 等长文字撑宽槽位，保持等宽布局 */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2136,7 +2137,8 @@ const BALL_SPRITE = {
 };
 (function prepareBallSprite() {
   const raw = new Image();
-  raw.crossOrigin = 'anonymous';
+  // 不设 crossOrigin：BALL_SPRITE 的 offscreen canvas 只做 drawImage，
+  // 不需要读取像素，设了反而会让 file:// 协议下加载失败。
   raw.onload = () => {
     // 原图 728×542，足球大致居中；取方形裁切区域 → 圆形裁切 → 透明
     const iw = raw.naturalWidth;
@@ -2953,33 +2955,33 @@ function paintStartBtnBall() {
 // 格式：每行按 [边缘→中心] 列出 ceil((rows+1)/2) 个唯一倍率值
 // 校准器对整体等比缩放，使期望 RTP ≈ 97.5%（Stake 约 99%，差异约 1.5%）
 const SLOT_REF = {
-  8:  [ [5.6, 2.1, 1.1, 1.0, 0.5],                        // 佛系
-        [13,  3,   1.3, 0.7, 0.4],                        // 刺激
-        [29,  4,   2.0, 0.2, 0.2] ],                      // 疯狂
-  9:  [ [5.6, 2.0, 1.6, 1.0, 0.7],
-        [18,  4,   1.7, 0.9, 0.5],
-        [43,  7,   2.0, 0.6, 0.2] ],
-  10: [ [8.9, 3.0, 1.4, 1.1, 1.0, 0.5],
-        [22,  5,   2.0, 1.4, 0.6, 0.4],
-        [76,  10,  3.0, 0.9, 0.3, 0.2] ],
-  11: [ [8.9, 3.0, 1.4, 1.1, 1.0, 0.5],
-        [24,  6,   3.0, 1.8, 0.7, 0.5],
-        [120, 14,  5.2, 1.4, 0.4, 0.2] ],
-  12: [ [10,  3.0, 1.6, 1.4, 1.1, 1.0, 0.5],
-        [33,  11,  4.0, 2.0, 1.1, 0.6, 0.3],
-        [170, 24,  8.1, 2.0, 0.7, 0.2, 0.2] ],
-  13: [ [13,  4.0, 2.0, 1.5, 1.2, 1.0, 0.5],
-        [43,  13,  6.0, 3.0, 1.3, 0.7, 0.4],
-        [260, 37,  11,  4.0, 1.0, 0.2, 0.2] ],
-  14: [ [18,  4.0, 2.0, 1.4, 1.1, 1.0, 0.5, 0.3],
-        [58,  15,  7.0, 3.0, 1.5, 0.7, 0.3, 0.2],
-        [420, 56,  18,  5.0, 1.9, 0.3, 0.2, 0.2] ],
-  15: [ [18,  4.0, 2.0, 1.4, 1.1, 1.0, 0.5, 0.3],
-        [58,  15,  7.0, 3.0, 1.5, 0.5, 0.3, 0.2],
-        [620, 83,  27,  8.0, 3.0, 0.5, 0.2, 0.2] ],
-  16: [ [16,  9.0, 2.0, 1.4, 1.4, 1.2, 1.1, 1.0, 0.5],
-        [58,  32,  14,  5.1, 1.9, 0.7, 0.2, 0.2, 0.2],
-        [1000,130, 26,  9.0, 4.0, 2.0, 0.2, 0.2, 0.2] ],
+  8:  [ [4,    2,    1.1,  0.9,  0.5],                    // 佛系
+        [15,   3,    1.4,  0.6,  0.2],                    // 激进
+        [30,   4,    1.1,  0.4,  0.1] ],                  // 疯狂
+  9:  [ [5,    2.6,  1.6,  1.2,  0.5],
+        [20,   5,    2,    0.9,  0.3],
+        [46,   8,    2.4,  0.4,  0.1] ],
+  10: [ [7,    3,    1.9,  1.1,  0.7,  0.5],
+        [30,   6,    2.5,  1,    0.5,  0.3],
+        [80,   6,    2.4,  1,    0.4,  0.1] ],
+  11: [ [9,    4,    2,    1.6,  0.9,  0.5],
+        [50,   9,    4,    1.5,  0.6,  0.3],
+        [110,  15,   4,    1.7,  0.4,  0.1] ],
+  12: [ [12,   5,    2.4,  1.5,  1,    0.7,  0.5],
+        [75,   12,   3.5,  1.5,  0.9,  0.6,  0.3],
+        [160,  16,   5.1,  1.8,  0.8,  0.4,  0.1] ],
+  13: [ [15,   6,    2.4,  1.8,  1.2,  0.9,  0.5],
+        [90,   25,   6,    2.5,  1.1,  0.6,  0.3],
+        [300,  43,   8,    2.5,  1.1,  0.4,  0.1] ],
+  14: [ [18,   7,    5,    2.6,  1.5,  1,    0.7,  0.5],
+        [120,  30,   6,    3,    1.5,  1,    0.6,  0.3],
+        [500,  64,   15,   4,    1.5,  0.6,  0.3,  0.1] ],
+  15: [ [20,   8,    4,    2,    1.5,  1.2,  1,    0.5],
+        [150,  32,   9,    4,    2.5,  1.2,  0.6,  0.3],
+        [1000, 75,   24,   6,    2.5,  0.8,  0.3,  0.1] ],
+  16: [ [25,   10,   5,    2.5,  1.5,  1.2,  1,    0.7,  0.5],
+        [250,  40,   8,    3,    2,    1.5,  1,    0.5,  0.3],
+        [2500, 200,  24,   5,    2.1,  1.2,  0.6,  0.3,  0.1] ],
 };
 
 // 根据行数生成基础倍率配置（对称展开）
@@ -3034,18 +3036,23 @@ function rollRespinSlots() {
   preset.forEach(pos1 => respinSlots.add(pos1 - 1));
 }
 
-// 根据槽宽计算倍率文字字号（窄行数时自动缩小，避免溢出）
-function calcSlotFsize(slotW) {
-  // 倍率文字占据槽宽，最长 "0.3×"/"130×" 约 4 字符
-  return {
-    fsize: Math.max(8, Math.min(12, Math.floor(slotW / 2.6))) + 'px',
-  };
-}
-
 function slotDisp(val) {
   return val >= 1000 ? (Math.round(val / 100) / 10 + 'K')
        : val >= 10   ? Math.round(val)
        : +val.toFixed(1);
+}
+
+// 根据槽宽 + 本行最长倍率字符数计算字号
+// 字号必须同时满足：① 不超过 12px（视觉上限）② 最长字符串能装进槽宽
+// Chakra Petch 数字每字符宽 ≈ 0.55 × fontSize；再留 10% 余量 → 0.6
+function calcSlotFsize(slotW, cfg) {
+  const maxLen = cfg && cfg.length
+    ? Math.max(...cfg.map(v => (slotDisp(v) + '×').length))
+    : 4;
+  const fitByWidth = Math.floor(slotW / (maxLen * 0.6));
+  return {
+    fsize: Math.max(7, Math.min(12, fitByWidth)) + 'px',
+  };
 }
 
 function rebuildSlotDom() {
@@ -3054,7 +3061,7 @@ function rebuildSlotDom() {
   const cfg    = slotConfigs[modeIdx] || [];
   const slotW  = (container.offsetWidth - 2 * PAD_SIDE) / slots;
   container.style.padding = `8px ${PAD_SIDE}px 10px`;
-  const { fsize } = calcSlotFsize(slotW);
+  const { fsize } = calcSlotFsize(slotW, cfg);
 
   rollRespinSlots();
 
@@ -3074,7 +3081,7 @@ function updateSlots(idx) {
   const cfg    = slotConfigs[idx] || [];
   const container = document.querySelector('.slots');
   const slotW  = (container.offsetWidth - 2 * PAD_SIDE) / (selectedRows + 1);
-  const { fsize } = calcSlotFsize(slotW);
+  const { fsize } = calcSlotFsize(slotW, cfg);
 
   slotEls.forEach((slot, i) => {
     const val = cfg[i];
@@ -3199,6 +3206,17 @@ let autoMode       = false;
 let autoRemaining  = 0;         // AUTO 连发剩余次数（待发射）
 let autoTotalAtStart = 0;       // 自动开始时的目标总数（Infinity 为 ∞）
 let autoLanded     = 0;         // 已落入的主体球数，用于显示倒计时
+let autoTimerId    = null;      // 独立发射定时器（300ms/球，不等上一球落槽）
+const AUTO_INTERVAL_MS = 700;   // auto 发球间隔
+const MANUAL_COOLDOWN_MS = 700; // 单发冷却（按钮置灰时间，不等球落槽）
+
+// 停止自动发射定时器（幂等）
+function stopAutoTimer() {
+  if (autoTimerId !== null) {
+    clearInterval(autoTimerId);
+    autoTimerId = null;
+  }
+}
 // 自动结束/停止时恢复 sel-auto 显示到用户选择的原始值
 function restoreAutoDisplay() {
   if (autoEl) autoEl.textContent = fmtAuto(autoValues[autoIdx]);
@@ -3226,6 +3244,7 @@ function onRowsChanged() {
   // 若在自动模式中切换行数（理论上控件被锁，但保险清理）
   autoMode = false;
   autoRemaining = 0;
+  stopAutoTimer();
   restoreAutoDisplay();
   const autoPanel = document.querySelector('.ctrl-auto');
   if (autoPanel) autoPanel.classList.remove('active');
@@ -3429,107 +3448,178 @@ function initGame() {
     drawBall(ball.x, ball.y, 1, ball.depth || 0, ball.rot || 0, ball.color || 'normal');
   }
 
-  // ── 物理更新 ──
+  // ── 物理更新：CCD（连续碰撞检测）+ Galton 50/50 瞄准 ──
+  // 主流 Plinko 物理：球精确停在接触钉子的瞬间，永不穿透、无视觉重叠。
+  //   ① 重力 + 空气阻尼 + 旋转积分
+  //   ② CCD：对所有未冷却钉子解二次方程 |P0 + V·t − C|² = R²，
+  //       求最小正根 t_hit ∈ [0, 1] → 球移到 P0 + V·t_hit（接触点）
+  //   ③ Galton 50/50：随机选边 → 解析 vx 精确瞄准下一行目标钉
+  //   ④ cooldown=18 步防止同一钉本次飞离前反复触发响应
+  //   ⑤ 边界墙（CCD 未撞钉才会走满整步，可能撞墙）
   function updateBall(ball, dt = 1) {
-    // 重力（按 dt 缩放）
+    // ── ① 重力 + 阻尼 + 旋转积分 ──
     ball.vy += 0.032;
     if (ball.vy > 1.8) ball.vy = 1.8;
-
     ball.vx *= 0.98;
 
-    ball.x += ball.vx;
-    ball.y += ball.vy;
-
-    // ── 旋转积分（空气极轻阻尼）──
     if (ball.rot  == null) ball.rot  = 0;
     if (ball.vrot == null) ball.vrot = 0;
     ball.rot  += ball.vrot * dt;
     ball.vrot *= 0.995;
 
-    // 边界反弹（反弹时注入自旋：ball 被墙弹回，摩擦产生相反方向旋转）
+    if (!ball.cooldown) ball.cooldown = {};
+    // 物理步开始：所有钉 cooldown 自减一次（字面含义：距上次响应过了 1 步）
+    for (const k in ball.cooldown) {
+      if (ball.cooldown[k] > 0) ball.cooldown[k]--;
+    }
+
+    const minDist      = ballR + pegR;
+    const minDistSplit = ballR + pegR * 2.1;
+    const splitKeys    = new Set(splits.map(([r, c]) => r * 20 + c));
+
+    // ── ② CCD：求球沿直线 P0 + V·t 最早撞到的钉子 ──
+    // 解 A·t² + B·t + C = 0  (A=|V|², B=2·V·(P0−C), C=|P0−C|²−R²)
+    // 有效范围：t ∈ [0, 1]，取最小正根
+    // 关键：**不跳过 cooldown 钉子**——CCD 必须始终保护物理体积，否则球会穿透。
+    //      cooldown 只改变"响应方式"（下面分叉处理），不改变"是否检测"。
+    const vx = ball.vx, vy = ball.vy;
+    const A  = vx * vx + vy * vy;
+
+    let bestT   = 2;            // 哨兵：> 1 表示本步无碰撞
+    let bestHit = null;         // { row, col, pegKey, px, py, isSplitPeg, useMinDist }
+
+    if (A > 1e-9) {
+      for (let row = 0; row < ROWS; row++) {
+        const numPegs = row + 3;
+        for (let col = 0; col < numPegs; col++) {
+          const pegKey = row * 20 + col;
+
+          const px = pegX(row, col);
+          const py = pegY(row);
+          const isSplitPeg = splitKeys.has(pegKey);
+          const useMinDist = isSplitPeg ? minDistSplit : minDist;
+
+          const dx0 = ball.x - px;
+          const dy0 = ball.y - py;
+          const C   = dx0 * dx0 + dy0 * dy0 - useMinDist * useMinDist;
+
+          let tHit;
+          if (C <= 0) {
+            // 球已嵌入钉子（浮点/分裂球兜底），立即触发 t=0
+            tHit = 0;
+          } else {
+            const B = 2 * (dx0 * vx + dy0 * vy);
+            if (B >= 0) continue;                        // 速度方向远离钉子
+            const disc = B * B - 4 * A * C;
+            if (disc < 0) continue;                      // 判别式 < 0，轨迹不相交
+            tHit = (-B - Math.sqrt(disc)) / (2 * A);
+            if (tHit < 0 || tHit > 1) continue;          // 本步时间外
+          }
+
+          if (tHit < bestT) {
+            bestT   = tHit;
+            bestHit = { row, col, pegKey, px, py, isSplitPeg, useMinDist };
+          }
+        }
+      }
+    }
+
+    let splitHit  = null;
+    let normalHit = null;
+
+    if (bestHit) {
+      // ── 有碰撞：球精确停在接触瞬间（CCD 保证无穿透）──
+      ball.x += vx * bestT;
+      ball.y += vy * bestT;
+
+      const { row, col, pegKey, px, py, isSplitPeg, useMinDist: useMinDistHit } = bestHit;
+
+      // 法向量（钉心→球心，即接触点方向的单位向量）
+      const dx   = ball.x - px;
+      const dy   = ball.y - py;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      const nx   = dx / dist;
+      const ny   = dy / dist;
+
+      const isCoolingDown = ball.cooldown[pegKey] > 0;
+
+      if (isCoolingDown) {
+        // ── cooldown 期间 re-contact：纯物理反射 ──
+        // 不重新触发 Galton、不刷新 cooldown、不触发 settle/split，仅保证球不穿透。
+        // 法线反弹 + 切线保留，整体衰减到 35%（视觉柔和，弹起幅度小于 1px）。
+        const vn = vx * nx + vy * ny;
+        if (vn < 0) {
+          ball.vx = (vx - 2 * vn * nx) * 0.35;
+          ball.vy = (vy - 2 * vn * ny) * 0.35;
+        }
+        // 推出钉子表面（+ 0.3 px 防浮点残留）
+        ball.x = px + nx * (useMinDistHit + 0.3);
+        ball.y = py + ny * (useMinDistHit + 0.3);
+        ball.prevX = ball.x;
+        ball.prevY = ball.y;
+        // 不设 splitHit / normalHit —— 不产生击中事件
+      } else {
+        // ── ③ 首次撞钉：Galton 50/50 响应（瞄准下一行目标钉）──
+        const chosenSide = Math.random() < 0.5 ? -1 : 1;       // 真 50/50 二分
+        const targetCol  = col + (chosenSide > 0 ? 1 : 0);
+        const vy0        = Math.max(Math.abs(ball.vy) * 0.65, 0.35) - 0.08;
+        const g          = 0.032;
+        const tFall      = (-vy0 + Math.sqrt(vy0 * vy0 + 2 * g * rowH)) / g;
+        const travelF    = (1 - Math.pow(0.98, tFall)) / 0.02;
+
+        if (row + 1 < ROWS) {
+          // vx = (下一行目标钉 x − 当前接触点 x) / 水平衰减因子
+          const targetX  = pegX(row + 1, targetCol);
+          const dxNeeded = targetX - ball.x;
+          ball.vx = (dxNeeded / travelF) * (0.94 + Math.random() * 0.12);
+        } else {
+          // 最后一行：无下一钉，常规横移 d/2 落槽
+          const vxBase = (d / 2) / travelF;
+          ball.vx = chosenSide * vxBase * (0.90 + Math.random() * 0.20);
+        }
+        ball.vy = vy0;
+        ball.cooldown[pegKey] = 18;
+
+        // 切向旋转：接触点切向速度 → ω = v_tangent / R
+        const tx = -ny, ty = nx;
+        const vT = ball.vx * tx + ball.vy * ty;
+        ball.vrot = vT / ballR * 0.85 + (Math.random() - 0.5) * 0.08;
+
+        pegGlows[pegKey] = 1;
+
+        // 推出钉子表面（+ 0.3 px 防浮点），之后 cooldown 内若再接触由上面物理反射兜底
+        ball.x = px + nx * (useMinDistHit + 0.3);
+        ball.y = py + ny * (useMinDistHit + 0.3);
+        ball.prevX = ball.x;
+        ball.prevY = ball.y;
+
+        // 命中分类
+        if (isSplitPeg && !ball.usedSplits?.[pegKey]) {
+          splitHit = { pegKey, isSplit: true };
+        } else {
+          normalHit = { pegKey, isSplit: false };
+        }
+      }
+    } else {
+      // ── 无碰撞：整步自由移动 ──
+      ball.x += vx;
+      ball.y += vy;
+    }
+
+    // ── ⑤ 边界墙（瞬移同步 prev）──
     if (ball.x < ballR) {
       ball.x = ballR;
       ball.vx = Math.abs(ball.vx) * 0.5;
       ball.vrot += ball.vy / ballR * 0.4;
+      ball.prevX = ball.x;
     }
     if (ball.x > W - ballR) {
       ball.x = W - ballR;
       ball.vx = -Math.abs(ball.vx) * 0.5;
       ball.vrot -= ball.vy / ballR * 0.4;
+      ball.prevX = ball.x;
     }
 
-    if (!ball.cooldown) ball.cooldown = {};
-    const minDist = ballR + pegR;
-    // 分裂钉碰撞半径：pegR × 2.1（贴合星芒外尖 outerR）
-    // 不能更大：相邻普通钉中心距 d ≈ 32px，若 minDistSplit + minDist > d 则碰撞圆重叠，
-    // 球进入重叠区会被两颗钉 push-out 互相挤回，陷入速度被反复覆盖的卡住循环。
-    // 为让视觉与物理一致，已同步收紧 drawBoard 里的 glowR 光环外沿（见 line 2469）。
-    const pegR_split  = pegR * 2.1;
-    const minDistSplit = ballR + pegR_split;
-    // 预计算分裂钉 key 集合，碰撞循环里 O(1) 判定
-    const splitKeys = new Set(splits.map(([r, c]) => r * 20 + c));
-
-    // ── 碰撞 + 分裂检测合并为同一遍循环 ──
-    // 设计：分裂必须发生在"球真正进入钉碰撞圆"之内（距离 < minDistSplit）。
-    //   这样可以保证：碰撞响应（line ↓ side*0.45~1.0 的侧向 vx）先于分裂 spawn 执行，
-    //   父球水平速度一定充分 → 子球反向 vx 一定可见 → 视觉"分裂"成立。
-    //   最大球速 ≈ 2 px/frame ≪ minDistSplit ≈ 20 px，不存在穿隧风险。
-    let splitHit  = null;  // 分裂钉命中（优先级最高）
-    let normalHit = null;  // 普通钉命中
-
-    for (let row = 0; row < ROWS; row++) {
-      const numPegs = row + 3;   // 第一行固定 3 钉，底行 = 槽数+1
-      for (let col = 0; col < numPegs; col++) {
-        const pegKey = row * 20 + col;
-        const px = pegX(row, col);
-        const py = pegY(row);
-        const dx = ball.x - px;
-        const dy = ball.y - py;
-        const distSq = dx * dx + dy * dy;
-
-        // 分裂钉视觉外沿 ≈ pegR × 2.1，碰撞半径随之放大，避免"球盖住星芒才反弹"
-        const isSplitPeg  = splitKeys.has(pegKey);
-        const useMinDist  = isSplitPeg ? minDistSplit : minDist;
-        if (distSq >= useMinDist * useMinDist) continue; // 不在碰撞范围，跳过
-
-        const dist = Math.sqrt(distSq);
-        const nx = dx / dist;
-        const ny = dy / dist;
-
-        // ── 始终推出，确保无视觉重叠 ──
-        ball.x = px + nx * (useMinDist + 2);
-        ball.y = py + ny * (useMinDist + 2);
-
-        if (ball.cooldown[pegKey] > 0) {
-          // 冷却中：仅推出，不改速度，不计为命中（避免重复触发分裂/音效）
-          ball.cooldown[pegKey]--;
-          continue;
-        }
-
-        // ── 碰撞响应：侧向偏转模型 ──
-        const side = dx >= 0 ? 1 : -1;
-        ball.vx = side * (0.45 + Math.random() * 0.55);
-        ball.vy = Math.max(Math.abs(ball.vy) * 0.65, 0.35) - 0.08;
-        ball.cooldown[pegKey] = 18;
-
-        // ── 碰撞驱动旋转：接触点切向速度 → 角速度（摩擦滚动模型）──
-        // 切向量 (tx, ty) = 法向量 (nx, ny) 顺时针旋 90°
-        const tx = -ny;
-        const ty = nx;
-        const vT = ball.vx * tx + ball.vy * ty;  // 切向线速度
-        // ω = v_tangent / R，0.85 为摩擦系数，带轻微随机抖动模拟滑移
-        ball.vrot = vT / ballR * 0.85 + (Math.random() - 0.5) * 0.08;
-
-        pegGlows[pegKey] = 1;
-
-        // 命中分类：分裂钉（未用过）优先；否则记为普通命中
-        if (isSplitPeg && !ball.usedSplits?.[pegKey]) {
-          if (!splitHit) splitHit = { pegKey, isSplit: true };
-        } else if (!normalHit) {
-          normalHit = { pegKey, isSplit: false };
-        }
-      }
-    }
     return splitHit || normalHit;
   }
 
@@ -3692,34 +3782,13 @@ function initGame() {
     drawBoard();
 
     if (autoMode && autoRemaining > 0) {
-      // 自动模式下保持控件锁定；按钮保持可点（用于点击停止）
+      // 自动模式：发球由独立 setInterval 驱动（见 start 按钮处理器）
+      // 此处只保持按钮可点击以便随时点击停止
       startBtn.disabled = false;
-      setTimeout(() => {
-        if (autoMode && autoRemaining > 0) {
-          const ok = launchBall();
-          if (ok) autoRemaining--;
-          else {
-            // 余额不足：退出自动
-            autoMode = false;
-            autoRemaining = 0;
-            autoPanel.classList.remove('active');
-            startBtn.classList.remove('stopping');
-            if (startLbl) startLbl.textContent = '开始';
-            restoreAutoDisplay();
-            lockControls(false);
-          }
-        } else if (autoMode) {
-          autoMode = false;
-          autoPanel.classList.remove('active');
-          startBtn.classList.remove('stopping');
-          if (startLbl) startLbl.textContent = '开始';
-          restoreAutoDisplay();
-          lockControls(false);
-        }
-      }, 600);
     } else if (autoMode) {
       // 余数归零，退出自动
       autoMode = false;
+      stopAutoTimer();
       autoPanel.classList.remove('active');
       startBtn.classList.remove('stopping');
       if (startLbl) startLbl.textContent = '开始';
@@ -3733,43 +3802,54 @@ function initGame() {
     }
   }
 
-  // ── 动画循环（多球）──
-  let lastFrameTime = 0;
-  function gameLoop(timestamp) {
-    if (balls.length === 0 && pendingSettles === 0) return;
-    const delta = lastFrameTime ? Math.min(timestamp - lastFrameTime, 50) : 16.67;
-    lastFrameTime = timestamp;
-    const dt = delta / 16.67;  // 连续缩放，避免整数步跳帧
+  // ── 动画循环：Fixed Timestep + Interpolation（Glenn Fiedler 2006 经典方案）──
+  // 问题：updateBall 内部按"每帧 1 步"硬编码（`vy += 0.032`、cooldown--），
+  //   不同刷新率屏幕（60Hz / 120Hz ProMotion / Chrome 降频 30Hz）下物理速度差异巨大。
+  // 方案：物理锁定 60Hz，渲染按显示刷新率（RAF），帧间用 alpha 线性插值。
+  //   → Chrome、Safari、Preview、60Hz、120Hz 下视觉完全一致，且任何刷新率都丝滑。
+  //
+  // 关键点：
+  //   1. 每个物理步开始前，保存 prev 位置/旋转（在 physicsStep 内）
+  //   2. 渲染时 alpha = accumulator/PHYS_DT，drawBall 用 lerp(prev, curr, alpha)
+  //   3. 尾迹 / 碰撞 / 落槽 全部基于物理位置（逻辑不变）
+  //   4. clamp frameDelta ≤ 250ms，防止切 tab 回来时 accumulator 炸锅
+  //   5. Page Visibility API：标签页隐藏时 accumulator 归零，避免累积补帧
+  const PHYS_DT_MS      = 16.67;   // 物理锁 60Hz（最经典电子游戏频率）
+  const MAX_FRAME_MS    = 250;     // 单帧最多累积 250ms 真实时间
+  const MAX_STEPS_FRAME = 5;       // 单帧最多跑 5 个物理步（防螺旋）
+  let   physLastTime    = 0;
+  let   physAccum       = 0;
 
-    // 衰减钉子发光
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  function physicsStep() {
+    // 衰减钉子发光（每物理步 0.08 → 60Hz 下 ~1.25s 归零，与旧版一致）
     Object.keys(pegGlows).forEach(k => {
       pegGlows[k] -= 0.08;
       if (pegGlows[k] <= 0) delete pegGlows[k];
     });
 
-    // 重绘静态层（含钉子发光）
-    drawBoard(pegGlows);
-
-    // 更新 + 绘制每颗球（物理步数按帧率校正，保持 60fps 等效速度）
     for (let i = balls.length - 1; i >= 0; i--) {
       const ball = balls[i];
 
-      // 记录尾迹
+      // ★ 保存前一物理步的位置（插值渲染关键）
+      ball.prevX   = ball.x;
+      ball.prevY   = ball.y;
+      ball.prevRot = ball.rot || 0;
+
+      // 记录尾迹（物理位置；插值只影响主球绘制，不影响尾迹轨迹）
       if (!ball.trail) ball.trail = [];
       ball.trail.push({ x: ball.x, y: ball.y });
       if (ball.trail.length > 7) ball.trail.shift();
 
-      // 物理更新（连续 delta-time，每帧1次，无跳帧）
-      let hit = null;
-      const h = updateBall(ball, dt);
-      if (h) hit = h;
+      // 物理更新（dt=1 保持原 updateBall 的"每帧 1 步"语义）
+      const hit = updateBall(ball, 1);
       if (hit) {
         pegGlows[hit.pegKey] = 1.0;
         const canSplitNow = hit.isSplit &&
           (ball.splitFrom == null || ball.splitFrom !== hit.pegKey) &&
           balls.length < 8;
         if (canSplitNow) {
-          // 分裂成功后再标记 usedSplits，避免"误耗"分裂机会
           if (!ball.usedSplits) ball.usedSplits = {};
           ball.usedSplits[hit.pegKey] = true;
           ball.splitFrom = hit.pegKey;
@@ -3779,6 +3859,9 @@ function initGame() {
           balls.push({
             x:  ball.x,
             y:  ball.y,
+            prevX: ball.x,
+            prevY: ball.y,
+            prevRot: ball.rot || 0,
             vx: -(ball.vx) + (Math.random() - 0.5) * 0.4,
             vy:  ball.vy  * 0.85,
             trail:    [],
@@ -3789,28 +3872,19 @@ function initGame() {
             depth:    ball.depth,
             rot:      ball.rot || 0,
             vrot:     -(ball.vrot || 0) * 0.7 + (Math.random() - 0.5) * 0.2,
-            // 继承父球已用的分裂钉记忆：避免子球反弹回同一分裂钉时重复触发
             usedSplits: { ...(ball.usedSplits || {}) },
             color:     ball.color || 'normal',
             extraMult: ball.extraMult || 1,
-            // 分裂子球不算主体球，不占自动投注额度
             primary:   false,
-            // 继承父球的投注记录索引，使其赢利计入同一条记录
             recordIdx: ball.recordIdx,
           });
-          // 分裂特效：粒子 + 飘字 + 音效
           if (window._onSplit) window._onSplit(ball.x, ball.y);
         } else if (!hit.isSplit) {
-          // 仅普通碰钉走普通音效。分裂钉但 canSplitNow 失败（如 balls.length 达上限）
-          // 时视觉有 pegGlows 高亮反馈，不额外播普通音效避免语义混淆。
           if (window._onHit) window._onHit();
         }
       }
 
-      // 绘制（含尾迹）
-      drawBallWithTrail(ball);
-
-      // 落槽检测
+      // 落槽检测（基于物理位置）
       const idx = checkLanded(ball);
       if (idx >= 0) {
         const w = (ball.weight ?? 1) * (ball.extraMult ?? 1);
@@ -3818,7 +3892,6 @@ function initGame() {
         balls.splice(i, 1);
         pendingSettles++;
         settle(idx, w, ball.recordIdx);
-        // 自动投注倒计时：每有一颗主体球落地，显示数字 -1（∞ 除外）
         if (autoMode && wasPrimary && autoTotalAtStart !== Infinity) {
           autoLanded++;
           const remain = Math.max(0, autoTotalAtStart - autoLanded);
@@ -3826,11 +3899,66 @@ function initGame() {
         }
       }
     }
+  }
+
+  // 渲染一帧：用插值后的位置绘制每颗球（alpha 0~1 = 物理步内的进度）
+  function renderFrame(alpha) {
+    drawBoard(pegGlows);
+    for (const ball of balls) {
+      const px = (ball.prevX !== undefined) ? ball.prevX : ball.x;
+      const py = (ball.prevY !== undefined) ? ball.prevY : ball.y;
+      const pr = (ball.prevRot !== undefined) ? ball.prevRot : (ball.rot || 0);
+      const rx = lerp(px, ball.x, alpha);
+      const ry = lerp(py, ball.y, alpha);
+      // rot 连续累加不会跨 2π 跳变，直接线性插值即可
+      const rr = lerp(pr, ball.rot || 0, alpha);
+      drawBall(rx, ry, 1, ball.depth || 0, rr, ball.color || 'normal');
+    }
+  }
+
+  function gameLoop(timestamp) {
+    if (balls.length === 0 && pendingSettles === 0) {
+      physLastTime = 0;
+      physAccum    = 0;
+      return;
+    }
+
+    // 计算本帧真实时间差（clamp 防后台切回炸锅）
+    let frameDelta = physLastTime ? (timestamp - physLastTime) : PHYS_DT_MS;
+    if (frameDelta > MAX_FRAME_MS) frameDelta = MAX_FRAME_MS;
+    physLastTime = timestamp;
+    physAccum   += frameDelta;
+
+    // 固定步长物理：每攒够 PHYS_DT_MS 跑一次，60Hz 精确
+    let steps = 0;
+    while (physAccum >= PHYS_DT_MS && steps < MAX_STEPS_FRAME) {
+      physAccum -= PHYS_DT_MS;
+      steps++;
+      physicsStep();
+      if (balls.length === 0) break;   // 全落槽，早退
+    }
+    // 卡顿后被 MAX_STEPS 截断：丢弃残余避免 spiral of death
+    if (physAccum > PHYS_DT_MS) physAccum = 0;
+
+    // 插值渲染：当前帧位置 = prev + (curr - prev) × alpha
+    const alpha = balls.length > 0 ? Math.min(1, physAccum / PHYS_DT_MS) : 0;
+    renderFrame(alpha);
 
     if (balls.length > 0 || pendingSettles > 0) {
       rafId = requestAnimationFrame(gameLoop);
+    } else {
+      physLastTime = 0;
+      physAccum    = 0;
     }
   }
+
+  // 切 tab 回来时重置计时，避免 frameDelta 巨大
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      physLastTime = 0;
+      physAccum    = 0;
+    }
+  });
 
   // ── 一次发球（单球）──
   function launchBall(opts = {}) {
@@ -3850,8 +3978,14 @@ function initGame() {
 
     balance = parseFloat((balance - totalCost).toFixed(2));
     balEl.textContent = fmtBalance(balance);
-    // 自动模式下按钮保持可点（用于"停止"）；单发模式才置灰
-    startBtn.disabled = !autoMode;
+    // 自动模式下按钮保持可点（用于"停止"）；单发模式置灰 MANUAL_COOLDOWN_MS 后自动解锁
+    if (!autoMode && !free) {
+      startBtn.disabled = true;
+      setTimeout(() => {
+        // 若期间进入 auto 模式或球未完成，按钮状态由对应路径管理，这里只处理单发冷却到期
+        if (!autoMode) startBtn.disabled = false;
+      }, MANUAL_COOLDOWN_MS);
+    }
     lockControls(true);
 
     // 高倍率球抽样：开启后按概率产出红/金球
@@ -3881,25 +4015,34 @@ function initGame() {
     }
     const myRecordIdx = betHistory.length - 1;   // 刚 push 的这条
 
-    balls.push({
-      x:  cx + (Math.random() - 0.5) * 10,
-      y:  padT - 16,
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: 1.6,
-      trail:    [],
-      cooldown: {},
-      isSplit:   false,
-      splitFrom: null,
-      weight:    1.0,
-      rot:       (Math.random() - 0.5) * Math.PI, // 出场随机姿态
-      vrot:      (Math.random() - 0.5) * 0.05,
-      color:     ballColor,
-      extraMult: extraMult,
-      // 主体球：付费发出的常规球；免费球（respin 返还）不占自动投注额度
-      primary:   !free,
-      // 绑定投注记录索引（分裂子球继承同一 recordIdx，共同计入总赢利）
-      recordIdx: myRecordIdx,
-    });
+    {
+      const initX = cx + (Math.random() - 0.5) * 10;
+      const initY = padT - 16;
+      const initRot = (Math.random() - 0.5) * Math.PI;
+      balls.push({
+        x:  initX,
+        y:  initY,
+        // 插值渲染用：上一个物理步的位置/旋转（初始等于当前，避免首帧闪现）
+        prevX: initX,
+        prevY: initY,
+        prevRot: initRot,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: 1.6,
+        trail:    [],
+        cooldown: {},
+        isSplit:   false,
+        splitFrom: null,
+        weight:    1.0,
+        rot:       initRot, // 出场随机姿态
+        vrot:      (Math.random() - 0.5) * 0.05,
+        color:     ballColor,
+        extraMult: extraMult,
+        // 主体球：付费发出的常规球；免费球（respin 返还）不占自动投注额度
+        primary:   !free,
+        // 绑定投注记录索引（分裂子球继承同一 recordIdx，共同计入总赢利）
+        recordIdx: myRecordIdx,
+      });
+    }
 
     if (!rafId || balls.length === 1) {
       rafId = requestAnimationFrame(gameLoop);
@@ -3915,6 +4058,7 @@ function initGame() {
       // 停止自动：立即结束（仍在飞的球会自然落下；afterSettle 会补全清理）
       autoMode = false;
       autoRemaining = 0;
+      stopAutoTimer();
       autoPanel.classList.remove('active');
       startBtn.classList.remove('stopping');
       if (startLbl) startLbl.textContent = '开始';
@@ -3944,6 +4088,27 @@ function initGame() {
       restoreAutoDisplay();
     } else if (autoMode) {
       autoRemaining--;
+      // 启动独立定时器：每 AUTO_INTERVAL_MS 发一球，不等上一球落槽
+      stopAutoTimer();
+      autoTimerId = setInterval(() => {
+        if (!autoMode || autoRemaining <= 0) {
+          stopAutoTimer();
+          return;
+        }
+        const fired = launchBall();
+        if (fired) {
+          autoRemaining--;
+        } else {
+          // 余额不足：退出自动
+          autoMode = false;
+          autoRemaining = 0;
+          stopAutoTimer();
+          autoPanel.classList.remove('active');
+          startBtn.classList.remove('stopping');
+          if (startLbl) startLbl.textContent = '开始';
+          restoreAutoDisplay();
+        }
+      }, AUTO_INTERVAL_MS);
     }
   }, { signal });
 

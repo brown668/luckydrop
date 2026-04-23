@@ -248,6 +248,11 @@ body {
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  /* 左边缘渐隐遮罩：避免滚动到底后最左侧 badge 半露，被误认为"屏幕左上有个球"。
+     右侧保持硬边界（新球落槽靠右，不应再渐隐）。18px 的渐变宽度 ≈ 半个 badge，
+     足够把部分可见的橙色 badge 柔和融入背景。 */
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 18px, #000 100%);
+          mask-image: linear-gradient(to right, transparent 0, #000 18px, #000 100%);
 }
 .hist-list::-webkit-scrollbar { display: none; }
 .hist-badge {
@@ -561,28 +566,51 @@ body {
 }
 .slot::before { display: none; }  /* 移除旧反光条 */
 
-/* 灯条通用样式：cyan 发光条风格（参考图） */
+/* 灯条通用样式：发光胶囊条（升级版 v2）
+   - 保持 14px 高度不变
+   - 端盖暗晕（box-shadow inset 左右）：让灯条像被"捏"出端头金属感
+   - 三层 inset：顶部强高光 / 底部深色沉边 / 微弱中间镜面
+   - 外部基座阴影：让灯条"坐落"在面板上，不再漂浮
+   - 饱和度/对比度提升，色阶更鲜明 */
 .slot .slot-bar {
   width: 100%;
   height: 14px;
-  border-radius: 4px;
-  border: 1px solid rgba(200,245,255,0.55);
+  border-radius: 5px;
+  border: 1px solid rgba(220,250,255,0.55);
   position: relative;
-  background: linear-gradient(180deg, var(--accent-cyan-g) 0%, var(--accent-cyan) 45%, var(--accent-cyan-d) 100%);
+  background: linear-gradient(180deg, var(--accent-cyan-g) 0%, var(--accent-cyan) 50%, var(--accent-cyan-d) 100%);
   box-shadow:
+    /* 外发光（由色阶变量控制） */
     0 0 var(--slot-glow, 8px) var(--slot-glow-c, rgba(77,208,225,0.6)),
-    inset 0 1px 0 rgba(255,255,255,0.7),
-    inset 0 -2px 2px rgba(0,60,80,0.3);
+    /* 两侧端盖暗晕（营造金属端头） */
+    inset 5px 0 6px -4px rgba(0,0,0,0.28),
+    inset -5px 0 6px -4px rgba(0,0,0,0.28),
+    /* 顶部高光线（更亮更清晰） */
+    inset 0 1.5px 0 rgba(255,255,255,0.88),
+    /* 顶部 2px 内柔光（镜面反光） */
+    inset 0 2px 2.5px rgba(255,255,255,0.28),
+    /* 底部深色沉边（厚度感） */
+    inset 0 -2px 2.5px rgba(0,40,60,0.42),
+    /* 基座阴影（让灯条贴在面板上） */
+    0 1.5px 0 rgba(0,0,0,0.32),
+    0 2px 3px rgba(0,0,0,0.25);
 }
-/* 灯条中部细高光 */
+/* 灯条中部细高光：更宽、两端软淡出、微模糊 */
 .slot .slot-bar::after {
   content: '';
   position: absolute;
-  left: 15%; right: 15%;
-  top: 2px;
-  height: 3px;
+  left: 12%; right: 12%;
+  top: 1.8px;
+  height: 2.4px;
   border-radius: 2px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.95), transparent);
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.85) 18%,
+    rgba(255,255,255,1) 50%,
+    rgba(255,255,255,0.85) 82%,
+    rgba(255,255,255,0) 100%);
+  filter: blur(0.3px);
+  pointer-events: none;
 }
 
 /* 下方倍率文字：白色 + 深蓝描边（不用金色） */
@@ -1164,15 +1192,19 @@ body {
 }
 .slot.is-respin .slot-bar::after { display: none; }
 
-/* Respin 图标 —— 红色足球 + 旋转光环 */
+/* Respin 图标 —— 红色足球 + 旋转光环
+   —— top 从 -11px 收回到 -5px，且尺寸 22→20px
+      旧版高行数（16 行）下图标跨过绿色草坪底线 11px，侵入 peg 区域视觉脏；
+      新版图标只轻微浮出 5px，既保留"凸出灯条"的主题提示，又不撞草坪线。
+   —— 20x20 尺寸同比缩小 9%，避免 16 行下槽宽 17px 时图标横向溢出过多。*/
 .slot.is-respin .slot-bar::before {
   content: '';
   position: absolute;
   left: 50%;
-  top: -11px;
+  top: -5px;
   transform: translateX(-50%);
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   background-image: url('respin.png');
   background-size: contain;
   background-position: center;
@@ -1308,7 +1340,7 @@ body {
   }
 }
 
-/* "+1 免费球" 大号金色飘字 */
+/* "免费发球+1" 大号金色飘字 */
 .jersey-respin-text {
   position: absolute;
   font-family: 'Chakra Petch', 'PingFang SC', 'Microsoft YaHei', sans-serif;
@@ -1338,19 +1370,72 @@ body {
   100% { transform: translate(-50%, -64px) scale(0.95); opacity: 0; }
 }
 
-/* ─── 槽位中奖高亮 ─── */
+/* ─── 槽位中奖高亮（v2：不再拉伸形变，用光脉冲 + 数字弹跳反馈） ───
+   旧版 scaleY(1.3) 把灯条拉高 30%，上沿挤入 canvas 底部被足球遮挡。
+   新版保持灯条尺寸不变，反馈改为：
+   ①亮度/饱和度脉冲  ②强发光  ③数字弹跳（scale）  ④顶部"冲击光"上升
+   ——所有反馈都不改变灯条本身高度，避免被球挡。 */
 .slot.winning .slot-bar {
-  filter: brightness(1.6);
-  transform: scaleY(1.3);
-  box-shadow:
-    0 0 20px var(--accent-cyan-g),
-    0 0 32px var(--accent-cyan),
-    inset 0 1px 0 rgba(255,255,255,0.95);
-  transition: filter .15s, transform .15s, box-shadow .15s;
+  animation: slotHitFlash 0.5s ease-out both;
 }
+/* 顶部"冲击光"：贴在灯条顶沿向上跳一下后淡出，不改变灯条高度
+   ——放在 .slot::after 上（不是 .slot-bar::before，避免和 respin 图标冲突）
+   ——.slot 是 position:relative，::after 绝对定位于 top:0 = 灯条顶部位置 */
+.slot.winning::after {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 0;
+  height: 2px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center,
+    rgba(255,255,255,0.95) 0%,
+    var(--slot-glow-c, rgba(77,208,225,0.85)) 45%,
+    transparent 100%);
+  filter: blur(1px);
+  transform-origin: 50% 100%;
+  pointer-events: none;
+  z-index: 3;
+  animation: slotHitBurst 0.5s ease-out both;
+}
+/* respin 槽不显示冲击光（它有自己的 jersey-hit 反馈） */
+.slot.is-respin.winning::after { display: none; }
+.slot.is-respin.winning .slot-bar { animation: none; }
 .slot.winning .slot-val {
-  filter: brightness(1.2);
-  transition: filter .15s;
+  animation: slotValPop 0.5s cubic-bezier(0.34, 1.35, 0.64, 1) both;
+}
+
+@keyframes slotHitFlash {
+  0%   { filter: brightness(2.4) saturate(1.35); box-shadow:
+           0 0 28px var(--slot-glow-c, rgba(77,208,225,1)),
+           0 0 44px var(--slot-glow-c, rgba(77,208,225,0.7)),
+           inset 5px 0 6px -4px rgba(0,0,0,0.28),
+           inset -5px 0 6px -4px rgba(0,0,0,0.28),
+           inset 0 1.5px 0 rgba(255,255,255,1),
+           inset 0 -2px 2.5px rgba(0,40,60,0.42),
+           0 1.5px 0 rgba(0,0,0,0.32); }
+  55%  { filter: brightness(1.55) saturate(1.2); }
+  100% { filter: brightness(1) saturate(1); box-shadow:
+           0 0 var(--slot-glow, 8px) var(--slot-glow-c, rgba(77,208,225,0.6)),
+           inset 5px 0 6px -4px rgba(0,0,0,0.28),
+           inset -5px 0 6px -4px rgba(0,0,0,0.28),
+           inset 0 1.5px 0 rgba(255,255,255,0.88),
+           inset 0 2px 2.5px rgba(255,255,255,0.28),
+           inset 0 -2px 2.5px rgba(0,40,60,0.42),
+           0 1.5px 0 rgba(0,0,0,0.32),
+           0 2px 3px rgba(0,0,0,0.25); }
+}
+@keyframes slotHitBurst {
+  0%   { opacity: 0;   transform: translateY(0)    scaleY(0.4) scaleX(0.6); }
+  30%  { opacity: 1;   transform: translateY(-5px) scaleY(3.5) scaleX(1.05); }
+  100% { opacity: 0;   transform: translateY(-11px) scaleY(6)   scaleX(1.35); }
+}
+@keyframes slotValPop {
+  0%   { transform: scale(1);    filter: brightness(1); }
+  25%  { transform: scale(1.30); filter: brightness(1.4); }
+  60%  { transform: scale(0.97); filter: brightness(1.15); }
+  100% { transform: scale(1);    filter: brightness(1); }
 }
 
 /* ─── 开始按钮禁用态 ─── */
@@ -2071,7 +2156,7 @@ body {
       </div>
       <div class="buy-row-main">
         <span class="buy-row-title">分裂钉</span>
-        <span class="buy-row-desc">足球触碰后会分裂 ×2</span>
+        <span class="buy-row-desc">足球碰撞后会分裂X2</span>
         <span class="buy-row-cost">花费 <span id="costSplit">+0.6</span></span>
       </div>
       <label class="buy-toggle">
@@ -2470,53 +2555,171 @@ function drawBoard(glows = {}) {
       const isSplit = splits.some(([sr, sc]) => sr === row && sc === col);
 
       if (isSplit) {
-        const spikes  = 6;
-        // 呼吸脉冲：0~1 正弦，每颗钉相位略有偏移增加层次感
-        const phase   = (row * 7 + col * 3) * 0.8;
-        const pulse   = 0.5 + 0.5 * Math.sin(Date.now() / 700 + phase);
-        // 星芒外尖不应大于钉子碰撞圆（视觉上与触发逻辑对齐）；
-        // 视觉 peak = pegR × 2.1，即大致等于 ball-edge 位置，做到"看到即触发"。
-        const outerR  = pegR * (1.75 + pulse * 0.35); // 1.75~2.1：峰值与碰撞圆对齐
-        const innerR  = pegR * 0.72;
-        // glowR 仅在星尖外极薄一层（0.3~0.5px），继续保留呼吸光晕但不越界
-        const glowR   = outerR + 0.3 + pulse * 0.2;
+        // ── 分裂钉"★金星徽章"设计（v2：放大精装版）────────────
+        // 视觉语言与"特色功能"按钮的 ⭐ 图标对齐：
+        //   深金凹碟 + 中心大金星（白芯渐变 + 星尖微闪）+ 柔和金环 + 呼吸光晕
+        // 每颗钉相位不同，避免全部同步呼吸造成"机械感"
+        const phase    = (row * 7 + col * 3) * 0.8;
+        const pulse    = 0.5 + 0.5 * Math.sin(Date.now() / 900 + phase);   // 慢呼吸 0~1
+        const starSpin = Math.sin(Date.now() / 1600 + phase) * 0.08;       // 星微摆（±0.08 rad）
+        const shimmer  = 0.5 + 0.5 * Math.sin(Date.now() / 420 + phase * 2); // 快闪烁（星尖高光用）
+        const bodyR    = pegR * 1.38;                                       // 徽章半径
+        const glowR    = pegR * (2.15 + pulse * 0.35);                      // 外光晕呼吸（更大更暖）
+        const haloR    = pegR * 1.74;                                       // 中层柔和金环半径
 
-        // Outer breathing glow（金色）
+        // 1) 外呼吸光晕（暖金，三段色阶更饱满）
         const ga = ctx.createRadialGradient(x, y, 0, x, y, glowR);
-        ga.addColorStop(0,   `rgba(255,210,50,${0.45 + pulse * 0.3})`);
-        ga.addColorStop(0.5, `rgba(255,160,20,${0.15 + pulse * 0.1})`);
-        ga.addColorStop(1,   'transparent');
+        ga.addColorStop(0,    `rgba(255,225,110,${0.48 + pulse * 0.32})`);
+        ga.addColorStop(0.45, `rgba(255,175,45,${0.22 + pulse * 0.14})`);
+        ga.addColorStop(0.80, `rgba(215,125,15,${0.10 + pulse * 0.06})`);
+        ga.addColorStop(1,    'transparent');
         ctx.fillStyle = ga;
         ctx.beginPath(); ctx.arc(x, y, glowR, 0, Math.PI * 2); ctx.fill();
 
-        // Starburst shape（金色渐变）
+        // 2) 中层柔和金环（代替虚线，用渐变环填补徽章与光晕之间的层次）
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        const halo = ctx.createRadialGradient(x, y, haloR * 0.76, x, y, haloR * 1.08);
+        halo.addColorStop(0,   'rgba(255,200,80,0)');
+        halo.addColorStop(0.5, `rgba(255,228,130,${0.40 + pulse * 0.22})`);
+        halo.addColorStop(1,   'rgba(255,180,50,0)');
+        ctx.fillStyle = halo;
+        ctx.beginPath(); ctx.arc(x, y, haloR * 1.08, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+
+        // 3) 底部投影（徽章托举感）
+        const sh = ctx.createRadialGradient(x + 0.6, y + 2, 0, x + 0.6, y + 2, bodyR + 1.8);
+        sh.addColorStop(0, 'rgba(50,25,0,0.55)');
+        sh.addColorStop(1, 'transparent');
+        ctx.fillStyle = sh;
+        ctx.beginPath(); ctx.arc(x + 0.6, y + 2, bodyR + 1.8, 0, Math.PI * 2); ctx.fill();
+
+        // 4) 徽章底盘——深金凹碟（中心亮、边缘深铜金，让中心星"浮"起来）
+        //    边缘改深铜而非纯黑——避免小尺寸下呈现脏黑框
+        const dg = ctx.createRadialGradient(x, y, 0, x, y, bodyR);
+        dg.addColorStop(0,    '#FFD878');
+        dg.addColorStop(0.4,  '#CC7500');
+        dg.addColorStop(0.85, '#7A3500');
+        dg.addColorStop(1,    '#5A2400');
+        ctx.fillStyle = dg;
+        ctx.beginPath(); ctx.arc(x, y, bodyR, 0, Math.PI * 2); ctx.fill();
+
+        // 5) 碟面反光——左上圆弧高光（金属质感）
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        const rimLight = ctx.createRadialGradient(
+          x - bodyR * 0.45, y - bodyR * 0.55, 0,
+          x - bodyR * 0.45, y - bodyR * 0.55, bodyR * 0.9
+        );
+        rimLight.addColorStop(0,   `rgba(255,240,180,${0.55 + pulse * 0.15})`);
+        rimLight.addColorStop(0.6, 'rgba(255,200,100,0)');
+        ctx.fillStyle = rimLight;
+        ctx.beginPath(); ctx.arc(x, y, bodyR, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+
+        // 6) 徽章外圈金边（双层：内亮外暗 → 刻边金属感）
+        ctx.strokeStyle = `rgba(255,200,80,${0.9 + pulse * 0.1})`;
+        ctx.lineWidth   = 1.0;
+        ctx.beginPath(); ctx.arc(x, y, bodyR - 0.3, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = 'rgba(90,40,0,0.75)';
+        ctx.lineWidth   = 0.6;
+        ctx.beginPath(); ctx.arc(x, y, bodyR + 0.2, 0, Math.PI * 2); ctx.stroke();
+
+        // 7) ★ 中心金星（核心设计元素 · 放大精装版）★
+        //    5 顶点五角星占满徽章；径向金色渐变 + 细金描边 + 左上高光 + 星尖微闪
+        const starScale  = 1.0 + pulse * 0.08;   // 呼吸微缩放
+        const starOuterR = bodyR * 0.98 * starScale;   // ← 放大（原 0.82 → 0.98，几乎占满徽章）
+        const starInnerR = bodyR * 0.40 * starScale;   // ← 同比放大（原 0.33 → 0.40，保持五角星比例）
+
+        // 7a) 星体底部柔影（让星"浮"在徽章表面）
+        ctx.save();
+        ctx.translate(x + 0.4, y + 0.9);
+        ctx.rotate(starSpin);
         ctx.beginPath();
-        for (let i = 0; i < spikes * 2; i++) {
-          const angle = (i * Math.PI / spikes) - Math.PI / 2;
-          const r = i % 2 === 0 ? outerR : innerR;
-          const sx = x + Math.cos(angle) * r;
-          const sy = y + Math.sin(angle) * r;
-          i === 0 ? ctx.moveTo(sx, sy) : ctx.lineTo(sx, sy);
+        for (let i = 0; i < 10; i++) {
+          const angle = (i * Math.PI / 5) - Math.PI / 2;
+          const r = (i % 2 === 0) ? starOuterR : starInnerR;
+          const sx = Math.cos(angle) * r;
+          const sy = Math.sin(angle) * r;
+          if (i === 0) ctx.moveTo(sx, sy);
+          else ctx.lineTo(sx, sy);
         }
         ctx.closePath();
-        const sg = ctx.createRadialGradient(x - 1, y - 2, 0, x, y, outerR);
-        sg.addColorStop(0,   '#fff0a0');
-        sg.addColorStop(0.4, '#ffcc20');
-        sg.addColorStop(0.8, '#dd8800');
-        sg.addColorStop(1,   '#995500');
-        ctx.fillStyle = sg;
+        ctx.fillStyle = 'rgba(40,18,0,0.42)';
         ctx.fill();
+        ctx.restore();
 
-        // Center circle
-        const cg = ctx.createRadialGradient(x - 1, y - 1.5, 0, x, y, innerR);
-        cg.addColorStop(0, '#fffde0');
-        cg.addColorStop(1, '#ffaa00');
-        ctx.fillStyle = cg;
-        ctx.beginPath(); ctx.arc(x, y, innerR, 0, Math.PI * 2); ctx.fill();
+        // 7b) 星体主体
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(starSpin);
+        ctx.beginPath();
+        for (let i = 0; i < 10; i++) {
+          const angle = (i * Math.PI / 5) - Math.PI / 2;
+          const r = (i % 2 === 0) ? starOuterR : starInnerR;
+          const sx = Math.cos(angle) * r;
+          const sy = Math.sin(angle) * r;
+          if (i === 0) ctx.moveTo(sx, sy);
+          else ctx.lineTo(sx, sy);
+        }
+        ctx.closePath();
+        // 星体渐变（左上偏移让光从左上照下；白芯 → 亮金 → 深铜）
+        const starG = ctx.createRadialGradient(
+          -starOuterR * 0.35, -starOuterR * 0.45, 0,
+          0, 0, starOuterR
+        );
+        starG.addColorStop(0,    '#FFFFFF');
+        starG.addColorStop(0.18, '#FFF4C4');
+        starG.addColorStop(0.48, '#FFD040');
+        starG.addColorStop(0.82, '#D08010');
+        starG.addColorStop(1,    '#6A2E00');
+        ctx.fillStyle = starG;
+        ctx.fill();
+        // 细金描边：勾勒星形但不压暗
+        ctx.strokeStyle = 'rgba(90,45,0,0.65)';
+        ctx.lineWidth   = 0.55;
+        ctx.stroke();
 
-        // Center shine
-        ctx.fillStyle = `rgba(255,255,220,${0.6 + pulse * 0.3})`;
-        ctx.beginPath(); ctx.arc(x - 1, y - 1.5, innerR * 0.38, 0, Math.PI * 2); ctx.fill();
+        // 7c) 5 个星尖微闪（提升精致感；加法混合）
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        for (let i = 0; i < 5; i++) {
+          const a    = (i * 2 * Math.PI / 5) - Math.PI / 2;
+          const tipX = Math.cos(a) * starOuterR;
+          const tipY = Math.sin(a) * starOuterR;
+          const tipG = ctx.createRadialGradient(tipX, tipY, 0, tipX, tipY, starOuterR * 0.22);
+          tipG.addColorStop(0, `rgba(255,255,240,${0.45 + shimmer * 0.35})`);
+          tipG.addColorStop(1, 'rgba(255,255,200,0)');
+          ctx.fillStyle = tipG;
+          ctx.beginPath(); ctx.arc(tipX, tipY, starOuterR * 0.22, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+
+        ctx.restore();
+
+        // 8) 星体顶端大高光（左上斜椭圆，模拟金属反光）
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(starSpin - Math.PI / 6);
+        ctx.fillStyle = `rgba(255,255,245,${0.88 + pulse * 0.12})`;
+        ctx.beginPath();
+        ctx.ellipse(
+          -starOuterR * 0.16, -starOuterR * 0.50,
+          starOuterR * 0.22, starOuterR * 0.09,
+          0, 0, Math.PI * 2
+        );
+        ctx.fill();
+        ctx.restore();
+
+        // 9) 星心亮芯（让中央有"发光"感；加法混合，随 shimmer 闪烁）
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        const coreG = ctx.createRadialGradient(x, y, 0, x, y, starInnerR * 0.75);
+        coreG.addColorStop(0, `rgba(255,255,220,${0.55 + shimmer * 0.30})`);
+        coreG.addColorStop(1, 'rgba(255,220,120,0)');
+        ctx.fillStyle = coreG;
+        ctx.beginPath(); ctx.arc(x, y, starInnerR * 0.75, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
 
       } else {
         // Drop shadow — 深草投影
@@ -3178,33 +3381,39 @@ const PlinkoEngine = (function () {
 
 
 // ============================================================
-// BallAnimator —— Stake 风格的路径播放动画
+// BallAnimator —— Stake 风格的路径播放动画（B 档真实感版）
 // ------------------------------------------------------------
-// 职责：给定 PlinkoEngine 预算出的 path[] + slotIdx，按抛物线分段
-//       驱动一颗球从发射点走到目标槽，途中触发 peg 发光 / land 事件。
+// 职责：给定 PlinkoEngine 预算出的 path[] + slotIdx，按抛物线段驱动
+//       一颗球从发射点走到目标槽，途中触发 peg 发光 / land 事件。
 // 架构：**纯动画层，绝不改变结果。**
 //   path 由 HMAC-SHA256 确定性算出，客户端只负责可视化。
 // ------------------------------------------------------------
-// 分段模型（共 ROWS + 1 段）：
-//   段 0        : 起点 (cx, padT-16) → 第 0 行核心钉的撞后位置
-//   段 k (1..R-1): 第 k-1 行撞后位置 → 第 k 行撞后位置
-//   段 ROWS     : 最后一行撞后位置 → 槽中心 (slotCenterX, H - ballR)
+// 分段模型（共 ROWS + 1 段，反弹融入下一段初速度）：
+//   段 0          : 起点 → 第 0 行接触点          （抛物线，pegHit）
+//   段 1          : 第 0 行接触点 → 第 1 行接触点  （抛物线，pegHit）
+//   ...
+//   段 ROWS       : 最后接触点 → 槽中心             （抛物线，无 peg 事件）
 //
 // 每段解析抛物线：y = y0 + vy0·t + 0.5·g·t²，x = x0 + vx·t
-//   tFall = (-vy0 + √(vy0² + 2g·Δy)) / g
-//   vx    = Δx / tFall
-// 段末（即撞钉瞬间）纵向速度 vy_end = vy0 + g·tFall，再 ×damping 作为下一段 vy0。
+//   vy0 来自上一段末速度 × 反弹系数（撞钉后为负 = 向上）
+//   tFall 由二次方程解析求得：vy0·t + 0.5g·t² = dy
+// ------------------------------------------------------------
+// 反弹视觉（不额外占段）：
+//   撞钉后的下一段起始 vy 为负 → 球先上升再下降 → 视觉即"反弹"
+//   反弹幅度 ≈ (|vyEnd|·BOUNCE_UP)² / (2G)，BOUNCE_UP=0.36 可见约 6~7px 弹起
+//   避免了"独立反弹段 + 负初速度主段"的双重时长拖累（v1 实测 5.9s → v2 目标 3.5s）
 // ------------------------------------------------------------
 // Pascal 三角映射（核心钉列跟踪）：
 //   第 0 行撞的中心钉固定 col=1（pegX(0,1) == cx）
 //   下一行的列 = 当前列 + path[i]  (path=0 向左, path=1 向右)
-//   最终: slotIdx = (col_at_row[R-1] + path[R-1]) - 1 = Σpath  ✓
+//   最终: slotIdx = Σpath
 //
-// 接触偏向（让撞钉看起来不是机械正碰）：
-//   撞第 row 行钉时，球**即将**往 path[row] 方向走 → 撞后位置偏在该侧。
-//     path=1 (下一步右行) → 撞后点在钉子右上 (+offX, -offY)
-//     path=0 (下一步左行) → 撞后点在钉子左上 (-offX, -offY)
-//   offX = (ballR+pegR)·sin30°, offY = (ballR+pegR)·cos30°
+// 接触偏向（让撞钉不是机械正碰）：
+//   撞第 row 行钉时，球**即将**往 path[row] 方向走 → 接触点偏在该侧。
+//     path=1 (下一步右行) → 接触点在钉子右上
+//     path=0 (下一步左行) → 接触点在钉子左上
+//   基准偏移 = (ballR+pegR)·sin30°, (ballR+pegR)·cos30°
+//   B 档新增：±6% 随机微扰（基于 nonce + row 伪随机），每球每行都略有不同
 // ============================================================
 function createBallAnimator(ball, path, slotIdx, ctx, opts = {}) {
   const {
@@ -3216,75 +3425,139 @@ function createBallAnimator(ball, path, slotIdx, ctx, opts = {}) {
 
   // ── opts：支持主球（默认）和副球（分裂球） ──
   //   startRow:  核心钉序列的起始行（主球=0，副球=forkRow+1）
-  //   startCol:  起始行的核心钉列（主球=1，副球=父球列 + (1 - path[forkRow])）
-  //   startPos:  段 0 的起点坐标（主球=发射位，副球=分裂钉接触位置）
-  //   initVy:    段 0 的初始 vy（主球=1.6，副球=父球撞 split peg 后的 vy × 0.85）
-  //   pathOffset: path 数组对应的首个核心钉索引（副球 path 长度 = ROWS - startRow）
-  const startRow    = opts.startRow  ?? 0;
-  const startCol    = opts.startCol  ?? 1;
-  const startPos    = opts.startPos  ?? { x: cx, y: padT - 16 };
-  const initVy      = opts.initVy    ?? 1.6;
+  //   startCol:  起始行的核心钉列
+  //   startPos:  段 0 的起点坐标
+  //   initVy:    段 0 的初始 vy
+  //   initVx:    段 0 的初始 vx（B 档新增，入场时用 ±0.3 起手微扰）
+  //   jitterSeed: 接触点微扰的伪随机种子（一般传 engineNonce，保证可复现）
+  const startRow    = opts.startRow   ?? 0;
+  const startCol    = opts.startCol   ?? 1;
+  const startPos    = opts.startPos   ?? { x: cx, y: padT - 30 };
+  const initVy      = opts.initVy     ?? 1.8;   // 入场初速度（配合 G=0.100，给合理的落速）
+  const initVx      = opts.initVx     ?? 0;
+  const jitterSeed  = opts.jitterSeed ?? 0;
 
-  // ── 物理常量（与游戏节奏感一致：g=0.032，撞钉后 vy 衰减 50%） ──
-  const G         = 0.032;     // 重力加速度
-  const DAMPING   = 0.5;       // 撞钉后 vy 衰减（视觉上球会明显"慢一拍"）
-  const CONTACT_OFF_X = (ballR + pegR) * 0.5;    // sin(30°)
-  const CONTACT_OFF_Y = (ballR + pegR) * 0.866;  // cos(30°)
+  // ── 物理常量（B 档 v2：反弹融入下一段初速度，段数 = ROWS+1） ──
+  // 设计：撞钉后初 vy 为负（向上），主段前期球自然上抬，视觉即"反弹"；
+  //       不再有独立反弹段 → 飞行时长回到合理范围。
+  //   稳态解析：dy = 0.5·GT²·(1-BU)/(1+BU) → T² = 2·rowH·(1+BU)/(G·(1-BU))
+  //   反弹高度：h_bounce = G·T²·BU²/(2·(1+BU)²)
+  //   目标 (ROWS=13)：单段 T ≈ 16~18 步，总时长 ≈ 3.5~4s；h_bounce ≈ 8px 视觉可见
+  const G            = 0.60;    // 重力（像素/步²；步长 = 1/60s）
+  const BOUNCE_UP    = 0.36;    // 撞钉后 vy' = -|入射vy| × 此值（向上，产生视觉反弹）
+  const BOUNCE_TAN   = 0.92;    // 切线（水平）能量保留率（反弹后 vx' = vx × 此值）
+  const BASE_OFF_SIN = 0.5;     // sin(30°)
+  const BASE_OFF_COS = 0.866;   // cos(30°)
 
-  // ── 1. 核心钉序列（Pascal 三角逐层追踪） ──
-  // 主球：从 (0, 1) 走到第 ROWS-1 行，path 长度 = ROWS
-  // 副球：从 (startRow, startCol) 走到第 ROWS-1 行，path 长度 = ROWS - startRow
-  const coreArr = [];
-  let col = startCol;
-  for (let row = startRow; row < ROWS; row++) {
-    coreArr.push({ row, col });
-    col += path[row - startRow];              // 0→左（列不变），1→右（列+1）
+  // 微扰 PRNG：基于 (jitterSeed, row) 的 mulberry32 变种
+  // 范围：[-0.06, +0.06]（接触点位置 ±6% 扰动）
+  function jitterAt(row) {
+    let h = (jitterSeed ^ (row * 0x9e3779b1)) >>> 0;
+    h = Math.imul(h ^ (h >>> 15), 0x85ebca6b) >>> 0;
+    h = Math.imul(h ^ (h >>> 13), 0xc2b2ae35) >>> 0;
+    h = (h ^ (h >>> 16)) >>> 0;
+    return ((h / 0xffffffff) - 0.5) * 0.12;   // [-0.06, +0.06]
   }
 
-  // ── 2. 关键点数组（起点 + 每个撞钉位置 + 槽中心） ──
-  const points = [];
-  points.push({ x: startPos.x, y: startPos.y });
+  // ── 1. 核心钉序列（Pascal 三角逐层追踪） ──
+  const coreArr = [];
+  {
+    let c = startCol;
+    for (let row = startRow; row < ROWS; row++) {
+      coreArr.push({ row, col: c });
+      c += path[row - startRow];
+    }
+  }
 
+  // ── 2. 接触点数组（每个核心钉的接触位置 + 该接触点对应的单位法线） ──
+  // 接触点 = 钉心 + 外推 (ballR+pegR) × 单位方向（sin, -cos），方向由 path 决定左右
+  const slotLeft    = cx - SLOTS * d / 2;
+  const slotCenterX = slotLeft + (slotIdx + 0.5) * d;
+
+  const contacts = [];  // { x, y, nx, ny, row, col }
   for (let i = 0; i < coreArr.length; i++) {
     const { row, col: c } = coreArr[i];
-    const side = path[i] === 1 ? +1 : -1;      // 撞后朝哪边落
-    points.push({
-      x: pegX(row, c) + side * CONTACT_OFF_X,
-      y: pegY(row)     - CONTACT_OFF_Y,
+    const side   = path[i] === 1 ? +1 : -1;
+    const j      = jitterAt(row);
+    // 接触偏移：sinθ 微扰（改变接触角，视觉不对称）
+    const offSin = BASE_OFF_SIN + j;
+    // cosθ 按 sqrt(1 - sin²) 反推，保证 (球心 - 钉心) 距离严格 = ballR + pegR
+    const offCos = Math.sqrt(Math.max(0, 1 - offSin * offSin));
+    const r      = ballR + pegR;
+
+    const px = pegX(row, c);
+    const py = pegY(row);
+    const bx = px + side * offSin * r;
+    const by = py - offCos * r;
+
+    // 法线 = 球心 - 钉心（单位向量）：撞钉反射用
+    contacts.push({
+      x: bx, y: by,
+      nx: side * offSin, ny: -offCos,
+      row, col: c,
     });
   }
 
-  // 终点：目标槽中心（底部内缩 ballR）
-  const slotLeft    = cx - SLOTS * d / 2;
-  const slotCenterX = slotLeft + (slotIdx + 0.5) * d;
-  points.push({ x: slotCenterX, y: H - ballR });
-
-  // ── 3. 为每段求解抛物线参数（tFall, vx, vy0） ──
+  // ── 3. 构建段序列：ROWS+1 个主段，反弹融入下一段初速度 ──
+  //    每段：当前起点 → 下一接触点（或槽心）；段末如有 pegHit 则触发反弹
+  //    反弹视觉：下一段初 vy 为负 → 球自然上抬再下降（不额外占段）
   const segments = [];
-  let vy = initVy;
-  for (let i = 0; i < points.length - 1; i++) {
-    const p0 = points[i], p1 = points[i + 1];
-    const dx = p1.x - p0.x;
-    const dy = p1.y - p0.y;
+  let cx0 = startPos.x, cy0 = startPos.y;  // 当前段起点
+  let vx0 = initVx,      vy0 = initVy;      // 当前段初速度（仅 vy0 用于构建段，vx 由 dx/tF 反算）
 
-    // 自由落体时间：vy0·t + 0.5g·t² = dy  →  t = (-vy0 + √(vy0² + 2g·dy)) / g
-    // 若 disc < 0（理论上不应出现，兜底为 1 步）
-    const disc  = vy * vy + 2 * G * dy;
-    const tFall = disc > 0 ? (-vy + Math.sqrt(disc)) / G : 1;
-    const tF    = Math.max(tFall, 1);   // 防除零
+  for (let i = 0; i < contacts.length; i++) {
+    const c = contacts[i];
+
+    // ── 段 i：从 (cx0, cy0) 抛物线到接触点 (c.x, c.y) ──
+    const dx = c.x - cx0;
+    const dy = c.y - cy0;
+    // 自由落体时间：vy0·t + 0.5g·t² = dy
+    //   判别式 disc = vy0² + 2G·dy
+    //   注意：vy0 为负（反弹向上）时，若 dy 够大，仍有正根（球先升后降到目标）
+    const disc  = vy0 * vy0 + 2 * G * dy;
+    const tFall = disc > 0 ? (-vy0 + Math.sqrt(disc)) / G : 1;
+    const tF    = Math.max(tFall, 1);
     const vx    = dx / tF;
 
     segments.push({
-      x0: p0.x, y0: p0.y,
-      vx, vy0: vy, g: G,
+      kind:  'main',
+      x0: cx0, y0: cy0,
+      vx, vy0, g: G,
       tFall: tF,
-      // 段 i 的 pegHit = 第 i 个核心钉（段末触发 peg 事件）；最后一段为 null
-      pegHit: i < coreArr.length ? coreArr[i] : null,
-      isLast: i === points.length - 2,
+      pegHit: c,            // 段末触发 peg 事件（含法线 nx/ny，用于切线旋转校正）
+      isLast: false,
     });
 
-    // 下一段 vy0 = 本段末端 vy × damping
-    vy = (vy + G * tF) * DAMPING;
+    // 段末速度 → 反弹 → 直接作为下一段起点/初速度
+    //   vy' = -|vyEnd| × BOUNCE_UP（强制向上，产生视觉反弹）
+    //   vx' = vxEnd × BOUNCE_TAN（切线能量保留；vx 实际由下段 dx/tF 反算，此处仅作参考）
+    const vxEnd = vx;
+    const vyEnd = vy0 + G * tF;
+    cx0 = c.x;
+    cy0 = c.y;
+    vx0 = vxEnd * BOUNCE_TAN;
+    vy0 = -Math.abs(vyEnd) * BOUNCE_UP;
+  }
+
+  // ── 最后段：从最后接触点 → 槽中心 ──
+  {
+    const p1x = slotCenterX;
+    const p1y = H - ballR;
+    const dx  = p1x - cx0;
+    const dy  = p1y - cy0;
+    const disc  = vy0 * vy0 + 2 * G * dy;
+    const tFall = disc > 0 ? (-vy0 + Math.sqrt(disc)) / G : 1;
+    const tF    = Math.max(tFall, 1);
+    const vx    = dx / tF;
+
+    segments.push({
+      kind:  'main',
+      x0: cx0, y0: cy0,
+      vx, vy0, g: G,
+      tFall: tF,
+      pegHit: null,
+      isLast: true,
+    });
   }
 
   // ── 4. 动画状态 ──
@@ -3293,12 +3566,14 @@ function createBallAnimator(ball, path, slotIdx, ctx, opts = {}) {
 
   // ── 5. step(dt)：推进 dt 个物理步，返回事件数组 ──
   // 事件类型：
-  //   { type: 'peg',  row, col, pegKey }  撞核心钉（触发发光）
-  //   { type: 'land', slotIdx }           到达槽（触发 settle）
-  // 跨段逻辑：一个 dt 可能连续完成多段，循环消耗 remaining。
+  //   { type: 'peg',  row, col, pegKey, vyEnd, nx, ny, contactX, contactY }
+  //   { type: 'land', slotIdx }
   function step(dt) {
     const events = [];
     let remaining = dt;
+    // 记录本 step 内首次跨段的信息（用于渲染侧 V 型分段插值，消除碰撞时的"穿拐点"顿挫）
+    // cross.k ∈ (0, 1]：跨段时刻占整个 dt 的比例；cross.x/y：接触点坐标
+    let cross = null;
 
     while (remaining > 0 && segIdx < segments.length) {
       const seg  = segments[segIdx];
@@ -3310,15 +3585,21 @@ function createBallAnimator(ball, path, slotIdx, ctx, opts = {}) {
         ball.x = seg.x0 + seg.vx * tEnd;
         ball.y = seg.y0 + seg.vy0 * tEnd + 0.5 * seg.g * tEnd * tEnd;
 
+        // 记录本步首次跨段的时刻与位置（即接触点）
+        if (!cross) {
+          cross = { k: (dt - remaining + tRem) / dt, x: ball.x, y: ball.y };
+        }
+
         if (seg.pegHit) {
-          const { row, col } = seg.pegHit;
-          // vyEnd = 段末纵向速度（含本段重力加速）——副球分裂时继承为初 vy
+          const c = seg.pegHit;
           const vyEnd = seg.vy0 + seg.g * seg.tFall;
           events.push({
             type:   'peg',
-            row, col,
-            pegKey: row * 20 + col,
+            row:    c.row,
+            col:    c.col,
+            pegKey: c.row * 20 + c.col,
             vyEnd,
+            nx: c.nx, ny: c.ny,               // 接触法线（用于切线旋转校正）
             contactX: ball.x,
             contactY: ball.y,
           });
@@ -3327,7 +3608,7 @@ function createBallAnimator(ball, path, slotIdx, ctx, opts = {}) {
           events.push({ type: 'land', slotIdx });
           segIdx++;
           segT = 0;
-          break;                          // land 后不再推进
+          break;
         }
 
         remaining -= tRem;
@@ -3342,7 +3623,11 @@ function createBallAnimator(ball, path, slotIdx, ctx, opts = {}) {
       }
     }
 
+    // 暴露跨段信息给外层（physicsStep 会转存到 ball.lastCross 供 renderFrame 使用）
+    ball.lastCross = cross;
+
     // 旋转：根据当前段 vx 换算角速度（v/R），积分到 ball.rot
+    // 反弹段 vx 可能反向，产生自然的旋转反转感
     if (segIdx < segments.length) {
       ball.vrot = segments[segIdx].vx / ballR * 0.6;
     } else {
@@ -3356,9 +3641,9 @@ function createBallAnimator(ball, path, slotIdx, ctx, opts = {}) {
   return {
     step,
     get finished() { return segIdx >= segments.length; },
-    // 调试/诊断用（不参与逻辑）
+    // 调试/诊断用
     segments,
-    points,
+    contacts,
     coreArr,
   };
 }
@@ -3655,9 +3940,22 @@ function initGame() {
   const H          = padT + ROW_H16 * ROWS_MAX + padB - 14;
   const pegR       = Math.min(rowH, d) * 0.17;
   const ballR      = Math.max(4, Math.min(9, pegR * 1.75));
-  const splits = getSplits();
-  // 分裂钉的 pegKey 集合（一次 initGame 定下来，供 Engine animator 分支 O(1) 查询）
-  const splitKeys = new Set(splits.map(([r, c]) => r * 20 + c));
+  // 分裂钉的 pegKey 集合：惰性缓存 + 依赖指纹，支持开关切换实时生效
+  //   ⚠ 不能一次性 const 冻结：buyFeatures.split 切换后必须立即反映，否则
+  //   开关打开但 splitKeys 仍是空集 → 路径经过 split peg 也不触发 fork
+  //   策略：用 (buyFeatures.split, selectedRows) 作为缓存键，变化时重建 Set
+  let _splitKeysCache = null;
+  let _splitKeysStamp = '';
+  const splitKeys = {
+    has(pegKey) {
+      const stamp = `${!!window.buyFeatures?.split}|${selectedRows}`;
+      if (stamp !== _splitKeysStamp) {
+        _splitKeysCache = new Set(getSplits().map(([r, c]) => r * 20 + c));
+        _splitKeysStamp = stamp;
+      }
+      return _splitKeysCache.has(pegKey);
+    },
+  };
 
   // 底行钉子中心固定在 canvas 底部上方 15px（与 drawBoard 一致）
   const pegShift   = (H - padB - 15) - (padT + (ROWS - 0.5) * rowH);
@@ -3750,13 +4048,13 @@ function initGame() {
    * 底色采用黑色，不再画白色内圆 → 黑色瓣直接透出
    */
   function drawSoccerBall(cx2d, x, y, R, rot = 0) {
-    // 阴影（阴影位置不跟随旋转）
+    // 阴影（不跟随旋转，只跟随 x/y）
     cx2d.save();
     cx2d.fillStyle = 'rgba(0,0,0,0.38)';
     cx2d.beginPath(); cx2d.arc(x + 0.8, y + 1.4, R * 0.96, 0, Math.PI * 2); cx2d.fill();
     cx2d.restore();
 
-    // 优先使用 ball1.jpg 生成的 sprite 贴图（带旋转）
+    // 优先使用 ball1.jpg 生成的 sprite 贴图（带自转）
     if (BALL_SPRITE.ready && BALL_SPRITE.img) {
       cx2d.save();
       cx2d.translate(x, y);
@@ -3767,6 +4065,8 @@ function initGame() {
     }
 
     // 回退几何绘制
+    cx2d.save();
+
     // 1. 黑色底圆（作为中心五边形 + 5 瓣 + 外圈细边的共同底色）
     cx2d.fillStyle = '#141414';
     cx2d.beginPath(); cx2d.arc(x, y, R, 0, Math.PI * 2); cx2d.fill();
@@ -3810,12 +4110,34 @@ function initGame() {
     sh.addColorStop(1,    'rgba(255,255,255,0)');
     cx2d.fillStyle = sh;
     cx2d.beginPath(); cx2d.arc(x, y, R - 0.5, 0, Math.PI * 2); cx2d.fill();
+
+    cx2d.restore();
   }
 
-  // ── 绘制球 + 尾部幻影 ──
-  function drawBallWithTrail(ball) {
+  // ── 绘制球 + 尾部幻影（B 档启用）──
+  // 尾迹由 physicsStep 每步记录一个位置（最多 7 个），这里从老到新画出半透明缩小球影。
+  // 注意：主球由 renderFrame 的插值后坐标绘制，这里只画尾迹。
+  function drawTrail(ball) {
+    const trail = ball.trail;
+    if (!trail || trail.length < 2) return;
+    const n = trail.length;
+    ctx.save();
+    // 尾迹形状保持圆形，颜色略暖白
+    for (let i = 0; i < n - 1; i++) {  // -1 跳过最新一帧（主球已画）
+      const t   = trail[i];
+      const k   = (i + 1) / n;           // 0→1，越新越显眼
+      const a   = 0.02 + k * 0.12;       // alpha 0.02 → 0.14（弱化后）
+      const rR  = ballR * (0.35 + k * 0.45);
+      ctx.globalAlpha = a;
+      ctx.fillStyle   = ball.color === 'gold' ? 'rgba(255,215,90,0.9)'
+                      : ball.color === 'blue' ? 'rgba(130,185,255,0.9)'
+                      : 'rgba(255,255,255,0.9)';
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, rR, 0, Math.PI * 2);
+      ctx.fill();
+    }
     ctx.globalAlpha = 1;
-    drawBall(ball.x, ball.y, 1, ball.depth || 0, ball.rot || 0, ball.color || 'normal');
+    ctx.restore();
   }
 
   // 注：结果由 PlinkoEngine（HMAC-SHA256）确定；BallAnimator 播放路径动画。
@@ -3918,13 +4240,13 @@ function initGame() {
           setTimeout(() => sp.remove(), 850 + k * 45);
         }
 
-        // 4) "+1 免费球" 飘字 —— 吸附完成后再出现
+        // 4) "免费发球+1" 飘字 —— 吸附完成后再出现
         setTimeout(() => {
           const tx = document.createElement('div');
           tx.className = 'jersey-respin-text';
           tx.style.left = '50%';
           tx.style.top = '-8px';
-          tx.textContent = '+1 免费球';
+          tx.textContent = '免费发球+1';
           slotEl.appendChild(tx);
           setTimeout(() => tx.remove(), 1600);
         }, 480);
@@ -4028,6 +4350,16 @@ function initGame() {
   //   5. weight 父子各继承父球的 ×0.55（与旧物理版本一致）
   //   6. startPos = 父球撞钉接触点；initVy = 父球段末 vyEnd × 0.85（碰撞阻尼）
   //   7. engineNonce 继承到副球上，使二级副球（副球再撞 split peg）也能复用同 nonce
+  //   8. ★ enginePath 索引基准：
+  //      - Primary ball：startRow=0, enginePath[row] 对应绝对 row（length=ROWS）
+  //      - Fork ball：startRow=parentForkRow+1, enginePath[row-startRow] 对应相对 row
+  //        （length=ROWS-startRow）
+  //      → 读 parentBall.enginePath 时必须减掉 parentBall.startRow 偏移。
+  //        否则二级 fork 用绝对 forkRow 索引会越界 → parentStep=undefined
+  //        → forkStartCol=NaN → slotIdx=NaN → land 事件 slotIdx=NaN
+  //        → physicsStep 的 `landedSlot>=0` 判断为 false（NaN>=0 是 false）
+  //        → splice 不执行 → 球永久卡在 balls[] → afterSettle 永不触发
+  //        → 特色功能永久置灰（#bug: 分裂 + 13 行 + 佛系 + 连续 Play 的复现）
   // ============================================================
   async function spawnForkBall(parentBall, forkRow, forkCol, vyEnd, contactX, contactY) {
     if (balls.length >= 8) return;
@@ -4039,7 +4371,24 @@ function initGame() {
     parentBall.usedSplits[pegKey] = true;
 
     // 父球在 forkRow 的路径决策：0=左，1=右 → 副球走相反侧
-    const parentStep   = parentBall.enginePath[forkRow];
+    // ★ 关键：parentBall.enginePath 的索引基准 = parentBall.startRow（见上方"关键点8"）
+    //   Primary ball 没有 startRow 属性 → ?? 0 → 对齐绝对 row
+    //   Fork ball 的 startRow = 其被创建时的 forkRow+1 → 减掉偏移
+    const parentStartRow = parentBall.startRow ?? 0;
+    const parentPathIdx  = forkRow - parentStartRow;
+    const parentStep     = parentBall.enginePath[parentPathIdx];
+
+    // 防御：父 path 越界 / path 被污染时，parentStep 会是 undefined/NaN，
+    // 继续会把 NaN 传染到 forkStartCol → slotIdx → 'land' 事件 → 永久卡死。
+    // 明确放弃这次 fork（usedSplits 已标记，不会二次触发）。
+    if (parentStep !== 0 && parentStep !== 1) {
+      console.warn('[fork] invalid parentStep, abandon fork:', {
+        forkRow, parentStartRow, parentPathIdx,
+        pathLen: parentBall.enginePath?.length, parentStep,
+      });
+      return;
+    }
+
     const forkStartCol = forkCol + (1 - parentStep);
     const forkPathLen  = ROWS - forkRow - 1;
 
@@ -4088,6 +4437,9 @@ function initGame() {
       engineNonce: parentBall.engineNonce,
       enginePath:  forkResult.path,
       engineSlot:  forkResult.slotIdx,
+      // ★ 记录此 fork 的 path 起始行：二级 fork 生成时据此换算 parentStep 索引。
+      //   forkBall.enginePath[i] 对应绝对 row = startRow + i（i ∈ [0, path.length)）
+      startRow:    forkRow + 1,
     };
 
     forkBall.animator = createBallAnimator(
@@ -4096,16 +4448,29 @@ function initGame() {
       forkResult.slotIdx,
       { ROWS, SLOTS, pegX, pegY, cx, d, padT, H, rowH, ballR, pegR },
       {
-        startRow: forkRow + 1,
-        startCol: forkStartCol,
-        startPos: { x: contactX, y: contactY },
-        initVy:   vyEnd * 0.85,
+        startRow:   forkRow + 1,
+        startCol:   forkStartCol,
+        startPos:   { x: contactX, y: contactY },
+        initVy:     vyEnd * 0.85,
+        initVx:     0,
+        // 副球用父 nonce + fork 坐标混合种子（避免与父球微扰序列重叠）
+        jitterSeed: (parentBall.engineNonce ^ (forkRow * 0x9e3779b1) ^ (forkCol * 0x85ebca6b)) >>> 0,
       },
     );
 
     balls.push(forkBall);
     if (window._onSplit) window._onSplit(contactX, contactY);
+
+    // ★ 防御：父球可能在 fork HMAC await 期间已落槽 → gameLoop 因
+    //   balls=0 && pendingSettles=0 自停（rafId 已清零）。
+    //   此刻 fork push 进 balls 但没人推进 → 视觉卡在 contact 位置。
+    //   修复：fork push 完若 gameLoop 已停，立即重启。
+    if (!rafId) {
+      rafId = requestAnimationFrame(gameLoop);
+    }
   }
+
+  const VROT_ADOPT      = 0.55;   // 撞钉后切线速度对 vrot 的采纳权重
 
   function physicsStep() {
     // 衰减钉子发光（每物理步 0.08 → 60Hz 下 ~1.25s 归零，与旧版一致）
@@ -4117,7 +4482,7 @@ function initGame() {
     for (let i = balls.length - 1; i >= 0; i--) {
       const ball = balls[i];
 
-      // ★ 保存前一物理步的位置（插值渲染关键）
+      // ★ 保存前一物理步的位置/旋转（插值渲染关键）
       ball.prevX   = ball.x;
       ball.prevY   = ball.y;
       ball.prevRot = ball.rot || 0;
@@ -4136,6 +4501,15 @@ function initGame() {
       for (const e of events) {
         if (e.type === 'peg') {
           pegGlows[e.pegKey] = 1.0;
+          // B 档：切线方向速度校正 vrot（吃到旋转感）
+          if (e.nx !== undefined && e.vyEnd !== undefined) {
+            // 切线 = 法线转 90°：(-ny, nx)
+            const tx = -e.ny, ty = e.nx;
+            // 接触瞬间的速度近似：vx ≈ 0 是不对的，但这里用 animator 段内最新 vx / vyEnd
+            // 简化：用当前球的 vrot 与 (vyEnd * ty / ballR) 做加权平均（tx 分量小，主导来自 vy）
+            const tangentialOmega = (e.vyEnd * ty) / ballR;
+            ball.vrot = (ball.vrot || 0) * (1 - VROT_ADOPT) + tangentialOmega * VROT_ADOPT;
+          }
           if (
             splitKeys.has(e.pegKey) &&
             !(ball.usedSplits && ball.usedSplits[e.pegKey]) &&
@@ -4149,31 +4523,85 @@ function initGame() {
           landedSlot = e.slotIdx;
         }
       }
-      if (landedSlot >= 0) {
+      // ★ 防御：landedSlot 必须是有限整数才走结算路径。
+      //   NaN>=0 是 false（JS 语义），会让"isLast 段已走完但 splice 没执行"
+      //   的 bug 路径把球永久滞留在 balls[] 中 → afterSettle 永不触发 → 特色锁死。
+      //   → 但如果有球走完 animator 却没落槽（finished && landedSlot 非法），
+      //     必须强制清理，避免上述卡死。
+      if (Number.isFinite(landedSlot) && landedSlot >= 0) {
         const w = (ball.weight ?? 1) * (ball.extraMult ?? 1);
         const wasPrimary = ball.primary === true;
         balls.splice(i, 1);
         pendingSettles++;
-        settle(landedSlot, w, ball.recordIdx);
+        // settle 内部最终会调用 done() 使 pendingSettles-- 并 afterSettle()。
+        // 若 settle 抛异常（slotEls/respin DOM 异常、飘字节点缺失等），要兜底把
+        // pendingSettles 还原，并在全部球落槽后强制 afterSettle()，否则会永远
+        // 卡在"balls=[] && pendingSettles>0"导致控件锁死（#bug 特色功能置灰）。
+        try {
+          settle(landedSlot, w, ball.recordIdx);
+        } catch (err) {
+          console.error('[settle] failed, unwinding pendingSettles:', err);
+          pendingSettles--;
+          if (balls.length === 0 && pendingSettles === 0) {
+            try { afterSettle(); } catch (e2) {
+              console.error('[afterSettle] failed, force unlock:', e2);
+              lockControls(false);
+            }
+          }
+        }
         if (autoMode && wasPrimary && autoTotalAtStart !== Infinity) {
           autoLanded++;
           const remain = Math.max(0, autoTotalAtStart - autoLanded);
           if (autoEl) autoEl.textContent = String(remain);
         }
+      } else if (ball.animator && ball.animator.finished) {
+        // ★ 终极防御：animator 已跑完所有段（finished=true）但没有合法的 landedSlot
+        //   → 球永远卡在 balls[]，gameLoop 不会退出，afterSettle 不会触发，
+        //     特色功能永久置灰。此时必须强制丢弃僵尸球。
+        //   触发条件（已知）：二级 fork 的 path 索引越界导致 slotIdx=NaN，
+        //     'land' 事件带 NaN slotIdx 被 Number.isFinite 拦截。
+        //     这里兜底剔除该球，避免任何未来类似路径再造成死锁。
+        console.warn('[zombie-ball] finished animator but no valid landedSlot; discarding:', {
+          primary: ball.primary, depth: ball.depth, recordIdx: ball.recordIdx,
+          x: ball.x, y: ball.y, landedSlot,
+        });
+        balls.splice(i, 1);
       }
     }
   }
 
   // 渲染一帧：用插值后的位置绘制每颗球（alpha 0~1 = 物理步内的进度）
+  // 流程：先画尾迹（物理位置序列，不插值），再画主球（位置/旋转插值）
+  // ── V 型分段插值（消除碰撞顿挫）──
+  // 当 ball.lastCross 存在（本物理步跨越了段边界 = 碰到钉）时，把单段 lerp 拆成两段：
+  //   alpha < k : prev    → contact （前半段，压到接触点上）
+  //   alpha ≥ k : contact → now     （后半段，从接触点出发进入反弹段）
+  // 效果：球在视觉上"明确触碰到钉再弹开"，不再抄直线穿过拐点。
   function renderFrame(alpha) {
     drawBoard(pegGlows);
     for (const ball of balls) {
+      drawTrail(ball);
+
       const px = (ball.prevX !== undefined) ? ball.prevX : ball.x;
       const py = (ball.prevY !== undefined) ? ball.prevY : ball.y;
       const pr = (ball.prevRot !== undefined) ? ball.prevRot : (ball.rot || 0);
-      const rx = lerp(px, ball.x, alpha);
-      const ry = lerp(py, ball.y, alpha);
-      // rot 连续累加不会跨 2π 跳变，直接线性插值即可
+
+      let rx, ry;
+      const cross = ball.lastCross;
+      if (cross && cross.k > 0 && cross.k < 1) {
+        if (alpha <= cross.k) {
+          const t = alpha / cross.k;
+          rx = lerp(px, cross.x, t);
+          ry = lerp(py, cross.y, t);
+        } else {
+          const t = (alpha - cross.k) / (1 - cross.k);
+          rx = lerp(cross.x, ball.x, t);
+          ry = lerp(cross.y, ball.y, t);
+        }
+      } else {
+        rx = lerp(px, ball.x, alpha);
+        ry = lerp(py, ball.y, alpha);
+      }
       const rr = lerp(pr, ball.rot || 0, alpha);
       drawBall(rx, ry, 1, ball.depth || 0, rr, ball.color || 'normal');
     }
@@ -4183,6 +4611,7 @@ function initGame() {
     if (balls.length === 0 && pendingSettles === 0) {
       physLastTime = 0;
       physAccum    = 0;
+      rafId        = 0;   // ★ 必须清零：否则后续 spawnForkBall / launchBall 用 !rafId 判断"是否停转"时失效
       return;
     }
 
@@ -4212,6 +4641,7 @@ function initGame() {
     } else {
       physLastTime = 0;
       physAccum    = 0;
+      rafId        = 0;   // ★ 同 early-return 分支：清零让后续 fork/launch 能正确重启 gameLoop
     }
   }
 
@@ -4294,15 +4724,28 @@ function initGame() {
       lockControls(false);
       return false;
     }
-    if (signal.aborted) return false;
+    if (signal.aborted) {
+      // 异步间隙中本 initGame 实例被中断（通常是用户切换行数）。
+      // onRowsChanged 已自行重置状态（含 lockControls(false)），但此刻我们在
+      // "放弃挂 ball"之前已经扣过余额 + lockControls(true)，需要逐一回滚：
+      //   ① 退还 totalCost
+      //   ② 解锁控件（避免残留锁死：见 bug #1 现象"特色功能置灰"）
+      balance = parseFloat((balance + totalCost).toFixed(2));
+      balEl.textContent = fmtBalance(balance);
+      lockControls(false);
+      return false;
+    }
 
     const enginePath  = result.path;
     const engineSlot  = result.slotIdx;
     const engineNonce = result.seed.nonce;
 
     {
+      // 入场 Gutter：从 padT-30 高处轻微下落（比旧版 padT-16 高 14px）
+      // 配合 initVy=1.2，保持合理节奏同时有"下坠→撞板"的层次感
       const initX = cx + (Math.random() - 0.5) * 10;
-      const initY = padT - 16;
+      const initY = padT - 30;
+      const initVx = (Math.random() - 0.5) * 0.6;   // 起手微扰 ±0.3
       const initRot = (Math.random() - 0.5) * Math.PI;
       const ballObj = {
         x:  initX,
@@ -4329,6 +4772,11 @@ function initGame() {
 
       ballObj.animator = createBallAnimator(ballObj, enginePath, engineSlot, {
         ROWS, SLOTS, pegX, pegY, cx, d, padT, H, rowH, ballR, pegR,
+      }, {
+        startPos:   { x: initX, y: initY },
+        initVy:     1.8,
+        initVx:     initVx,
+        jitterSeed: (engineNonce ^ 0x5a5a5a5a) >>> 0,  // 接触点微扰种子
       });
 
       balls.push(ballObj);
@@ -4404,10 +4852,19 @@ function initGame() {
   }, { signal });
 
   // ── 常驻呼吸动画（行数切换时 abort 自动停止）──
+  // 兼做"锁死守门员"：只要 balls 空且 pendingSettles=0，控件就必须是解锁状态。
+  // 任何异步异常/竞态漏掉了解锁，下一帧呼吸循环就把它强制掰回来——避免用户被
+  // 永久置灰的"特色功能"按钮困住（#bug 排查记录）。
   (function breathingLoop() {
     if (signal.aborted) return;
     if (balls.length === 0 && pendingSettles === 0) {
       drawBoard(pegGlows);
+      if (!autoMode) {
+        const buyBtn = document.getElementById('btnBuyFeatures');
+        if (buyBtn && buyBtn.style.pointerEvents === 'none') {
+          lockControls(false);
+        }
+      }
     }
     requestAnimationFrame(breathingLoop);
   })();

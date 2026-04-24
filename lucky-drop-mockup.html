@@ -472,6 +472,24 @@ body {
 .board-canvas {
   display: block;
   width: 100%;
+  /* v42 漏绿终结方案 · 底部直接截短到 slots-wrap 顶位置
+     ─────────────────────────────────────────────────────────
+     v40/v41 复盘：试图用 clip-path 削角匹配 ::before 斜率(0.4)，
+       但因 canvas 内 apron 是 `ctx.fillRect(0, H-11, W, 11)` 全宽矩形
+       （`ctx.restore` 已退出草坪梯形 clip，无斜率约束），
+       加之 sub-pixel 渲染精度，::before 白边外侧仍残留 1-2px 绿色。
+     v42 策略：不再削角匹配，而是**直接截短 canvas 底 10px**。
+       canvas 显示区 y ∈ [0, H-10]，与 slots-wrap 顶部 (margin-top:-10) 正好衔接；
+       白边斜边外侧漏出的是 board-wrap 的 outBg 深蓝，不再有任何 canvas 绿色，
+       从根源上消灭"apron 绿茵比 ::before 白边更向外延伸"的问题。
+     视觉代价：canvas 底 3px 草坪渐变尾部丢失（反正本就是 apron 渐变过渡），
+               slots-wrap::after 顶色 #5cb03f 继续承接 pitch 绿茵，衔接依然平滑。 */
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 10px),
+    0 calc(100% - 10px)
+  );
 }
 
 /* ─── 高倍率球图例（左上角说明条，仅 hiMult 打开时显示）─── */
@@ -586,7 +604,8 @@ body {
 .slots-wrap {
   position: relative;
   z-index: 2;                    /* 压过 board-wrap(z:1) —— 解决顶部蓝带 */
-  margin-top: -5px;              /* ★ 只咬 canvas 底部 5px 深蓝区，保留第 7px 金色 apron 线 */
+  margin-top: -10px;             /* v41: -5 → -10px，吃掉 canvas 底部 apron（≈11px）绝大部分，
+                                         让 slot 灯条整体上移 5px · 消除中间绿色接缝 */
   padding: 0 0 20px;             /* v11: 上 0（灯条贴顶，与球底重叠形成"落入槽位"感）+ 下 20px 厚度带给 section-won */
 }
 .slots-wrap > .slots {

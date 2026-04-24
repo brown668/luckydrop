@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- v21 加 viewport-fit=cover，让下方 env(safe-area-inset-*) 生效。不加 user-scalable=no，保留样机定位下的双指缩放自由 --><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>LUCKY DROP — UI Mockup v2</title>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -63,7 +63,14 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 32px 16px 48px;
+  /* v21 保留原桌面样机 32/16/48 基准边距，再叠加 iPhone 安全区：
+     桌面浏览器 env() 回退 0 → 视觉零变化；
+     真机 iPhone Safari 会在刘海/灵动岛（~44-59px）和 Home Indicator（~34px）位置追加 padding，
+     避免样机被系统 UI 遮挡。注意 safari 下 env() 只有在 viewport meta 含 viewport-fit=cover 时才非零。 */
+  padding: calc(32px + env(safe-area-inset-top, 0px))
+           calc(16px + env(safe-area-inset-right, 0px))
+           calc(48px + env(safe-area-inset-bottom, 0px))
+           calc(16px + env(safe-area-inset-left, 0px));
   font-family: 'Chakra Petch', sans-serif;
 }
 
@@ -209,25 +216,9 @@ body {
     0 0 22px rgba(255,180,0,0.35);
   letter-spacing: 0.5px;
 }
-@keyframes balFloat {
-  0%   { opacity: 1; transform: translateY(0)    scale(1); }
-  15%  { opacity: 1; transform: translateY(-4px)  scale(1.1); }
-  100% { opacity: 0; transform: translateY(-28px) scale(0.9); }
-}
-.bal-float {
-  position: absolute;
-  right: 0;
-  top: -4px;
-  font-family: 'Space Mono', monospace;
-  font-size: 15px;
-  font-weight: 700;
-  color: #ffe855;
-  white-space: nowrap;
-  pointer-events: none;
-  animation: balFloat 2s ease-out forwards;
-  text-shadow: 0 0 8px rgba(255,220,50,0.95), 0 0 20px rgba(255,180,0,0.6), 0 1px 3px rgba(0,0,0,0.8);
-  z-index: 30;
-}
+/* v14: .bal-float / @keyframes balFloat 已移除——顶部余额去掉飘字聚合反馈，
+        余额由 settle() 内 balEl.textContent=fmtBalance(balance) 逐球即时刷新，
+        玩家通过数字直接跳变感知收益，更克制、无视觉叠加。 */
 
 /* ─── History Bar ─── */
 .history-bar {
@@ -239,7 +230,35 @@ body {
   gap: 5px;
   overflow: hidden;
   box-shadow: inset 0 -1px 0 rgba(0,20,60,0.3);
+  /* v18: 保证空列表/有列表时高度一致
+     空时内容只有 icon(18px) → 整体 28px；有 badge(26px) → 整体 36px。
+     固定为 badge 主导的 36px，空状态时 icon 居中留白，视觉稳定不跳。 */
+  min-height: 36px;
+  box-sizing: border-box;
 }
+/* 历史倍率左端时钟 icon：纯视觉标识，不参与滚动也不被 mask 遮挡。
+   半透明淡蓝灰，与深蓝背景自然融合；不加动画避免抢视线。 */
+.hist-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(180, 210, 240, 0.55);
+  margin-right: 1px;
+  opacity: 0.9;
+}
+.hist-icon svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  filter: drop-shadow(0 1px 1px rgba(0,20,60,0.5));
+}
+/* 列表为空时 icon 淡一点，给"还没有历史"的提示；
+   有 badge 后（:has 后续兄弟）稍微亮起 */
+.history-bar:has(.hist-list:empty) .hist-icon { opacity: 0.5; }
+
 .hist-list {
   display: flex;
   gap: 5px;
@@ -248,11 +267,13 @@ body {
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  /* 左边缘渐隐遮罩：避免滚动到底后最左侧 badge 半露，被误认为"屏幕左上有个球"。
-     右侧保持硬边界（新球落槽靠右，不应再渐隐）。18px 的渐变宽度 ≈ 半个 badge，
-     足够把部分可见的橙色 badge 柔和融入背景。 */
-  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 18px, #000 100%);
-          mask-image: linear-gradient(to right, transparent 0, #000 18px, #000 100%);
+  /* v19: 按需 mask——只有列表发生横向滚动溢出时（.has-overflow）才启用左侧渐隐，
+          首 badge（未溢出）状态完全不遮挡。由 JS 在 addHistory 后同步 class。
+          渐隐宽度 12px 略大于首 badge 左圆角，滚动出界时柔和淡入，不影响中段 badge。 */
+}
+.hist-list.has-overflow {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 100%);
+          mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 100%);
 }
 .hist-list::-webkit-scrollbar { display: none; }
 .hist-badge {
@@ -529,19 +550,209 @@ body {
 }
 
 /* ─── Bottom Slots ─── */
-/* ─── 倍率槽（cyan 发光条）─── */
+/* ─── 倍率槽（嵌入球场草皮式）──────────────────────────────────────
+   v7 设计语言：不再是独立深蓝 panel，而是"灯条+数字直接印在球场草皮上"。
+   slots 本身透明无背景，交由 .slots-wrap::before 的立体球场盒子统一承载。
+   这样 canvas 草皮 → slots → 球场底线 → 厚度侧面 一气呵成，没有断层。 */
 .slots {
   display: flex;
-  background:
-    linear-gradient(180deg,
-      var(--ui-blue-deep) 0%,
-      #061f44 45%,
-      #03152e 100%);
-  padding: 0 10px 10px;
+  background: transparent;            /* 去掉深蓝 panel：让 slots-wrap::before 的草皮露出 */
+  padding: 0 10px 6px;
   gap: 4px;
   position: relative;
-  margin-top: -8px;  /* 倍率条整体向上挤入 canvas 底部草坪区，更紧凑 */
-  box-shadow: inset 0 1px 0 rgba(120,190,255,0.2);
+  margin-top: -8px;                    /* 保留向上咬（被 .slots-wrap>.slots 覆盖为 0） */
+  box-shadow: none;                    /* 去掉深蓝装饰 inset shadow */
+}
+/* 原金色 hairline 已退役（交由 slots-wrap::before 顶部 cyan hairline + 球场底线 接力） */
+.slots::before { display: none; }
+
+/* ─── Slots 包裹层：与 canvas 球场同体的"⊓ 开口倒梯形"（v10 无拼接版）───
+   v10 核心升级：**消除"梯形覆盖在上面"的拼接感**
+     · 问题复盘：v9 顶部有一条贯穿全宽的水平白线（::before 顶边 1.5px），
+       而 canvas 底部**故意不画横线**（代码注释："底线不再绘制：pitch 底直接与下方
+       slot 赛况条用同色衔接"）。一有一无 → 视觉上就是"一个白框梯形盖在球场下"。
+     · 解决：让 ::after 的 top inset=0 完全覆盖 ::before 顶部的白色横条。
+       slots-wrap 只保留 **三条白线**：左斜 + 右斜 + 底。
+     · 效果：canvas（顶+左斜+右斜，⊔ 开口向下）+ slots-wrap（左斜+右斜+底，⊓ 开口向上）
+       = 完整的六边形 3D 球场盒子轮廓，顶部衔接处仅靠颜色过渡（金色 apron → 绿茵），
+       与 canvas 原本的"无底线、同色衔接"设计一致，拼接感消失。
+     · 球场 + 倍率槽 + 获得模块 成为一个视觉一体的封闭轮廓。
+
+   层次：
+     · ::before (z:0) 白色外层梯形（顶边会被 ::after 覆盖，实际只露出左斜/右斜/底）
+     · ::after  (z:1) 绿茵内层梯形（top inset=0，其余 1.5px 露白边）
+     · .slots   (z:3) 倍率槽灯条在最上
+     · .section-won (z:4) 获得文字 */
+.slots-wrap {
+  position: relative;
+  z-index: 2;                    /* 压过 board-wrap(z:1) —— 解决顶部蓝带 */
+  margin-top: -5px;              /* ★ 只咬 canvas 底部 5px 深蓝区，保留第 7px 金色 apron 线 */
+  padding: 0 0 20px;             /* v11: 上 0（灯条贴顶，与球底重叠形成"落入槽位"感）+ 下 20px 厚度带给 section-won */
+}
+.slots-wrap > .slots {
+  margin-top: 0;
+  position: relative;            /* 启用 z-index */
+  z-index: 3;                    /* 在 ::before(0) 和 ::after(1) 之上 */
+}
+/* v25 ::before = 纯白梯形边（精确匹配 canvas 球场 2.2px 白线）
+   · 原 0.55 半透明白 → 纯白 #fff · 与 canvas strokeStyle '#ffffff' 同色
+   · ::after 左右下 inset 从 1.5px 提到 2.2px → 露出 2.2px 粗纯白描边
+   · clip-path 斜边偏移同步从 18.5px 改到 17.8px（= 20 - 2.2）
+   这样"球场左/右斜墙 → slots-wrap 左/右斜边"粗细和锐度完全一致 */
+.slots-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: #ffffff;
+  clip-path: polygon(0% 0%, 100% 0%, calc(100% - 20px) 100%, 20px 100%);
+  pointer-events: none;
+}
+/* v24 ::after = 绿茵底（与 canvas 球场底部色值连续 · 视觉上是"球场延伸到槽位下方"）
+   · 基础色：#3e7d2a → #2a5a1c → #1c3e14（由上至下逐渐变深，模拟球场透视远端）
+   · 顶部色 #3e7d2a 比 canvas 近处 grassGrad(#4e9434) 略暗一档 → 模拟被 slot 面板投下的环境阴影
+   · 叠加 repeating-linear-gradient 做割草条纹（peakA 0.12，比 canvas 内 0.28 柔 → 避免抢灯条/文字）
+   · 左右下 inset 1.5px 露外层白边，top inset=0 与 canvas 底部无缝衔接 */
+.slots-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0 2.2px 2.2px 2.2px;     /* v25：1.5px → 2.2px 对齐 canvas 白线粗细 */
+  z-index: 1;
+  background:
+    /* v31 顶层：和 canvas 草皮共享的像素级肌理（水平短纹 · 纯明度抖动）
+       JS 启动时从 drawBoard 的 _grassNoiseLayer 导出为 dataURL 注入
+       size 固定 100% 100% → 和 canvas 同比例铺满，视觉无缝衔接 */
+    var(--grass-noise, none),
+    /* 中层：割草条纹（18px 一组 · 明暗交替 · 柔和半透 不抢主体） */
+    repeating-linear-gradient(180deg,
+      rgba(255,255,230,0.00) 0px,
+      rgba(255,255,230,0.12) 9px,
+      rgba(15,48,16,0.00) 18px,
+      rgba(15,48,16,0.12) 27px,
+      rgba(15,48,16,0.00) 36px
+    ),
+    /* 底层：草绿渐变基底（v26 对齐参考图 · 顶部严格对齐 canvas 新近处色 #5cb03f）
+       · 0%：#5cb03f（和 canvas 新近处 grassGrad 末端无缝）
+       · 45%：#4c9830
+       · 100%：#377420 */
+    linear-gradient(180deg,
+      #5cb03f 0%,
+      #4c9830 45%,
+      #377420 100%);
+  background-size:
+    100% 100%,      /* 肌理层：拉伸贴满 */
+    auto,           /* 割草条纹：保持 18px 间距 */
+    100% 100%;      /* 渐变基底：铺满 */
+  background-repeat:
+    no-repeat,
+    repeat,
+    no-repeat;
+  clip-path: polygon(0% 0%, 100% 0%, calc(100% - 17.8px) 100%, 17.8px 100%);
+  pointer-events: none;
+}
+
+/* ─── Section 返还展示："获得 $ XX" 结算带文字 ─── (v5 融入式)
+   ─ 不再是独立圆角胶囊，而是"结算带（slots-wrap 延伸区）"里的一行裸文字
+   ─ 无 background / border / box-shadow / border-radius —— 形状让位于内容
+   ─ ::before 轻微金色柔光：给数字视觉重量但无硬边界
+   ─ 文字加深色 halo：保持在深蓝底上的清晰度
+   ─ 位置：在 padding-bottom 26px 带内居中（bottom:5px）
+   ─ 动画：保留淡入 + 上浮 + bump 脉冲 */
+.section-won {
+  position: absolute;
+  left: 50%;
+  bottom: 4px;                  /* v12: 20px 厚度带内（文字 ~17px，离底 4px） */
+  transform: translate(-50%, 0) translateY(3px);
+  opacity: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;                   /* v12: 去掉 padding —— 字号上调后靠字体自身尺寸撑开 */
+  /* 去掉：background / border / border-radius / box-shadow —— 让"胶囊"形状消失 */
+  font-family: 'Chakra Petch', sans-serif;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  z-index: 4;                   /* v9: 在 ::before(0) 和 ::after(1) 之上 */
+  transition:
+    opacity 0.26s ease,
+    transform 0.30s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+/* ::before：数字背后的柔金光晕 —— 给文字视觉重量但无硬边界
+   —— 这是"聚光灯打在结算数字上"而不是"外贴的圆角方块" */
+.section-won::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100% + 28px);
+  height: calc(100% + 10px);
+  background: radial-gradient(ellipse 55% 55% at 50% 50%,
+    rgba(255, 200, 70, 0.11) 0%,
+    rgba(255, 200, 70, 0.04) 45%,
+    rgba(255, 200, 70, 0) 75%);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.30s ease;
+  pointer-events: none;
+  filter: blur(0.5px);
+}
+.section-won.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.section-won.visible::before {
+  opacity: 1;
+}
+.section-won .sw-label {
+  font-size: 13px;               /* v12: 11 → 13 (字号上调) */
+  /* v37：暖米灰过暗 → 提亮至近白暖调
+   * 复盘：rgba(215,210,195,0.72) 在深蓝底上对比度不足，读不清
+   * 新色：rgba(245,240,225,0.95) 暖近白 · 高 alpha 保对比，色温仍与金黄数字同向（不冷冲）*/
+  color: rgba(245, 240, 225, 0.95);
+  font-weight: 600;              /* 500 → 600：加粗一级让笔画更清晰 */
+  letter-spacing: 0.12em;        /* 字间距稍加 · 更显 label 气质 */
+  /* 深色外描：双层加强可读性 */
+  text-shadow:
+    0 1px 2px rgba(0, 12, 30, 0.90),
+    0 0 1px rgba(0, 12, 30, 0.75);
+}
+.section-won .sw-value {
+  font-size: 17px;               /* v12: 14 → 17 (字号上调 + 去掉美元符号，让数值本身更突出) */
+  font-weight: 800;
+  color: #ffd966;                /* 金黄：呼应页面底部"余额"的金色，视觉语言 = "钱" */
+  letter-spacing: 0.02em;
+  min-width: 3ch;
+  text-align: left;
+  display: inline-block;
+  /* 双层 text-shadow：外层深色 halo 提对比 + 内层金色柔光强化发光感 */
+  text-shadow:
+    0 0 5px rgba(255, 210, 80, 0.35),
+    0 1px 2px rgba(0, 12, 30, 0.90);
+  transition: color 0.30s ease, text-shadow 0.30s ease;
+}
+/* 每球落槽的 +won bump：scale + 金色发光脉冲 */
+.section-won.bump .sw-value {
+  animation: swBump 0.40s cubic-bezier(0.2, 0.9, 0.25, 1);
+}
+.section-won.bump::before {
+  animation: swGlow 0.50s ease-out;
+}
+@keyframes swBump {
+  0%   { transform: scale(1);
+         text-shadow: 0 0 5px rgba(255,210,80,0.35), 0 1px 2px rgba(0,12,30,0.90); }
+  35%  { transform: scale(1.14);
+         text-shadow: 0 0 10px rgba(255,220,90,0.85),
+                      0 0 3px rgba(255,240,160,0.7),
+                      0 1px 2px rgba(0,12,30,0.90); }
+  100% { transform: scale(1);
+         text-shadow: 0 0 5px rgba(255,210,80,0.35), 0 1px 2px rgba(0,12,30,0.90); }
+}
+@keyframes swGlow {
+  0%   { opacity: 1; transform: translate(-50%, -50%) scale(0.9); }
+  40%  { opacity: 1; transform: translate(-50%, -50%) scale(1.25); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
 /* 槽位容器：上下两部分——蓝色灯条 + 白色数字 */
@@ -613,17 +824,18 @@ body {
   pointer-events: none;
 }
 
-/* 下方倍率文字：白色 + 深蓝描边（不用金色） */
+/* 下方倍率文字：白色 + 深绿描边（v24：槽位底变绿茵后，深蓝描边在绿底上失去意义）
+   · #0c2d10 是深得接近黑的森林绿 → 在绿茵上既提供强对比又不"破绿" */
 .slot .slot-val {
   font-size: 11px;
   font-weight: 800;
   color: #fff;
   letter-spacing: 0.3px;
   text-shadow:
-    -1px 0 var(--ui-blue-edge),
-    1px 0 var(--ui-blue-edge),
-    0 -1px var(--ui-blue-edge),
-    0 1px var(--ui-blue-edge),
+    -1px 0 #0c2d10,
+    1px 0 #0c2d10,
+    0 -1px #0c2d10,
+    0 1px #0c2d10,
     0 2px 3px rgba(0,0,0,0.5);
   white-space: nowrap;
 }
@@ -714,7 +926,8 @@ body {
   justify-content: center;
   align-items: center;
   align-content: start;   /* 禁用行拉伸：flex:1 带来的多余空间堆到底部，不塞进 row 1 */
-  border-top: 1px solid rgba(140,180,225,0.18);
+  /* v5 整体化：结算带延续后，这条顶线被削弱到几乎隐形，避免打断"结算 → 控件"的连续深蓝 */
+  border-top: 1px solid rgba(140,180,225,0.06);
   position: relative;
 }
 .controls::before { content: none; }
@@ -1474,12 +1687,12 @@ body {
   position: absolute;
   pointer-events: none;
   font-family: 'Chakra Petch', sans-serif;
-  font-size: 20px;
+  font-size: 16px;            /* v17: 20 → 16 缩小飘字，更精致不抢戏 */
   font-weight: 900;
   color: #fff;
   white-space: nowrap;
   z-index: 30;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;      /* v17: 字号缩小同步收窄字距，视觉密度一致 */
   animation: splitFloat 1.2s ease-out forwards;
   text-shadow:
     0 0 10px rgba(120,255,220,1),
@@ -1487,10 +1700,11 @@ body {
     0 0 40px rgba(0,180,255,0.5);
 }
 @keyframes splitFloat {
+  /* v15: 上飘距离 -28/-60 → -12/-28，文字始终停留在分裂钉附近而非飘到画面上部 */
   0%   { opacity: 1; transform: translateX(-50%) scale(0.6); }
   20%  { opacity: 1; transform: translateX(-50%) scale(1.25); }
-  60%  { opacity: 1; transform: translateX(-50%) translateY(-28px) scale(1); }
-  100% { opacity: 0; transform: translateX(-50%) translateY(-60px) scale(0.85); }
+  60%  { opacity: 1; transform: translateX(-50%) translateY(-12px) scale(1); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-28px) scale(0.85); }
 }
 
 /* ─── 设置按钮（废弃，保留占位） ─── */
@@ -1960,17 +2174,16 @@ body {
 
 
   <!-- History Bar -->
+  <!-- 左端时钟 icon：视觉锚点，让玩家一眼识别这是"历史记录"；
+       倍率徽章列表初始清空，仅在真实结算后通过 addHistory(m) 追加 -->
   <div class="history-bar">
-    <div class="hist-list">
-      <div class="hist-badge h-high">3×</div>
-      <div class="hist-badge h-great">1.2×</div>
-      <div class="hist-badge h-low">0.4×</div>
-      <div class="hist-badge h-good">1.1×</div>
-      <div class="hist-badge h-mid">1×</div>
-      <div class="hist-badge h-good">1.1×</div>
-      <div class="hist-badge h-jackpot">25×</div>
-      <div class="hist-badge h-orange">1.6×</div>
+    <div class="hist-icon" aria-label="历史倍率">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="9"></circle>
+        <polyline points="12 7 12 12 15.5 14"></polyline>
+      </svg>
     </div>
+    <div class="hist-list"></div>
   </div>
 
   <!-- 球门发球区：白色球门 + 网内一堆足球 -->
@@ -1988,30 +2201,40 @@ body {
     <canvas class="board-canvas" id="board"></canvas>
 
     <!-- 高倍率球图例（hiMult 开启时显示在左上） -->
+    <!-- v20 金球 ×4 → ×3：E[extraMult] 从 1.41 修正到 1.20，维持 hiMult 下 98% RTP -->
     <div class="mult-legend" id="multLegend" aria-hidden="true">
       <span class="ml-item"><span class="ml-ball ml-b-normal"></span>1×</span>
       <span class="ml-item"><span class="ml-ball ml-b-blue"></span>2×</span>
-      <span class="ml-item"><span class="ml-ball ml-b-gold"></span>4×</span>
+      <span class="ml-item"><span class="ml-ball ml-b-gold"></span>3×</span>
     </div>
   </div>
 
-  <!-- Slots (初始占位，onload 后由 rebuildSlotDom 重建) -->
-  <div class="slots">
-    <div class="slot s-jackpot"><div class="slot-bar"></div><div class="slot-val">25×</div></div>
-    <div class="slot s-high"><div class="slot-bar"></div><div class="slot-val">3×</div></div>
-    <div class="slot s-orange"><div class="slot-bar"></div><div class="slot-val">2×</div></div>
-    <div class="slot s-orange"><div class="slot-bar"></div><div class="slot-val">1.6×</div></div>
-    <div class="slot s-yellow"><div class="slot-bar"></div><div class="slot-val">1.2×</div></div>
-    <div class="slot s-warm"><div class="slot-bar"></div><div class="slot-val">1.1×</div></div>
-    <div class="slot s-neutral"><div class="slot-bar"></div><div class="slot-val">1×</div></div>
-    <div class="slot s-low"><div class="slot-bar"></div><div class="slot-val">0.4×</div></div>
-    <div class="slot s-neutral"><div class="slot-bar"></div><div class="slot-val">1×</div></div>
-    <div class="slot s-warm"><div class="slot-bar"></div><div class="slot-val">1.1×</div></div>
-    <div class="slot s-yellow"><div class="slot-bar"></div><div class="slot-val">1.2×</div></div>
-    <div class="slot s-orange"><div class="slot-bar"></div><div class="slot-val">1.6×</div></div>
-    <div class="slot s-orange"><div class="slot-bar"></div><div class="slot-val">2×</div></div>
-    <div class="slot s-high"><div class="slot-bar"></div><div class="slot-val">3×</div></div>
-    <div class="slot s-jackpot"><div class="slot-bar"></div><div class="slot-val">25×</div></div>
+  <!-- Slots 包裹层：容纳倍率槽 + 浮沉式"获得"胶囊（胶囊绝对定位，不占布局高度）-->
+  <div class="slots-wrap">
+    <!-- Slots (初始占位，onload 后由 rebuildSlotDom 重建) -->
+    <div class="slots">
+      <div class="slot s-jackpot"><div class="slot-bar"></div><div class="slot-val">25×</div></div>
+      <div class="slot s-high"><div class="slot-bar"></div><div class="slot-val">3×</div></div>
+      <div class="slot s-orange"><div class="slot-bar"></div><div class="slot-val">2×</div></div>
+      <div class="slot s-orange"><div class="slot-bar"></div><div class="slot-val">1.6×</div></div>
+      <div class="slot s-yellow"><div class="slot-bar"></div><div class="slot-val">1.2×</div></div>
+      <div class="slot s-warm"><div class="slot-bar"></div><div class="slot-val">1.1×</div></div>
+      <div class="slot s-neutral"><div class="slot-bar"></div><div class="slot-val">1×</div></div>
+      <div class="slot s-low"><div class="slot-bar"></div><div class="slot-val">0.4×</div></div>
+      <div class="slot s-neutral"><div class="slot-bar"></div><div class="slot-val">1×</div></div>
+      <div class="slot s-warm"><div class="slot-bar"></div><div class="slot-val">1.1×</div></div>
+      <div class="slot s-yellow"><div class="slot-bar"></div><div class="slot-val">1.2×</div></div>
+      <div class="slot s-orange"><div class="slot-bar"></div><div class="slot-val">1.6×</div></div>
+      <div class="slot s-orange"><div class="slot-bar"></div><div class="slot-val">2×</div></div>
+      <div class="slot s-high"><div class="slot-bar"></div><div class="slot-val">3×</div></div>
+      <div class="slot s-jackpot"><div class="slot-bar"></div><div class="slot-val">25×</div></div>
+    </div>
+
+    <!-- Section 返还：浮沉标签，位于倍率槽下方预留区，不遮挡倍率数字。每球落槽 +won；2.5s 无新球即淡出 -->
+    <div class="section-won" id="sectionWon">
+      <span class="sw-label">获得</span>
+      <span class="sw-value" id="sectionWonVal">0.0</span>
+    </div>
   </div>
 
   <!-- Controls: grid 布局，中心 开始 足球按钮 -->
@@ -2021,7 +2244,7 @@ body {
       <span class="fb-left">
         <span class="fb-label">特色功能</span>
         <span class="fb-icons" aria-hidden="true">
-          <span class="bf-icon" data-key="split" title="分裂钉">
+          <span class="bf-icon" data-key="split" title="裂变足球">
             <svg viewBox="0 0 24 24"><path d="M12 2l2.6 5.3 5.9.9-4.25 4.1 1 5.8L12 15.8 6.75 18.1l1-5.8L3.5 8.2l5.9-.9L12 2z"/></svg>
           </span>
           <span class="bf-icon" data-key="respin" title="免费足球">
@@ -2155,8 +2378,8 @@ body {
         <svg viewBox="0 0 24 24"><path d="M12 2l2.6 5.3 5.9.9-4.25 4.1 1 5.8L12 15.8 6.75 18.1l1-5.8L3.5 8.2l5.9-.9L12 2z"/></svg>
       </div>
       <div class="buy-row-main">
-        <span class="buy-row-title">分裂钉</span>
-        <span class="buy-row-desc">足球碰撞后会分裂X2</span>
+        <span class="buy-row-title">裂变足球</span>
+        <span class="buy-row-desc">碰撞分裂钉会裂变成2个球</span>
         <span class="buy-row-cost">花费 <span id="costSplit">+0.6</span></span>
       </div>
       <label class="buy-toggle">
@@ -2262,61 +2485,77 @@ const WALL_SLOPE = 0.19;                             // 缓梯形（参考图：
 // domeR(d) = 3*d/4 — 壁顶开口始终与外沿钉对齐
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  分裂钉布局：基于严密数学推导的预设表
+//  分裂钉布局：基于严格数学推导的按 (行数, 难度) 二维预设表
 // ═══════════════════════════════════════════════════════════════════════════
 //  记号：(r, c) 表示第 r 行（0-indexed）、第 c 列钉子（该行路径可达 col ∈ [1, r+1]）
+//  第 r 行共有 r+3 个钉，路径位于下方 2 个钉之间；底部 R+1 个倍率槽。
 //
-//  数学模型：
-//    - Plinko 梯形板，第 r 行有 r+3 个钉、R+1 个底槽
-//    - 球每撞钉 50/50 向左/右偏移 d/2
-//    - 命中概率  P_hit(r, c) = C(r, c-1) / 2^r
-//    - 分裂后子球：左 (r+1, c)、右 (r+1, c+1)，weight = 0.55 × 父
-//    - 子球期望倍率：E_child = Σ C(R-r-1, k)/2^(R-r-1) × M[offset+k]
-//    - 单球分裂增益：gain(r,c) = P_hit × (E_L + E_R) × 0.05
-//                   (推导：0.55×(E_L+E_R) - 0.5×(E_L+E_R) = 0.05×(E_L+E_R))
-//    - 分裂分离度：sep = |E_R − E_L|，衡量"左右子球走向不同"的可感知程度
+//  v6（2026-04-24）严格数学推导：
+//  ────────────────────────────────────────────────
+//  1. 成本模型：开启"分裂"特色功能 = 投注 × 1.6（+60%），玩家单轮实际支出 = 1.6B
+//  2. 单球期望返还 E_single 用 **精确递归期望**（非 Monte Carlo）计算：
+//       E(r, c, mask) =
+//         若 r == R：M[c-1]（落入底槽倍率）
+//         若 (r, c) ∈ S 且 mask 未置位：触发分裂 → E(r+1,c,mask') + E(r+1,c+1,mask')（父球+副球）
+//         否则：0.5 × (E(r+1,c,mask) + E(r+1,c+1,mask))
+//       起点 E(0, 1, 0)，mask 为 bitfield 防同钉重复触发。
+//  3. RTP_split = E(0, 1, 0) / 1.6，目标 98%；约束：**RTP ≤ 98%** 且最接近（防止庄家亏损）
+//  4. 搜索空间：左右对称对 (r, c_left) + (r, r+2-c_left)，K ∈ {0, 2, 4}，r ∈ [2, R-1]
+//       · 对称轴为该行钉子几何中心 (r+2)/2（代码验证：pegX = cx - (row+2)*d/2 + col*d）
+//       · K=4 要求两对异行或同行列距 ≥ 2，避免乒乓反弹
+//  5. 对每个 (R ∈ [8,16], mode ∈ {0,1,2}) 独立全搜索 → 27 组最优解
 //
-//  优化目标：composite = gain × (1 + α × sep/(E_L+E_R))，α=2.5
-//  设计约束：左右严格对称、同行最多 2 钉、双层分布（浅+深）、避 sep=0 中心钉
+//  精确 RTP_split 结果（所有值 ∈ [96.09%, 98.00%]，严格 ≤ 98%，庄家永不亏损）：
+//     R\模式      佛系          激进          疯狂
+//      8       97.66%        96.09%        97.22%
+//      9       97.85%        98.00%        97.34%
+//     10       97.78%        97.79%        97.99%
+//     11       97.95%        97.97%        97.94%
+//     12       97.72%        97.89%        97.94%
+//     13       98.00%        97.98%        97.98%
+//     14       97.93%        97.99%        97.97%
+//     15       97.99%        97.99%        97.90%
+//     16       97.98%        97.93%        97.95%
+//   注：R=8 激进 96.09% 是全搜索理论上限（倍率表 E0=0.928，分裂增益受限）。
 //
-//  V4 重设计（2026-04，考虑 split 开启 +60% 成本，目标每球期望命中 ≥ 85%）：
-//  设计原则：
-//    1. 每行 K=4 双层布局（浅锚 r=4 + 深层按行数缩放），保证触发密度
-//    2. 仅用 "偶数行 + 中心±1 列" 对称组合，该 2 钉列距=2 不相邻（避免相邻钉的乒乓反弹）
-//    3. 浅层 r=4 提供即时分裂刺激；深层位置随 R 上移至 R/2 附近，让子球仍有足够下落空间
-//    4. P_hit 为单钉命中概率，sum 表示每球期望命中的分裂钉次数（含链式）
-//
-//  推导结果（Monte Carlo 200k 样本/行数）：
-//    R=8   K=4  (4,2)(4,4)(6,3)(6,5)    p_hit_sum=96.8%
-//    R=9   K=4  (4,2)(4,4)(6,3)(6,5)    p_hit_sum=96.8%
-//    R=10  K=4  (4,2)(4,4)(8,4)(8,6)    p_hit_sum=93.8%
-//    R=11  K=4  (4,2)(4,4)(8,4)(8,6)    p_hit_sum=93.8%
-//    R=12  K=4  (4,2)(4,4)(8,4)(8,6)    p_hit_sum=93.8%
-//    R=13  K=4  (4,2)(4,4)(10,5)(10,7)  p_hit_sum=91.1%
-//    R=14  K=4  (4,2)(4,4)(10,5)(10,7)  p_hit_sum=91.1%
-//    R=15  K=4  (4,2)(4,4)(12,6)(12,8)  p_hit_sum=88.7%
-//    R=16  K=4  (4,2)(4,4)(14,7)(14,9)  p_hit_sum=86.5%
-//  相较 V3：R=9 从 31% → 96.8% 彻底解决高行数无分裂问题；R=10-12 从 122% 收敛到 94%
-//  与 60% 成本加成更匹配（玩家花钱即有高概率体验分裂效果）。
+//  推导与搜索脚本：/tmp/plinko_rtp.py + /tmp/plinko_search.py
 // ═══════════════════════════════════════════════════════════════════════════
+//  数据结构：SPLIT_PRESETS[rows] = [pegs_佛系, pegs_激进, pegs_疯狂]
+//           每个 pegs = [[r, c], ...] 对称分裂钉坐标对列表
 const SPLIT_PRESETS = {
-  8:  [[4,2],[4,4],[6,3],[6,5]],
-  9:  [[4,2],[4,4],[6,3],[6,5]],
-  10: [[4,2],[4,4],[8,4],[8,6]],
-  11: [[4,2],[4,4],[8,4],[8,6]],
-  12: [[4,2],[4,4],[8,4],[8,6]],
-  13: [[4,2],[4,4],[10,5],[10,7]],
-  14: [[4,2],[4,4],[10,5],[10,7]],
-  15: [[4,2],[4,4],[12,6],[12,8]],
-  16: [[4,2],[4,4],[14,7],[14,9]],
+  //     佛系                              激进                              疯狂
+  8:  [ [[3,2],[3,3]],                    [[5,2],[5,5],[7,4],[7,5]],        [[4,2],[4,4],[7,1],[7,8]]   ],
+  9:  [ [[4,1],[4,5],[8,4],[8,6]],        [[5,3],[5,4],[8,2],[8,8]],        [[5,1],[5,3],[5,4],[5,6]]   ],
+  10: [ [[5,2],[5,5],[9,3],[9,8]],        [[5,3],[5,4],[6,2],[6,6]],        [[3,2],[3,3],[9,2],[9,9]]   ],
+  11: [ [[6,2],[6,6],[9,4],[9,7]],        [[3,2],[3,3],[8,1],[8,9]],        [[4,2],[4,4],[7,4],[7,5]]   ],
+  12: [ [[3,2],[3,3],[7,1],[7,8]],        [[2,1],[2,3],[8,1],[8,9]],        [[3,1],[3,4],[7,4],[7,5]]   ],
+  13: [ [[7,3],[7,6],[12,5],[12,9]],      [[8,4],[8,6],[9,4],[9,7]],        [[4,2],[4,4],[8,4],[8,6]]   ],
+  14: [ [[5,2],[5,5],[10,3],[10,9]],      [[6,2],[6,6],[9,3],[9,8]],        [[8,3],[8,7],[11,4],[11,9]] ],
+  15: [ [[4,2],[4,4],[13,4],[13,11]],     [[2,1],[2,3],[8,1],[8,9]],        [[5,2],[5,5],[13,5],[13,10]]],
+  16: [ [[9,4],[9,7],[11,6],[11,7]],      [[7,4],[7,5],[13,5],[13,10]],     [[3,1],[3,4],[10,1],[10,11]]],
 };
 
 function getSplits() {
   if (!(window.buyFeatures && window.buyFeatures.split)) return [];
-  const preset = SPLIT_PRESETS[selectedRows];
-  if (!preset) return [];
+  const presetByMode = SPLIT_PRESETS[selectedRows];
+  if (!presetByMode) return [];
+  // 按难度模式（0=佛系 / 1=激进 / 2=疯狂）取对应预设
+  const idx = (typeof modeIdx === 'number' && modeIdx >= 0 && modeIdx < presetByMode.length) ? modeIdx : 0;
+  const preset = presetByMode[idx] || presetByMode[0];
   return preset.map(([r, c]) => [r, c]);
 }
+
+// v28 像素级噪点缓存（草皮真实颗粒肌理的核心）
+// ────────────────────────────────────────────────────────────────
+//   ctx.arc(x,y,0.3) 画出来的"颗粒"永远是模糊圆斑（抗锯齿所致），
+//   再小也像"点"不像"噪点"。真实草皮照片的颗粒是 PIXEL 级别的：
+//   每个 1×1 像素独立决定亮/暗，颗粒数 = W×H（几十万级），这才叫肌理。
+//   性能策略：只在 W/H 变化时生成一次，后续每帧 drawImage(cache) 即可
+// v31：同步生成一份 dataURL 注入 CSS 变量 --grass-noise，
+//       让底部 slot 区域（.slots-wrap::after）共享同一套像素肌理 → 视觉统一
+let _grassNoiseLayer = null;
+let _grassNoiseKey   = '';
+let _grassNoiseTileURL = '';
 
 function drawBoard(glows = {}) {
   const canvas = document.getElementById('board');
@@ -2338,7 +2577,12 @@ function drawBoard(glows = {}) {
   const rowH       = d * Math.sqrt(3) / 2;
   const H          = padT + ROW_H16 * ROWS_MAX + padB - 14;  // canvas 高度（较原始固定高 -14px，目标 ≈360px）
 
-  const dpr = window.devicePixelRatio || 1;
+  // v13 HiDPI：钉子在高行数下直径仅 5~6 CSS px；若 dpr=1（普通屏/外接低分屏），
+  //   整圈 radial gradient 只有 5~6 个实体像素，色阶全部糊在一起 → "低分辨率"观感。
+  //   策略：在 1× 设备上强制 2× 渲染（相当于手动开高清），保证任意行数下钉子仍有
+  //   足够采样点；Retina 设备 dpr=2/3 不受影响，直接沿用原生像素密度。
+  //   性能：canvas 内部面积 ×4，对于 378×360 × max 230 钉来说 60fps 仍稳（M1+Chrome 实测）。
+  const dpr = Math.max(2, window.devicePixelRatio || 1);
   canvas.width  = W * dpr;
   canvas.height = H * dpr;
   canvas.style.width  = W + 'px';
@@ -2348,6 +2592,9 @@ function drawBoard(glows = {}) {
 
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
+  // v13：开启高质量图像平滑，确保缩放 / gradient 边缘抗锯齿最佳
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
   const cx   = W / 2;
   const pegR = Math.min(rowH, d) * 0.17;
 
@@ -2421,6 +2668,26 @@ function drawBoard(glows = {}) {
   ctx.fillStyle = spotRight;
   ctx.fillRect(W - 200, 0, 200, 260);
 
+  // ── v22 体育场舞台聚光灯（从屏外虚拟灯柱投下的体积光锥）─────────
+  //   设计意图：舞台打光成为视觉主体 —— 四道光从屏外 y<0 辐射进场地
+  //   前排两道（暖白主光）+ 后排两道（冷白补光），色温拉开制造"被多灯打到"的真实感
+  //   峰值 alpha 0.18~0.28，避免盖过钉子；光晕半径到达钉阵顶部仍有 40%+ 强度
+  const spotLights = [
+    { x: 0.08 * W, y: -70,  r: 340, c: '255,248,215', a: 0.28 }, // 前排左 · 暖白主光
+    { x: 0.92 * W, y: -70,  r: 340, c: '255,248,215', a: 0.28 }, // 前排右 · 暖白主光
+    { x: 0.22 * W, y: -120, r: 300, c: '220,235,255', a: 0.18 }, // 后排左 · 冷白补光
+    { x: 0.78 * W, y: -120, r: 300, c: '220,235,255', a: 0.18 }, // 后排右 · 冷白补光
+  ];
+  for (const L of spotLights) {
+    const lg = ctx.createRadialGradient(L.x, L.y, 0, L.x, L.y, L.r);
+    lg.addColorStop(0,    `rgba(${L.c},${L.a})`);
+    lg.addColorStop(0.40, `rgba(${L.c},${L.a * 0.50})`);
+    lg.addColorStop(0.75, `rgba(${L.c},${L.a * 0.15})`);
+    lg.addColorStop(1,    `rgba(${L.c},0)`);
+    ctx.fillStyle = lg;
+    ctx.fillRect(L.x - L.r, 0, L.r * 2, L.r * 2);
+  }
+
   // ── 球场草坪梯形（缓和透视、宽顶口、深浅横条）──────────────────
   const domeBottomY = mwH - 9;
   const tubeL = cx - 130;  // 顶部开口宽（参考图：场地上沿宽度≈底边的70%）
@@ -2442,91 +2709,209 @@ function drawBoard(glows = {}) {
   ctx.closePath();
   ctx.clip();  // 梯形区域裁剪
 
-  // 基底草绿（明亮自然绿）
-  const grassGrad = ctx.createLinearGradient(0, domeBottomY, 0, botY);
-  grassGrad.addColorStop(0,    '#6bc04d');   // 远处略亮
-  grassGrad.addColorStop(0.4,  '#5fb344');   // pitch-light
-  grassGrad.addColorStop(0.75, '#4fa138');   // pitch-mid
-  grassGrad.addColorStop(1,    '#408a2c');   // pitch-dark
-  ctx.fillStyle = grassGrad;
-  ctx.fillRect(0, domeBottomY - 4, W, botY - domeBottomY + 6);
+  // ═════════════════════════════════════════════════════════════════
+  // v23 真实草皮设计（对标参考图 · 颗粒质感 + 柔边条纹 + 真实标线）
+  // 核心思路：真实草皮 ≠ "绘制很多小草"，而是 "密集半透明颗粒营造的噪点肌理"
+  //          + "6 条柔边明暗条纹" + "细腻的边缘过渡"
+  // ═════════════════════════════════════════════════════════════════
 
-  // 横向草坪条纹（明暗交替模拟割草机痕迹）
   const fieldH  = botY - domeBottomY;
+
+  // ═══════════════════════════════════════════════════════════════════
+  // v27 草坪重构（精细对标参考图：8 条纹 + 6100 颗细密粒 + 柔中央光）
+  //   复盘 v26 差距：
+  //     · 条纹数量错了：参考图是 7-8 条等宽条纹（不是 4 条宽带）
+  //     · 条纹边界太柔：参考图条纹边界更硬（接近 flat fill，不是 linearGradient 峰值）
+  //     · 颗粒密度不够：参考图是"胶片颗粒"级别的密度
+  //     · 中央光偏强：参考图中央亮但内敛，不应像"打光"
+  //   v27 对策：
+  //     1) 条纹 4→8，改用 flat fill + 锐边（不再用 edge→peak→edge 柔渐变）
+  //     2) 颗粒 3700→6100（5000 超细 + 800 中 + 300 高光）
+  //     3) 主光 alpha 0.22→0.13，外围补光 0.10→0.06
+  // ═══════════════════════════════════════════════════════════════════
+
+  // 1) 基底草绿（v27 保留 v26 色彩 · 已对标参考图）
+  const grassGrad = ctx.createLinearGradient(0, domeBottomY, 0, botY);
+  grassGrad.addColorStop(0,    '#4f9d34');
+  grassGrad.addColorStop(0.5,  '#6ec14d');
+  grassGrad.addColorStop(1,    '#5cb03f');
+  ctx.fillStyle = grassGrad;
+  ctx.fillRect(0, domeBottomY - 4, W, fieldH + 8);
+
+  // 2) 割草条纹（v27：8 条等分 · flat fill 锐边）
+  //    关键：不再用 linearGradient 中心峰值，而是用 solid rgba 直接 fill
+  //    → 条纹边界保持锐利（近似参考图的"割草推杆"切换感）
+  //    亮条 alpha 0.15、暗条 alpha 0.18（参考图条纹对比并非戏剧化）
+  //    顶/底两端各留 1px "抗锯齿过渡条"，避免条纹和 clip 边缘太硬
   const stripeN = 8;
   const stripeH = fieldH / stripeN;
   for (let i = 0; i < stripeN; i++) {
     const yA = domeBottomY + i * stripeH;
-    // 浅条加白提亮；深条加绿压暗
-    ctx.fillStyle = (i % 2 === 0) ? 'rgba(255,255,230,0.14)' : 'rgba(30,90,30,0.18)';
-    ctx.fillRect(0, yA, W, stripeH + 0.5);
+    const isLight = (i % 2 === 0);
+    // flat fill：整条同色同 alpha
+    ctx.fillStyle = isLight
+      ? 'rgba(255,255,200,0.15)'
+      : 'rgba(8,44,10,0.18)';
+    ctx.fillRect(0, yA, W, stripeH);
+  }
+  // 2.5) 条纹之间极细的过渡线（1px · 让硬边不显生硬）
+  for (let i = 1; i < stripeN; i++) {
+    const yA = domeBottomY + i * stripeH;
+    // 在边界 y 处涂 0.08 alpha 黑，让两条之间过渡一个像素
+    ctx.fillStyle = 'rgba(0,25,5,0.08)';
+    ctx.fillRect(0, yA - 0.5, W, 1);
   }
 
-  // 细密垂直草丝纹理
-  for (let i = 0; i < stripeN; i++) {
-    const yA = domeBottomY + i * stripeH;
-    const isLight = (i % 2 === 0);
-    const grassColor = isLight ? 'rgba(255,255,230,' : 'rgba(30,80,25,';
-    const grassAlpha = isLight ? 0.10 : 0.14;
-    const grassCount = 70;
-    for (let g = 0; g < grassCount; g++) {
-      const gx = Math.random() * W;
-      const gy = yA + Math.random() * stripeH;
-      const gh = 1.2 + Math.random() * 2.5;
-      ctx.strokeStyle = grassColor + grassAlpha + ')';
-      ctx.lineWidth = 0.7;
-      ctx.beginPath();
-      ctx.moveTo(gx, gy);
-      ctx.lineTo(gx + (Math.random() - 0.5) * 0.6, gy - gh);
-      ctx.stroke();
+  // 3) ═══ 草皮像素级噪点（v30：方向性短纹 · 模拟草叶横躺方向 · 零色相漂移）═══
+  //    v29 复盘：纯随机单像素 → "磨砂玻璃感"，缺少真实草皮方向性
+  //    v30 新原理：水平方向 1-3px 短条共享同一明度，模拟草叶躺倒方向
+  //      · 35% 微暗短条（纯黑 alpha 9-24 · 水平 1-3px）
+  //      · 30% 微亮短条（纯白 alpha 7-18 · 水平 1-3px）
+  //      · 35% 透明间隔（基底色原封不动透过来）
+  //    仍然只做明度抖动（无色相漂移）· 但相邻像素聚合成短纹 = 草叶走向
+  //    alpha 降低 · 密度降低 · 避免"噪点毯"感
+  const noiseKey = `${W}_${H}`;
+  if (!_grassNoiseLayer || _grassNoiseKey !== noiseKey) {
+    _grassNoiseLayer = document.createElement('canvas');
+    _grassNoiseLayer.width  = W;
+    _grassNoiseLayer.height = H;
+    const nctx = _grassNoiseLayer.getContext('2d');
+    const imgData = nctx.createImageData(W, H);
+    const data = imgData.data;
+
+    // seeded random 保证稳定（不闪烁）
+    let seed = 0x13579BDF;
+    const rnd = () => {
+      seed = (seed * 48271) % 0x7FFFFFFF;
+      return seed / 0x7FFFFFFF;
+    };
+
+    // 逐行扫描 · 水平方向聚合短条
+    for (let y = 0; y < H; y++) {
+      let runEnd = 0;
+      let runColor = 0;  // 0=黑, 255=白
+      let runAlpha = 0;
+      for (let x = 0; x < W; x++) {
+        const i = (y * W + x) * 4;
+        // 到达短条尾部 → 重新决定下一段
+        if (x >= runEnd) {
+          const r = rnd();
+          const runLen = 1 + Math.floor(rnd() * 3);  // 1-3px 长
+          if (r < 0.35) {
+            // 35% 微暗短条
+            runColor = 0;
+            runAlpha = Math.floor(rnd() * 16 + 9);   // alpha 9-24
+          } else if (r < 0.65) {
+            // 30% 微亮短条
+            runColor = 255;
+            runAlpha = Math.floor(rnd() * 12 + 7);   // alpha 7-18
+          } else {
+            // 35% 透明间隔
+            runAlpha = 0;
+          }
+          runEnd = x + runLen;
+        }
+        if (runAlpha > 0) {
+          data[i]     = runColor;
+          data[i + 1] = runColor;
+          data[i + 2] = runColor;
+          data[i + 3] = runAlpha;
+        } else {
+          data[i + 3] = 0;
+        }
+      }
+    }
+    nctx.putImageData(imgData, 0, 0);
+    _grassNoiseKey = noiseKey;
+
+    // v31：导出 dataURL · 注入 CSS 变量让 slot 区域共享同一套肌理
+    try {
+      _grassNoiseTileURL = _grassNoiseLayer.toDataURL('image/png');
+      document.documentElement.style.setProperty(
+        '--grass-noise',
+        `url("${_grassNoiseTileURL}")`
+      );
+    } catch (e) {
+      // toDataURL 失败（如 CORS）时降级：slot 区域就不显示肌理，但不影响 canvas
     }
   }
 
-  // 散落的细小亮斑/暗斑
-  ctx.globalAlpha = 0.5;
-  for (let i = 0; i < 140; i++) {
-    const nx = Math.random() * W;
-    const ny = domeBottomY + Math.random() * fieldH;
-    const nr = 0.4 + Math.random() * 0.8;
-    const isHi = Math.random() < 0.5;
-    ctx.fillStyle = isHi ? 'rgba(255,255,220,0.22)' : 'rgba(30,70,25,0.22)';
-    ctx.beginPath(); ctx.arc(nx, ny, nr, 0, Math.PI * 2); ctx.fill();
-  }
-  ctx.globalAlpha = 1;
+  // 绘制噪点层（alpha 保持 1.0 · 因为单像素 alpha 已经极低）
+  ctx.drawImage(_grassNoiseLayer, 0, 0);
 
-  // 边缘暗角（左右立体感）
-  const edgeGrad = ctx.createLinearGradient(0, 0, W, 0);
-  edgeGrad.addColorStop(0,    'rgba(30,70,25,0.28)');
-  edgeGrad.addColorStop(0.18, 'rgba(30,70,25,0)');
-  edgeGrad.addColorStop(0.82, 'rgba(30,70,25,0)');
-  edgeGrad.addColorStop(1,    'rgba(30,70,25,0.28)');
-  ctx.fillStyle = edgeGrad;
+  // 3.5) 阳光光影（v27：大幅柔化主光 · 参考图中央亮但内敛）
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+
+  // 主光：alpha 0.22 → 0.13（降幅 41%），保留"中央比边缘稍亮"但不打光
+  const mainLight = ctx.createRadialGradient(
+    W * 0.50, domeBottomY + fieldH * 0.45, 0,
+    W * 0.50, domeBottomY + fieldH * 0.45, Math.min(W, fieldH) * 0.58
+  );
+  mainLight.addColorStop(0,    'rgba(255,255,200,0.13)');
+  mainLight.addColorStop(0.45, 'rgba(255,250,180,0.07)');
+  mainLight.addColorStop(1,    'rgba(255,240,160,0)');
+  ctx.fillStyle = mainLight;
   ctx.fillRect(0, domeBottomY, W, fieldH);
-  // 上方日光晕（远处略亮）
-  const topGlow = ctx.createLinearGradient(0, domeBottomY, 0, domeBottomY + fieldH * 0.4);
-  topGlow.addColorStop(0, 'rgba(255,255,230,0.18)');
-  topGlow.addColorStop(1, 'rgba(255,255,230,0)');
-  ctx.fillStyle = topGlow;
-  ctx.fillRect(0, domeBottomY, W, fieldH * 0.4);
 
-  // ── 禁区白色标线已整体去除（大禁区/小禁区/罚球点/D 弧）──
+  // 外围小斑：alpha 降一档
+  const sunPatches = [
+    { x: 0.20 * W, y: domeBottomY + 0.15 * fieldH, r: 100, a: 0.06 },
+    { x: 0.82 * W, y: domeBottomY + 0.28 * fieldH, r: 110, a: 0.05 },
+    { x: 0.68 * W, y: domeBottomY + 0.75 * fieldH, r: 95,  a: 0.05 },
+  ];
+  for (const S of sunPatches) {
+    const g = ctx.createRadialGradient(S.x, S.y, 0, S.x, S.y, S.r);
+    g.addColorStop(0,   `rgba(255,255,200,${S.a})`);
+    g.addColorStop(0.5, `rgba(255,250,180,${S.a * 0.5})`);
+    g.addColorStop(1,   'rgba(255,250,180,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(S.x - S.r, S.y - S.r, S.r * 2, S.r * 2);
+  }
   ctx.restore();
 
-  // ── canvas 底部与 pitch 之间的 padB 缺口：草绿 → slot 深蓝的柔和过渡 ──
-  // slot 顶色为 var(--ui-blue-deep) = #0e2f5c
-  const bottomFill = ctx.createLinearGradient(0, botY - 2, 0, H);
-  bottomFill.addColorStop(0, 'rgba(94,168,67,0)');    // 融入 pitch 底部，无硬边
-  bottomFill.addColorStop(0.5, '#1a3a6a');
-  bottomFill.addColorStop(1, '#0e2f5c');              // 与 .slots 顶色对齐
+  // 4) 极淡的左右暗角（v27 保持 v26 的 0.12）
+  const edgeGrad = ctx.createLinearGradient(0, 0, W, 0);
+  edgeGrad.addColorStop(0,    'rgba(10,40,15,0.12)');
+  edgeGrad.addColorStop(0.25, 'rgba(10,40,15,0)');
+  edgeGrad.addColorStop(0.75, 'rgba(10,40,15,0)');
+  edgeGrad.addColorStop(1,    'rgba(10,40,15,0.12)');
+  ctx.fillStyle = edgeGrad;
+  ctx.fillRect(0, domeBottomY, W, fieldH);
+
+  // 5) 顶部边缘极淡阴影（v27 保持 v26 的 0.15）
+  const topShade = ctx.createLinearGradient(0, domeBottomY, 0, domeBottomY + 22);
+  topShade.addColorStop(0, 'rgba(0,20,0,0.15)');
+  topShade.addColorStop(1, 'rgba(0,20,0,0)');
+  ctx.fillStyle = topShade;
+  ctx.fillRect(0, domeBottomY, W, 22);
+
+  // v25：v23 的大小禁区白线 + 罚球点已按用户要求删除
+  //   原因：钉子阵列太密，线被大面积覆盖；留下零碎线段反而显乱。
+  //   球场边界白线（梯形 3 边）在后面 apron 段落统一重绘。
+
+  ctx.restore();  // 退出草坪梯形 clip
+
+  // ── v26 canvas 底部 apron：对齐新 slots-wrap::after 顶色 #5cb03f ──
+  const apronTopY = botY - 4;
+  const bottomFill = ctx.createLinearGradient(0, apronTopY, 0, H);
+  bottomFill.addColorStop(0.00, 'rgba(92,176,63,0)');   // 融入 pitch 底部
+  bottomFill.addColorStop(0.50, 'rgba(92,176,63,0.35)');
+  bottomFill.addColorStop(1.00, '#5cb03f');             // 与 slots-wrap::after 顶色严格对齐
   ctx.fillStyle = bottomFill;
-  ctx.fillRect(0, botY - 2, W, H - botY + 2);
+  ctx.fillRect(0, apronTopY, W, H - apronTopY);
+
+  // v25 删除底部暗影横线：slots-wrap 绿茵底已延续下去，这条暗线反而是"断层"
+  //   原 rgba(0,0,0,0.38) * 1px 横线已移除
 
   // ── 球场边界白线（梯形外框）──
-  ctx.lineCap   = 'round';
+  //   v25：shadowBlur 5 → 0 · alpha 0.95 → 1.0 · lineCap round → butt
+  //   目的：白线变锐利干净，和 slots-wrap::before 的 2.2px 纯白描边严格一致，
+  //        不再有"球场白线发光 + 槽位白边清晰"的粗细/锐度不统一
+  ctx.lineCap   = 'butt';
   ctx.lineWidth = 2.2;
-  ctx.shadowBlur  = 5;
-  ctx.shadowColor = 'rgba(255,255,255,0.5)';
-  ctx.strokeStyle = 'rgba(255,255,255,0.95)';
+  ctx.shadowBlur  = 0;
+  ctx.strokeStyle = '#ffffff';
 
   // 顶线（球门线，水平）
   ctx.beginPath();
@@ -2543,8 +2928,7 @@ function drawBoard(glows = {}) {
   ctx.moveTo(tubeR, domeBottomY);
   ctx.lineTo(wallBR, botY);
   ctx.stroke();
-  // 底线不再绘制：pitch 底直接与下方 slot 赛况条用同色衔接，避免"暗条纹—白线—亮绿"的跳变
-  ctx.shadowBlur = 0;
+  // 底线不绘制：和 slots-wrap 绿茵底无缝衔接，.slots-wrap::before 接力画梯形边
 
   // ── Pegs ─────────────────────────────────────────────────────────────
   for (let row = 0; row < ROWS; row++) {
@@ -2588,11 +2972,16 @@ function drawBoard(glows = {}) {
         ctx.restore();
 
         // 3) 底部投影（徽章托举感）
-        const sh = ctx.createRadialGradient(x + 0.6, y + 2, 0, x + 0.6, y + 2, bodyR + 1.8);
+        // v13：原 offset (0.6, 2) + ext 1.8 固定 → bodyR=5 时投影比徽章还大。
+        //      改为 bodyR 比例化，保证小徽章下投影不喧宾夺主
+        const _bsOX = bodyR * 0.08;
+        const _bsOY = bodyR * 0.26;
+        const _bsExt = bodyR * 0.23;
+        const sh = ctx.createRadialGradient(x + _bsOX, y + _bsOY, 0, x + _bsOX, y + _bsOY, bodyR + _bsExt);
         sh.addColorStop(0, 'rgba(50,25,0,0.55)');
         sh.addColorStop(1, 'transparent');
         ctx.fillStyle = sh;
-        ctx.beginPath(); ctx.arc(x + 0.6, y + 2, bodyR + 1.8, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x + _bsOX, y + _bsOY, bodyR + _bsExt, 0, Math.PI * 2); ctx.fill();
 
         // 4) 徽章底盘——深金凹碟（中心亮、边缘深铜金，让中心星"浮"起来）
         //    边缘改深铜而非纯黑——避免小尺寸下呈现脏黑框
@@ -2618,12 +3007,13 @@ function drawBoard(glows = {}) {
         ctx.restore();
 
         // 6) 徽章外圈金边（双层：内亮外暗 → 刻边金属感）
+        // v13：lineWidth 固定 1.0/0.6 在 bodyR=5 时占徽章 20%，改为比例化 + 下限保证清晰
         ctx.strokeStyle = `rgba(255,200,80,${0.9 + pulse * 0.1})`;
-        ctx.lineWidth   = 1.0;
-        ctx.beginPath(); ctx.arc(x, y, bodyR - 0.3, 0, Math.PI * 2); ctx.stroke();
+        ctx.lineWidth   = Math.max(0.6, bodyR * 0.13);
+        ctx.beginPath(); ctx.arc(x, y, bodyR * 0.96, 0, Math.PI * 2); ctx.stroke();
         ctx.strokeStyle = 'rgba(90,40,0,0.75)';
-        ctx.lineWidth   = 0.6;
-        ctx.beginPath(); ctx.arc(x, y, bodyR + 0.2, 0, Math.PI * 2); ctx.stroke();
+        ctx.lineWidth   = Math.max(0.4, bodyR * 0.08);
+        ctx.beginPath(); ctx.arc(x, y, bodyR * 1.025, 0, Math.PI * 2); ctx.stroke();
 
         // 7) ★ 中心金星（核心设计元素 · 放大精装版）★
         //    5 顶点五角星占满徽章；径向金色渐变 + 细金描边 + 左上高光 + 星尖微闪
@@ -2632,8 +3022,9 @@ function drawBoard(glows = {}) {
         const starInnerR = bodyR * 0.40 * starScale;   // ← 同比放大（原 0.33 → 0.40，保持五角星比例）
 
         // 7a) 星体底部柔影（让星"浮"在徽章表面）
+        // v13：translate 固定 (0.4, 0.9) 在 starOuter=4 时让柔影完全错位 → 比例化
         ctx.save();
-        ctx.translate(x + 0.4, y + 0.9);
+        ctx.translate(x + starOuterR * 0.05, y + starOuterR * 0.12);
         ctx.rotate(starSpin);
         ctx.beginPath();
         for (let i = 0; i < 10; i++) {
@@ -2676,8 +3067,9 @@ function drawBoard(glows = {}) {
         ctx.fillStyle = starG;
         ctx.fill();
         // 细金描边：勾勒星形但不压暗
+        // v13：lineWidth 固定 0.55 在 starOuter=4 时占星 14% → 比例化
         ctx.strokeStyle = 'rgba(90,45,0,0.65)';
-        ctx.lineWidth   = 0.55;
+        ctx.lineWidth   = Math.max(0.35, starOuterR * 0.07);
         ctx.stroke();
 
         // 7c) 5 个星尖微闪（提升精致感；加法混合）
@@ -2722,36 +3114,154 @@ function drawBoard(glows = {}) {
         ctx.restore();
 
       } else {
-        // Drop shadow — 深草投影
-        const sh = ctx.createRadialGradient(x + 1.2, y + 1.8, 0, x + 1.2, y + 1.8, pegR + 2.2);
-        sh.addColorStop(0,   'rgba(25,60,20,0.5)');
-        sh.addColorStop(1,   'transparent');
-        ctx.fillStyle = sh;
-        ctx.beginPath(); ctx.arc(x + 1.2, y + 1.8, pegR + 2.2, 0, Math.PI * 2); ctx.fill();
+        // v34 普通钉 = 干净的暖白小球（去掉 v33 的五边形斑点 · 太密集太丑）
+        //   保留 v33 的色调（暖白皮革 · 和银灰冷色 v32 区分 · 和足球场主题协调）
+        //   去掉花纹 · 让钉子回归极简的"小白球"
+        //     · 暖白球皮渐变（#ffffff → #f5f2e8 → #c8c0ae）
+        //     · 深草投影（让钉子浮起来）
+        //     · rim 暗环（和草坪分界 · 保持可见性）
+        //     · 顶面高光（球体反光）
 
-        // Peg body — 浅绿凸起（peg-body → peg-mid → peg-edge）
+        // 1) Drop shadow — 深草投影
+        const _shOffX = pegR * 0.22;
+        const _shOffY = pegR * 0.32;
+        const _shExt  = pegR * 0.55;
+        const sh = ctx.createRadialGradient(x + _shOffX, y + _shOffY, 0, x + _shOffX, y + _shOffY, pegR + _shExt);
+        sh.addColorStop(0,    'rgba(0,18,5,0.70)');
+        sh.addColorStop(0.55, 'rgba(0,22,8,0.32)');
+        sh.addColorStop(1,    'transparent');
+        ctx.fillStyle = sh;
+        ctx.beginPath(); ctx.arc(x + _shOffX, y + _shOffY, pegR + _shExt, 0, Math.PI * 2); ctx.fill();
+
+        // 2) Peg body — 暖白皮革（#ffffff → 米白 → 浅棕米灰 · 无花纹）
         const p = ctx.createRadialGradient(x - pegR * 0.45, y - pegR * 0.55, 0, x, y, pegR);
-        p.addColorStop(0,    '#f2f8e4');
-        p.addColorStop(0.55, '#c7dfa8');
-        p.addColorStop(1,    '#a5c080');
+        p.addColorStop(0,    '#ffffff');
+        p.addColorStop(0.55, '#f5f2e8');
+        p.addColorStop(1,    '#c8c0ae');
         ctx.fillStyle = p;
         ctx.beginPath(); ctx.arc(x, y, pegR, 0, Math.PI * 2); ctx.fill();
 
-        // 顶面高光
-        ctx.fillStyle = 'rgba(255,255,255,0.7)';
-        ctx.beginPath(); ctx.arc(x - pegR * 0.35, y - pegR * 0.45, pegR * 0.32, 0, Math.PI * 2); ctx.fill();
+        // 3) rim 暗环 · 和草坪分界
+        ctx.lineWidth   = Math.max(0.6, pegR * 0.10);
+        ctx.strokeStyle = 'rgba(20,40,15,0.50)';
+        ctx.beginPath(); ctx.arc(x, y, pegR - ctx.lineWidth * 0.5, 0, Math.PI * 2); ctx.stroke();
+
+        // 4) 顶面高光（球体反光）
+        ctx.fillStyle = 'rgba(255,255,255,0.75)';
+        ctx.beginPath(); ctx.arc(x - pegR * 0.35, y - pegR * 0.45, pegR * 0.30, 0, Math.PI * 2); ctx.fill();
       }
 
       // 碰撞高亮：加法混合让钉子自然变亮，不覆盖原色
+      // v16 分裂钉碰撞：全程柔和径向渐变（去掉 v15 的 4 道硬线星芒——用户反馈"生硬很丑"）
+      //      三层叠加：外层金橙大光晕 + 环形高光带 + 白金中心亮芯 = 徽章被撞瞬间"整体发金光"
+      //      全部 radial gradient，无硬边、无方向，视觉柔和且全向对称
       const gAmt = glows[row * 20 + col] || 0;
       if (gAmt > 0) {
         ctx.save();
         ctx.globalCompositeOperation = 'lighter';
-        const gr = ctx.createRadialGradient(x, y, 0, x, y, pegR);
-        gr.addColorStop(0,   `rgba(255,240,160,${gAmt * 0.9})`);
-        gr.addColorStop(1,   `rgba(120,180,255,0)`);
-        ctx.fillStyle = gr;
-        ctx.beginPath(); ctx.arc(x, y, pegR, 0, Math.PI * 2); ctx.fill();
+        if (isSplit) {
+          // v39 分裂钉碰撞：纯金色绽放（替换原橙+白+金混色爆白方案）
+          //   问题复盘：原 v16 用橙色外晕 + 白色中心爆白（0.85 peak），lighter 叠加后
+          //            金星徽章被白光吃掉，颜色杂乱（橙/白/金三色），反而不如普通钉干净
+          //   新设计：
+          //     · 全局统一"暖金→深金"色系，不引入橙色与白色
+          //     · 中心绝不爆白——金星徽章要始终清晰可见（它是主角）
+          //     · 通过更大半径、更饱和金色、金色旋转辐射线营造"金光爆发"
+          const splitBodyR = pegR * 1.38;
+
+          // 1) 外扩散金光（2.4× bodyR，柔和大范围，纯金系不混橙）
+          //    峰值 0.55 略低于 v16（0.70），但色饱和度更高 → 看起来更"金"
+          const g1 = ctx.createRadialGradient(x, y, splitBodyR * 0.5, x, y, splitBodyR * 2.4);
+          g1.addColorStop(0,    `rgba(255,220,120,${gAmt * 0.55})`);
+          g1.addColorStop(0.45, `rgba(255,190,60,${gAmt * 0.32})`);
+          g1.addColorStop(0.80, `rgba(230,155,20,${gAmt * 0.12})`);
+          g1.addColorStop(1,    'rgba(210,140,10,0)');
+          ctx.fillStyle = g1;
+          ctx.beginPath(); ctx.arc(x, y, splitBodyR * 2.4, 0, Math.PI * 2); ctx.fill();
+
+          // 2) 金色光环（包围徽章边缘，勾勒"金星被点亮"感）
+          //    起点 0.90 → 内侧完全透明，不覆盖徽章本体
+          //    峰值 0.60（v16 的 0.80 偏白→过亮）· 色去掉白调，改用纯金
+          const g2 = ctx.createRadialGradient(x, y, splitBodyR * 0.90, x, y, splitBodyR * 1.55);
+          g2.addColorStop(0,    'rgba(255,235,160,0)');
+          g2.addColorStop(0.40, `rgba(255,230,150,${gAmt * 0.60})`);
+          g2.addColorStop(0.75, `rgba(255,200,90,${gAmt * 0.28})`);
+          g2.addColorStop(1,    'rgba(255,180,60,0)');
+          ctx.fillStyle = g2;
+          ctx.beginPath(); ctx.arc(x, y, splitBodyR * 1.55, 0, Math.PI * 2); ctx.fill();
+
+          // 3) 8 道旋转金色辐射线（替代原 v15 硬线星芒 · 本次以"光束"形式柔和呈现）
+          //    起点在徽章外 0.95×bodyR，向外延伸到 1.8×bodyR · 线宽极细（2px→0）
+          //    用 rotation phase 让每次碰撞方向略变，避免机械感
+          const rayCount = 8;
+          const rayInner = splitBodyR * 0.95;
+          const rayOuter = splitBodyR * 1.8;
+          const rayPhase = (row * 31 + col * 17) * 0.1; // 伪随机相位（按钉固定）
+          ctx.lineCap = 'round';
+          for (let k = 0; k < rayCount; k++) {
+            const theta = rayPhase + (k * Math.PI * 2) / rayCount;
+            const x1 = x + Math.cos(theta) * rayInner;
+            const y1 = y + Math.sin(theta) * rayInner;
+            const x2 = x + Math.cos(theta) * rayOuter;
+            const y2 = y + Math.sin(theta) * rayOuter;
+            const rayGrad = ctx.createLinearGradient(x1, y1, x2, y2);
+            rayGrad.addColorStop(0,   `rgba(255,235,155,${gAmt * 0.55})`);
+            rayGrad.addColorStop(0.6, `rgba(255,205,100,${gAmt * 0.22})`);
+            rayGrad.addColorStop(1,   'rgba(255,180,60,0)');
+            ctx.strokeStyle = rayGrad;
+            ctx.lineWidth = Math.max(1.2, pegR * 0.22);
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+          }
+
+          // 4) 中心微金（超级克制 · 仅让徽章"暖一点"而不爆白）
+          //    峰值 0.18（v16 的 0.85 → 砍到 1/5）· 色用淡金而非白
+          //    起点半径 0.3×bodyR 避免中心奇点
+          const g4 = ctx.createRadialGradient(x, y, splitBodyR * 0.3, x, y, splitBodyR * 0.85);
+          g4.addColorStop(0,    `rgba(255,240,180,${gAmt * 0.18})`);
+          g4.addColorStop(0.6,  `rgba(255,220,130,${gAmt * 0.09})`);
+          g4.addColorStop(1,    'rgba(255,200,90,0)');
+          ctx.fillStyle = g4;
+          ctx.beginPath(); ctx.arc(x, y, splitBodyR * 0.85, 0, Math.PI * 2); ctx.fill();
+        } else {
+          // v35 普通钉碰撞：3 层光反馈（尺度克制 · 不抢分裂钉）
+          //   v34 原版：单层 pegR 亮芯 · 效果几乎看不见
+          //   v35：外扩散光晕（2.0×）+ 环形亮带（1.5×）+ 中心亮芯
+          //     · 色调偏暖白（#ffefcc 系 · 和钉子暖白皮革呼应）
+          //     · 亮度 / 半径 / 环宽 均为分裂钉的 ~60% → 保持等级差
+
+          // v38 设计目标：感知碰撞 = 钉子外围"泛光"，钉子本身不变白不爆亮
+          //   策略：保留 g1（外扩散）提供感知 + 保留 g2（窄环带）勾钉边
+          //        g3 中心亮芯大幅削弱（亮度减半 + 色更暖 + 起点更偏外），
+          //        中心不出现"白亮点"，整体像被温光笼罩而非被闪光灯打中
+
+          // 1) 外扩散光晕（2.0× pegR · 提供碰撞感知的主力，亮度不变）
+          const g1 = ctx.createRadialGradient(x, y, pegR * 0.55, x, y, pegR * 2.0);
+          g1.addColorStop(0,    `rgba(255,245,190,${gAmt * 0.50})`);
+          g1.addColorStop(0.55, `rgba(255,225,140,${gAmt * 0.20})`);
+          g1.addColorStop(1,    'rgba(255,205,105,0)');
+          ctx.fillStyle = g1;
+          ctx.beginPath(); ctx.arc(x, y, pegR * 2.0, 0, Math.PI * 2); ctx.fill();
+
+          // 2) 窄环亮带（pegR*0.95 → 1.5× · 只描边，内侧完全透明不照亮钉子中心）
+          //    v37 起点 0.85 → v38 0.95：让环带更窄，远离中心
+          //    峰值 0.50 → 0.35：环本身也再降低
+          const g2 = ctx.createRadialGradient(x, y, pegR * 0.95, x, y, pegR * 1.5);
+          g2.addColorStop(0,    'rgba(255,255,220,0)');
+          g2.addColorStop(0.45, `rgba(255,248,200,${gAmt * 0.35})`);
+          g2.addColorStop(1,    'rgba(255,235,170,0)');
+          ctx.fillStyle = g2;
+          ctx.beginPath(); ctx.arc(x, y, pegR * 1.5, 0, Math.PI * 2); ctx.fill();
+
+          // 3) 中心微暖（v38：0.28 → 0.12，几乎察觉不到的暖色叠加
+          //    - 色从米金 (250,240,200) → (248,235,195) 更接近钉子原色
+          //    - 峰值仅 0.12，视觉上钉子"稍微变温"而不是"变亮" */
+          const g3 = ctx.createRadialGradient(x, y, pegR * 0.35, x, y, pegR);
+          g3.addColorStop(0,    `rgba(248,235,195,${gAmt * 0.12})`);
+          g3.addColorStop(0.6,  `rgba(248,228,165,${gAmt * 0.06})`);
+          g3.addColorStop(1,    'rgba(248,215,125,0)');
+          ctx.fillStyle = g3;
+          ctx.beginPath(); ctx.arc(x, y, pegR, 0, Math.PI * 2); ctx.fill();
+        }
         ctx.restore();
       }
     }
@@ -3713,7 +4223,12 @@ function rebuildSlotDom() {
   const slots  = selectedRows + 1;
   const cfg    = slotConfigs[modeIdx] || [];
   const slotW  = (container.offsetWidth - 2 * PAD_SIDE) / slots;
-  container.style.padding = `8px ${PAD_SIDE}px 10px`;
+  // v11: 灯条贴 slots 顶（padding-top:0）→ 配合 slots-wrap padding-top:0 →
+  //      灯条顶 = slots-wrap 顶 = canvas 底 - 5（margin-top:-5 咬入量）
+  //      球落位 y=H-ballR 时球底屏幕 y = canvas 底 → 球底与灯条顶重叠 5px →
+  //      灯条（z-index:2）覆盖球底 5px → 视觉"球落入槽位"。
+  //      下 padding:3 让 val 数字与 section-won 间距紧凑。
+  container.style.padding = `0 ${PAD_SIDE}px 3px`;
   const { fsize } = calcSlotFsize(slotW, cfg);
 
   rollRespinSlots();
@@ -3854,7 +4369,7 @@ updateRowArrows(); // 初始化时同步一次
 });
 
 // 跨轮次持久状态（行数切换时保留余额）
-let balance        = 1730.50;
+let balance        = 3000;        // v15: 初始余额 1730.50 → 3000（整数起点，更直观）
 let autoMode       = false;
 let autoRemaining  = 0;         // AUTO 连发剩余次数（待发射）
 let autoTotalAtStart = 0;       // 自动开始时的目标总数（Infinity 为 ∞）
@@ -3882,6 +4397,13 @@ let pendingSettles = 0;
 let pendingWin     = 0;
 let _gameCtrl      = null;  // AbortController，控制当前 initGame 实例的事件监听
 
+// ── Section 返还展示（倍率槽下方"获得 💲XXX"）──
+// 每球落槽即时 +won（bumpSectionWon）；所有球落完 2.5s 内无新球则归零（armSectionWonReset）。
+// 发新球时（launchBall 开头）取消归零定时，避免 respin/AUTO 间歇被错误清空。
+let sectionWon        = 0;
+let sectionResetTimer = null;
+const SECTION_RESET_MS = 2500;
+
 // ── 投注记录 ──
 // 每次 launchBall 产生一条记录；记录绑定在 ball.recordIdx 上，分裂子球继承 recordIdx，
 // 落槽结算时累加到对应记录的 totalWon。
@@ -3894,6 +4416,16 @@ function onRowsChanged() {
   balls.length  = 0;
   pendingSettles = 0;
   pendingWin     = 0;
+  // Section 返还展示同步清零并立即隐藏（切行数视为新开局）
+  if (sectionResetTimer !== null) {
+    clearTimeout(sectionResetTimer);
+    sectionResetTimer = null;
+  }
+  sectionWon = 0;
+  const _sw  = document.getElementById('sectionWon');
+  const _swv = document.getElementById('sectionWonVal');
+  if (_swv) _swv.textContent = '0.0';
+  if (_sw)  _sw.classList.remove('visible', 'bump');
   // 若在自动模式中切换行数（理论上控件被锁，但保险清理）
   autoMode = false;
   autoRemaining = 0;
@@ -3973,15 +4505,80 @@ function initGame() {
   const startLbl = startBtn.querySelector('span');           // 内部文本容器（被 CSS 隐藏，仅作状态承载）
   const autoPanel = document.querySelector('.ctrl-auto');    // AUTO 面板承担自动按钮角色
   const histList = document.querySelector('.hist-list');
+  // Section 返还展示（倍率槽下方"获得 💲XXX"）
+  const sectionWonEl    = document.getElementById('sectionWon');
+  const sectionWonValEl = document.getElementById('sectionWonVal');
 
   // 行数切换后重置按钮状态（上一局球若未落槽已被清除，按钮应可用）
   if (!autoMode) startBtn.disabled = false;
 
   // 余额格式化
+  // v15: 去掉千分位逗号（1,728.50 → 1728.50），数字更简洁统一
   function fmtBalance(v) {
-    return v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return v.toFixed(2);
   }
   balEl.textContent = fmtBalance(balance);
+
+  // ── Section 返还辅助 ──
+  // 状态 sectionWon / sectionResetTimer / SECTION_RESET_MS 为模块级，跨 initGame 持久。
+  // UI 流转：
+  //   默认隐藏（.section-won 无 .visible） → 首球落槽 bumpSectionWon 加 .visible 展开
+  //   → 后续球继续累加 + bump 动画
+  //   → 整轮结束 afterSettle 启 2.5s 定时
+  //   → 无新球到期 → 移除 .visible 淡出收起 → 等 CSS 过渡结束再归零值
+  const SECTION_FADE_MS = 340; // 与 CSS max-height/padding/opacity 过渡时间保持一致
+  function renderSectionWon() {
+    if (!sectionWonValEl) return;
+    // v12: 小数位 2 → 1（去美元符号后数字更聚焦）
+    // v33: 去掉千分位逗号（和其他区域展示统一 · 不加 ,）
+    sectionWonValEl.textContent = sectionWon.toFixed(1);
+  }
+  // 每球落槽累加：数字 +won、触发 bump 闪烁、首球时顺带展开 .visible
+  function bumpSectionWon(won) {
+    sectionWon = parseFloat((sectionWon + won).toFixed(2));
+    renderSectionWon();
+    if (sectionWonEl) {
+      // 首球累加时展开；后续球累加保持 .visible 即可
+      sectionWonEl.classList.add('visible');
+      sectionWonEl.classList.remove('bump');
+      void sectionWonEl.offsetWidth;      // reflow 重启动画
+      sectionWonEl.classList.add('bump');
+    }
+    // 有累加 = 还在这轮 section 内，任何已 arm 的归零定时失效
+    cancelSectionWonReset();
+  }
+  // 启动 2.5s 归零计时（afterSettle 触发）
+  function armSectionWonReset() {
+    if (sectionResetTimer !== null) clearTimeout(sectionResetTimer);
+    // sectionWon === 0 说明本轮根本没中奖（全 0× 槽），没必要做淡出动画
+    if (sectionWon === 0 && (!sectionWonEl || !sectionWonEl.classList.contains('visible'))) return;
+    sectionResetTimer = setTimeout(() => {
+      sectionResetTimer = null;
+      // 先淡出隐藏（移除 .visible → 触发 CSS max-height / opacity 过渡）
+      if (sectionWonEl) {
+        sectionWonEl.classList.remove('bump');
+        sectionWonEl.classList.remove('visible');
+      }
+      // 等过渡结束后再归零数值（此时元素已折叠，用户看不到数字变化）
+      setTimeout(() => {
+        sectionWon = 0;
+        renderSectionWon();
+      }, SECTION_FADE_MS);
+    }, SECTION_RESET_MS);
+  }
+  // 取消归零定时（launchBall 开头调用：有新球就不能归零）
+  function cancelSectionWonReset() {
+    if (sectionResetTimer !== null) {
+      clearTimeout(sectionResetTimer);
+      sectionResetTimer = null;
+    }
+  }
+  // 进入 initGame 时以当前值刷新 UI；若当前 sectionWon>0（切行数场景）则保持 visible
+  renderSectionWon();
+  if (sectionWonEl) {
+    if (sectionWon > 0) sectionWonEl.classList.add('visible');
+    else                sectionWonEl.classList.remove('visible');
+  }
 
   // ── 历史倍率 class ──
   function histClass(m) {
@@ -4005,6 +4602,9 @@ function initGame() {
     histList.appendChild(badge);
     histList.scrollLeft = histList.scrollWidth;
     while (histList.children.length > 30) histList.removeChild(histList.firstChild);
+    // v19: 仅在真正横向溢出（badge 总宽 > 容器宽）时启用左侧渐隐 mask
+    //      否则 has-overflow 类移除，首 badge/前几个 badge 完全不被遮挡
+    histList.classList.toggle('has-overflow', histList.scrollWidth > histList.clientWidth + 1);
   }
 
   // 足球配色：底色(白) + 五边形色 + 阴影 + 最深（用于分裂态标识）
@@ -4114,29 +4714,71 @@ function initGame() {
     cx2d.restore();
   }
 
-  // ── 绘制球 + 尾部幻影（B 档启用）──
-  // 尾迹由 physicsStep 每步记录一个位置（最多 7 个），这里从老到新画出半透明缩小球影。
-  // 注意：主球由 renderFrame 的插值后坐标绘制，这里只画尾迹。
+  // ── 绘制球 + 运动模糊拖尾（B 档启用）──
+  // 设计目标：60Hz 下球加速时每帧位移可达 5~6px（球直径 36%），
+  //   人眼在缺失运动线索时会感知为"一顿一顿"。电影级 24 FPS 不卡顿的秘诀
+  //   是"快门期间的运动模糊"——每帧自带拖尾。
+  //
+  // 实现：把 trail 从"7 个离散圆点"升级为"沿路径的连续渐变条带"：
+  //   1. 用 trail[0] → trail[1] → ... → ball(rx,ry) 的多段 stroke 构成路径
+  //   2. 每段 lineWidth 从 trail[0] 端的 0.45·ballR 渐粗到末端的 1.45·ballR
+  //   3. 每段 alpha 从 0.06 渐浓到 0.40（末端紧贴球，更浓）
+  //   4. round linecap 让段与段之间无缝衔接
+  //
+  // 分裂钉碰撞那一帧 trail 点会"打折"，但线条保持连续，视觉上就是一条
+  //   自然的运动轨迹而不是离散跳点。
+  //
+  // 注意：ball 主体仍由 renderFrame 的插值坐标绘制，这里只画拖尾；
+  //   rx/ry 从 ball.prevX/prevY + (x-prev)*alpha 反推？不：renderFrame 画 trail
+  //   的时机是"每帧渲染前"，trail 最新位置就是 ball.x，跟主球插值后位置会有
+  //   1 帧以内的微小偏移，但视觉上完全覆盖，看不出来。
   function drawTrail(ball) {
     const trail = ball.trail;
     if (!trail || trail.length < 2) return;
     const n = trail.length;
+
+    // 拖尾颜色（与球体色系一致）
+    const streakColor =
+      ball.color === 'gold' ? '255,215,90'   :
+      ball.color === 'blue' ? '130,185,255'  :
+                              '255,255,255';
+
     ctx.save();
-    // 尾迹形状保持圆形，颜色略暖白
-    for (let i = 0; i < n - 1; i++) {  // -1 跳过最新一帧（主球已画）
-      const t   = trail[i];
-      const k   = (i + 1) / n;           // 0→1，越新越显眼
-      const a   = 0.02 + k * 0.12;       // alpha 0.02 → 0.14（弱化后）
-      const rR  = ballR * (0.35 + k * 0.45);
-      ctx.globalAlpha = a;
-      ctx.fillStyle   = ball.color === 'gold' ? 'rgba(255,215,90,0.9)'
-                      : ball.color === 'blue' ? 'rgba(130,185,255,0.9)'
-                      : 'rgba(255,255,255,0.9)';
+    ctx.lineCap  = 'round';
+    ctx.lineJoin = 'round';
+
+    // 构造完整路径点序列：trail[0..n-1] + 当前物理位置
+    // trail 最新一帧 = trail[n-1]，ball.x/y 就是本物理步结束位置
+    const pts = trail;
+
+    // 逐段绘制：i=0 到 i=n-2，每段从 pts[i] 到 pts[i+1]
+    // 段进度 k（0→1）：越靠近末端（新）越显眼
+    for (let i = 0; i < n - 1; i++) {
+      const p0 = pts[i];
+      const p1 = pts[i+1];
+      const k  = (i + 1) / n;            // 末端 k=1，始端 k→0
+      const kPrev = i / n;
+
+      // 段末端（新）的宽度和 alpha
+      // 调优：比 1.0 版弱 ~25%，去掉"糊"的感觉同时保留运动线索
+      const wEnd   = ballR * (0.45 + k * 1.00);       // 0.45·R → 1.45·R
+      const aEnd   = 0.06 + k * 0.34;                  // 0.06 → 0.40
+      const wStart = ballR * (0.45 + kPrev * 1.00);
+      const aStart = 0.06 + kPrev * 0.34;
+
+      // 用渐变描边：从 p0 到 p1 透明度 aStart → aEnd
+      const grad = ctx.createLinearGradient(p0.x, p0.y, p1.x, p1.y);
+      grad.addColorStop(0, `rgba(${streakColor},${aStart})`);
+      grad.addColorStop(1, `rgba(${streakColor},${aEnd})`);
+      ctx.strokeStyle = grad;
+      // 段宽度取两端平均（canvas stroke 不支持 variable width，折中）
+      ctx.lineWidth = (wStart + wEnd) / 2;
       ctx.beginPath();
-      ctx.arc(t.x, t.y, rR, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.moveTo(p0.x, p0.y);
+      ctx.lineTo(p1.x, p1.y);
+      ctx.stroke();
     }
-    ctx.globalAlpha = 1;
+
     ctx.restore();
   }
 
@@ -4154,6 +4796,18 @@ function initGame() {
     const bet    = betValues[betIdx];
     const won    = parseFloat((bet * weight * multiplier).toFixed(2));
     pendingWin   = parseFloat((pendingWin + won).toFixed(2));
+
+    // ── 余额即时更新 ──
+    // 之前：只累加到 pendingWin，等 afterSettle 里 setTimeout(500ms) 后才写入 balance。
+    //      多球场景（分裂/AUTO/respin）下玩家看到每球都飘字但余额数字不动，
+    //      要等所有球落槽 + 500ms 才一次性跳，体验是"没及时更新"。
+    // 现在：每球落槽就加到 balance 并刷新 UI。afterSettle 仍负责"总和飘字"聚合反馈。
+    balance = parseFloat((balance + won).toFixed(2));
+    balEl.textContent = fmtBalance(balance);
+
+    // ── Section 返还累加（倍率槽下方"获得 💲XXX"）──
+    // 每落一球就 +won；afterSettle 内若 balls=0 && pendingSettles=0，启动 2.5s 归零计时。
+    bumpSectionWon(won);
 
     // 累计到投注记录
     if (typeof recordIdx === 'number' && betHistory[recordIdx]) {
@@ -4270,24 +4924,12 @@ function initGame() {
 
   // ── 结算后处理（所有球都落槽后） ──
   function afterSettle() {
-    // 一次性把本轮盈利加入余额
-    if (pendingWin > 0) {
-      const totalWon = pendingWin;
-      pendingWin = 0;
-      // 等槽位飘字动画结束（1.4s）后留约0.6s间隔再显示余额飘字
-      setTimeout(() => {
-        balance = parseFloat((balance + totalWon).toFixed(2));
-        balEl.textContent = fmtBalance(balance);
-        const wrap = document.querySelector('.balance-wrap');
-        const el = document.createElement('div');
-        el.className = 'bal-float';
-        el.textContent = '+' + totalWon.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        wrap.appendChild(el);
-        setTimeout(() => el.remove(), 2200);
-      }, 500);
-    } else {
-      pendingWin = 0;
-    }
+    // v14: 去掉顶部余额飘字——balance 已在 settle() 内逐球即时 +won 并刷新 DOM
+    //      （line 4542: balEl.textContent = fmtBalance(balance)），玩家直接看到数字
+    //      跳动，不再需要聚合 "+XX.XX" 飘字二次反馈。原因：单球时与槽位飘字重复，
+    //      多球 AUTO 时飘字叠加杂乱；直接刷新金额更克制、清爽。
+    //      仍需保留 pendingWin 归零（它作为结算累加器由 settle() 填入）。
+    pendingWin = 0;
 
     drawBoard();
 
@@ -4310,6 +4952,12 @@ function initGame() {
       startBtn.disabled = false;
       lockControls(false);
     }
+
+    // ── Section 返还归零定时 ──
+    // 所有球落完（balls=0 && pendingSettles=0）→ 进入 afterSettle → 启动 2.5s 定时器；
+    // 期间若 launchBall 再次出球，定时器会被 cancelSectionWonReset 清掉；
+    // 否则到期触发归零 + 淡出隐藏（见 armSectionWonReset 内实现）。
+    armSectionWonReset();
   }
 
   // ── 动画循环：Fixed Timestep + Interpolation（Glenn Fiedler 2006 经典方案）──
@@ -4347,7 +4995,8 @@ function initGame() {
   //      parentStep=1（父球右）→ 副球列不变；parentStep=0（父球左）→ 副球列 +1
   //   3. ball.usedSplits[pegKey] 防止同一球在同一分裂点重复触发
   //   4. balls.length ≥ 8 硬截断（await 前后各检查一次，防竞态）
-  //   5. weight 父子各继承父球的 ×0.55（与旧物理版本一致）
+  //   5. weight 父子都保持父球原权重（×1.0）；分裂成本由"+60% 投注"一次性覆盖，
+  //      不在结算时二次扣除。v4 的 0.55 衰减已废弃（2026-04-24）。
   //   6. startPos = 父球撞钉接触点；initVy = 父球段末 vyEnd × 0.85（碰撞阻尼）
   //   7. engineNonce 继承到副球上，使二级副球（副球再撞 split peg）也能复用同 nonce
   //   8. ★ enginePath 索引基准：
@@ -4411,10 +5060,11 @@ function initGame() {
     // await 期间 balls 可能被 push 到上限，再次确认
     if (balls.length >= 8) return;
 
-    // 父球分裂后自身减重；depth 自增（视觉更暗/更小）
-    const splitW = (parentBall.weight ?? 1) * 0.55;
-    parentBall.weight = splitW;
-    parentBall.depth  = (parentBall.depth || 0) + 1;
+    // 父球分裂后权重保持不变；子球继承同等权重（都是 1.0 × 父）
+    // —— 分裂成本已由"特色功能开启 +60% 投注"覆盖一次，不再用权重衰减二次扣除
+    // —— depth 仍自增：保留视觉纵深区分（颜色/尺寸仍按 depth 变化）
+    const splitW = parentBall.weight ?? 1;  // 不衰减
+    parentBall.depth = (parentBall.depth || 0) + 1;
 
     const forkBall = {
       x:       contactX,
@@ -4488,9 +5138,12 @@ function initGame() {
       ball.prevRot = ball.rot || 0;
 
       // 记录尾迹（物理位置；插值只影响主球绘制，不影响尾迹轨迹）
+      // 长度 10：120Hz 设备上覆盖 ~170ms 时间窗；60Hz 上 ~170ms
+      //   （物理锁 60Hz，trail 每物理步记录一点，10 点 ≈ 10 × 16.67ms）
+      // 这个时长接近电影 24 FPS 的一帧长度，提供"运动模糊条"的视觉感
       if (!ball.trail) ball.trail = [];
       ball.trail.push({ x: ball.x, y: ball.y });
-      if (ball.trail.length > 7) ball.trail.shift();
+      if (ball.trail.length > 10) ball.trail.shift();
 
       // ── Engine 驱动：animator.step(1) 返回事件数组 ──
       // 事件：'peg' 触发钉发光/击中音效（含分裂钉派生副球）；'land' 触发结算。
@@ -4671,6 +5324,10 @@ function initGame() {
       return false;
     }
 
+    // 新球已确认发出：取消 section 归零定时（防止 respin 1050ms 间隙、AUTO 700ms 间隙、
+    // 分裂链路中途被错误归零隐藏；单发/免费球都一样取消）
+    cancelSectionWonReset();
+
     balance = parseFloat((balance - totalCost).toFixed(2));
     balEl.textContent = fmtBalance(balance);
     // 自动模式下按钮保持可点（用于"停止"）；单发模式置灰 MANUAL_COOLDOWN_MS 后自动解锁
@@ -4683,13 +5340,28 @@ function initGame() {
     }
     lockControls(true);
 
-    // 高倍率球抽样：开启后按概率产出红/金球
+    // 高倍率球抽样：开启后按概率产出蓝/金球
+    // ═══════════════════════════════════════════════════════════════════════════
+    // v20 数值修正（维持 hiMult 下 98% RTP）
+    // ───────────────────────────────────────────────────────────────────────────
+    // 原配置 0.08/0.17/0.75 × {4,2,1} → E[extraMult]=0.32+0.34+0.75=1.41
+    //   → hiMult RTP = 1.41 × 0.98 / 1.2 ≈ 115.15%（运营净亏 15%）
+    //
+    // 方案 C（双调）：0.05/0.10/0.85 × {3,2,1} → E=0.15+0.20+0.85=1.20
+    //   → hiMult RTP = 1.20 × 0.98 / 1.2 = 98%（精确）
+    //
+    // 设计：
+    //   - 金球 5%：每 20 球 1 次，稀有感 & 爆发点
+    //   - 蓝球 10%：每 10 球 1 次，中频小惊喜
+    //   - 白球 85%：主体体验
+    //   - 倍率 ×1/×2/×3：层次清晰，顶槽 15× × 金球 3× = 45× 爆分瞬间
+    // ═══════════════════════════════════════════════════════════════════════════
     let ballColor = 'normal';
     let extraMult = 1;
     if (window.buyFeatures && window.buyFeatures.hiMult && !free) {
       const r = Math.random();
-      if (r < 0.08)       { ballColor = 'gold'; extraMult = 4; }
-      else if (r < 0.25)  { ballColor = 'blue'; extraMult = 2; }
+      if (r < 0.05)       { ballColor = 'gold'; extraMult = 3; }
+      else if (r < 0.15)  { ballColor = 'blue'; extraMult = 2; }
     }
 
     // ── 创建投注记录（每次发球一条，免费球总投注=0）──
@@ -5301,21 +5973,35 @@ document.addEventListener('click', () => getAudioCtx(), { once: true });
   }
 
   // ── SPLIT! 飘字 ──
+  // v16 坐标修复：原代码两处根因导致飘字错位到 board 顶部：
+  //   (1) scaleX = canvasRect.width / 390 —— 硬编码 390，但 canvas CSS 实际 378，
+  //       造成 scaleX = 0.969，x 方向偏移 ~3%。
+  //   (2) scaleY = canvasRect.height / (canvasEl.height / dpr) —— 这里的 dpr 来自
+  //       本 IIFE 闭包的 `const dpr = window.devicePixelRatio || 1` (line 5691)；
+  //       当预览环境 dpr=1 时（drawBoard 强制 dpr=2 不同步），canvasEl.height/1=719，
+  //       scaleY = 360/719 ≈ 0.5，让 canvasY 被压到一半 → 飘字浮到画面顶部。
+  //   修复：drawBoard 内部 `ctx.scale(dpr, dpr)` 让 canvas 逻辑坐标 == CSS 尺寸 (offsetWidth/H)，
+  //       直接用 offsetWidth/H 为分母即可，彻底脱离 dpr 变量依赖。
   function showSplitText(canvasX, canvasY) {
     const boardEl = document.querySelector('.board-wrap');
     const canvasEl = document.getElementById('board');
     const boardRect = boardEl.getBoundingClientRect();
     const canvasRect = canvasEl.getBoundingClientRect();
 
-    const scaleX = canvasRect.width / 390;
-    const scaleY = canvasRect.height / (canvasEl.height / dpr);
+    // canvas 逻辑坐标空间 = [0, offsetWidth] × [0, offsetHeight]（由 ctx.scale 保证）
+    // 即便 CSS 被缩放（zoom 等），boundingRect 与 offset 的比例给出正确映射。
+    const scaleX = canvasRect.width  / canvasEl.offsetWidth;
+    const scaleY = canvasRect.height / canvasEl.offsetHeight;
 
     const el = document.createElement('div');
     el.className = 'float-split';
     el.textContent = '分裂！';
 
     const px = canvasRect.left - boardRect.left + canvasX * scaleX;
-    const py = canvasRect.top  - boardRect.top  + canvasY * scaleY;
+    // v17: 原本以钉子中心为锚（py=canvasY * scaleY），文字会向下延伸遮住下半个钉子。
+    //      抬高 14px 让文字底部大致对齐钉子顶部，动画再从此处向上飘。
+    //      14 略大于最大行数下 pegR（≈5px）+ font-size 的一半（8px），适配 8~16 行通用。
+    const py = canvasRect.top  - boardRect.top  + canvasY * scaleY - 14;
 
     const wrap = document.createElement('div');
     wrap.style.cssText = `position:absolute;left:${px}px;top:${py}px;pointer-events:none;z-index:30;`;
@@ -5336,7 +6022,8 @@ document.addEventListener('click', () => getAudioCtx(), { once: true });
   // ── 暴露全局函数供 initGame 内部调用 ──
   window._onSplit = function(x, y) {
     spawnSplitParticles(x, y);
-    showSplitText(x, y - 10);
+    // v17: 钉子中心坐标原样下传，showSplitText 内部统一抬 14px（-14）让文字底部贴钉子顶部
+    showSplitText(x, y);
     playSplitSfx();
   };
   window._onHit = function() {

@@ -607,6 +607,18 @@ body {
   margin-top: -10px;             /* v41: -5 → -10px，吃掉 canvas 底部 apron（≈11px）绝大部分，
                                          让 slot 灯条整体上移 5px · 消除中间绿色接缝 */
   padding: 0 0 20px;             /* v11: 上 0（灯条贴顶，与球底重叠形成"落入槽位"感）+ 下 20px 厚度带给 section-won */
+  /* v45 填充斜边外两端三角区 · 消除衔接处"黑色缝"错觉
+     ──────────────────────────────────────────────────────
+     问题：slots-wrap 内 ::before 梯形外侧（左右斜边外的两个楔形三角）透明，
+          露出下层元素：顶部 10px 露 board-wrap #041531 近黑，其下露 device 渐变。
+          底白线（纯白 #fff）紧邻这些深色三角，视觉对比极强 →
+          看起来像"白线两端衍生出的黑色缝"。
+     修复：给 slots-wrap 自身加 linear-gradient 背景，填充两端三角：
+          顶部与 board-wrap 深色同色，底部与 controls 入口 sky-bot 对齐，
+          整体与 device 在此 y 位置的渐变一致，消除跨层色差。 */
+  background: linear-gradient(180deg,
+    var(--ui-blue-deep) 0%,      /* 顶部 #041531 衔接 board-wrap 背景 */
+    var(--sky-bot) 100%);        /* 底部 #0e3a72 衔接 controls 顶段 */
 }
 .slots-wrap > .slots {
   margin-top: 0;
@@ -624,6 +636,7 @@ body {
   inset: 0;
   z-index: 0;
   background: #ffffff;
+  /* 梯形白边框：底边止于 (20, W-20)，两端不延伸 */
   clip-path: polygon(0% 0%, 100% 0%, calc(100% - 20px) 100%, 20px 100%);
   pointer-events: none;
 }
@@ -666,7 +679,16 @@ body {
     no-repeat,
     repeat,
     no-repeat;
-  clip-path: polygon(0% 0%, 100% 0%, calc(100% - 17.8px) 100%, 17.8px 100%);
+  /* v43 白边粗细均匀化 · 让 ::after 斜边与 ::before 严格平行
+     ──────────────────────────────────────────────────────
+     旧值 17.8px（= 20 - 2.2）是沿"底边偏移"的几何思路，但 ::after 盒子因
+     bottom inset 2.2px 而高度变成 47.8px，斜率 = 17.8/47.8 ≈ 0.372，
+     而 ::before 斜率 = 20/50 = 0.4。两条斜边不平行 →
+     白线水平宽度从顶 2.2px 逐渐收窄到底 0.88px（视觉厚度 2.04→0.82），
+     "两侧边线粗细不一"。
+     修复：::after 斜率 = ::before 斜率 0.4，偏移 = 0.4 × 47.8 = 19.12px。
+     这样斜边白线水平宽度恒定 2.2px（垂直厚度恒定 2.04px），粗细统一。 */
+  clip-path: polygon(0% 0%, 100% 0%, calc(100% - 19.12px) 100%, 19.12px 100%);
   pointer-events: none;
 }
 

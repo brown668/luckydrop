@@ -2221,6 +2221,50 @@ body {
   filter: drop-shadow(0 0 5px rgba(255,190,70,0.8));
 }
 
+/* ─── 游戏规则弹窗（v83）─── */
+.rules-modal { width: 320px; padding: 18px 20px 14px; }
+.rules-title {
+  font-family: 'Chakra Petch', 'PingFang SC', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(220,235,255,0.98);
+  letter-spacing: 0.06em;
+  text-align: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(150,200,255,0.18);
+  margin-bottom: 2px;
+}
+.rules-step {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(180deg, var(--ui-blue-top) 0%, var(--ui-blue-bot) 100%);
+  border: 1px solid rgba(150,200,255,0.55);
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--text-gold);
+  text-shadow: 0 1px 1px rgba(0,12,30,0.7);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
+  flex-shrink: 0;
+  margin: 0 4px;
+}
+.rules-row { padding: 9px 0; }
+.rules-row + .rules-row { border-top: 1px solid rgba(255,255,255,0.10); }
+.rules-row .buy-row-desc { line-height: 1.35; }
+.rules-tip {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(150,200,255,0.18);
+  font-family: 'PingFang SC', sans-serif;
+  font-size: 11px;
+  color: rgba(200,220,245,0.75);
+  text-align: center;
+  letter-spacing: 0.2px;
+  line-height: 1.5;
+}
+.rules-tip span + span::before { content: " · "; opacity: 0.5; }
+
 /* ─── 投注记录弹窗 ─── */
 .history-modal {
   position: absolute;
@@ -2680,6 +2724,48 @@ body {
         <input type="checkbox" id="toggleAllFeatures">
         <span class="buy-toggle-track"></span>
       </label>
+    </div>
+  </div>
+
+  <!-- 游戏规则弹窗（v83） -->
+  <div class="buy-modal rules-modal" id="rulesModal" role="dialog" aria-modal="true" aria-label="游戏规则">
+    <button class="buy-modal-close" id="rulesModalClose" aria-label="关闭">✕</button>
+    <div class="rules-title">游戏规则</div>
+
+    <div class="buy-row rules-row">
+      <div class="rules-step">1</div>
+      <div class="buy-row-main">
+        <span class="buy-row-title">投注</span>
+        <span class="buy-row-desc">选择金额、行数与难度</span>
+      </div>
+    </div>
+
+    <div class="buy-row rules-row">
+      <div class="rules-step">2</div>
+      <div class="buy-row-main">
+        <span class="buy-row-title">落球</span>
+        <span class="buy-row-desc">球从顶部落下，每碰一颗钉子随机偏左或偏右</span>
+      </div>
+    </div>
+
+    <div class="buy-row rules-row">
+      <div class="rules-step">3</div>
+      <div class="buy-row-main">
+        <span class="buy-row-title">中奖</span>
+        <span class="buy-row-desc">落入底部倍率槽，奖金 = 投注 × 倍率</span>
+      </div>
+    </div>
+
+    <div class="buy-row rules-row">
+      <div class="rules-step">4</div>
+      <div class="buy-row-main">
+        <span class="buy-row-title">加成（可选）</span>
+        <span class="buy-row-desc">购买特色：裂变 / 免费 / 高倍，提升收益空间</span>
+      </div>
+    </div>
+
+    <div class="rules-tip">
+      <span>边缘倍率高，中间倍率低；行数越多，最高倍率越大。</span>
     </div>
   </div>
 
@@ -6063,10 +6149,25 @@ iconMenu.addEventListener('click', e => {
 // 点击遮罩：关闭抽屉
 drawerBackdrop.addEventListener('click', closeDrawer);
 
-// 游戏规则：toast 敬请期待
+// 游戏规则：呼出弹窗（v83）
+const rulesModal      = document.getElementById('rulesModal');
+const rulesModalClose = document.getElementById('rulesModalClose');
+function openRulesModal() {
+  rulesModal.classList.add('open');
+  drawerBackdrop.classList.add('show');
+}
+function closeRulesModal() {
+  rulesModal.classList.remove('open');
+  if (!settingsPanel.classList.contains('open')) {
+    drawerBackdrop.classList.remove('show');
+  }
+}
 drawerRules.addEventListener('click', () => {
-  showToast('敬请期待');
+  closeDrawer();
+  openRulesModal();
 });
+rulesModalClose?.addEventListener('click', closeRulesModal);
+drawerBackdrop.addEventListener('click', closeRulesModal);
 
 // 退出游戏：关闭抽屉 + 提示
 drawerExit.addEventListener('click', () => {

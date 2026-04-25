@@ -264,15 +264,17 @@ body {
   text-transform: uppercase;
 }
 .bal-value {
+  /* v58 扁平化：去掉金色发光 + 立体浮雕阴影，纯色金字一气呵成 */
   font-family: 'Space Mono', monospace;
   font-size: 20px;
   font-weight: 700;
   color: var(--text-gold);
-  text-shadow:
-    0 1px 0 #6a3a00,
-    0 0 10px rgba(255,200,50,0.75),
-    0 0 22px rgba(255,180,0,0.35);
   letter-spacing: 0.5px;
+}
+.bal-value::before {
+  content: '$';
+  font-weight: 700;
+  margin-right: 1px;
 }
 /* v14: .bal-float / @keyframes balFloat 已移除——顶部余额去掉飘字聚合反馈，
         余额由 settle() 内 balEl.textContent=fmtBalance(balance) 逐球即时刷新，
@@ -831,6 +833,10 @@ body {
     0 1px 2px rgba(0, 12, 30, 0.90);
   transition: color 0.30s ease, text-shadow 0.30s ease;
 }
+.section-won .sw-value::before {
+  content: '$';
+  margin-right: 1px;
+}
 /* 每球落槽的 +won bump：scale + 金色发光脉冲 */
 .section-won.bump .sw-value {
   animation: swBump 0.40s cubic-bezier(0.2, 0.9, 0.25, 1);
@@ -1066,9 +1072,9 @@ body {
 .ctrl-auto   { grid-column: 3; grid-row: 3; }
 .start-btn   { grid-column: 2; grid-row: 2 / 4; }
 
-/* ─── 难度面板：与自动投注等高同字号 ─── */
+/* ─── 难度面板：与自动发球等高同字号 ─── */
 .controls .ctrl-risk .sel-value.sel-risk-label {
-  font-size: 18px;        /* 比自动投注 sel-value (19px) 小 1px */
+  font-size: 18px;        /* 比自动发球 sel-value (19px) 小 1px */
   letter-spacing: 0.04em;
   transition: color .2s;
   /* font-weight/family/text-shadow/line-height/white-space 继承基础 .sel-value */
@@ -1494,6 +1500,14 @@ body {
   white-space: nowrap;
   letter-spacing: 0.02em;
 }
+/* 投注栏数字前缀美元符号（仅 .ctrl-bet 生效） · 与数字同字号 / 字重略轻 → 自动对齐 */
+.controls .ctrl-bet .sel-value::before {
+  content: '$';
+  font-size: 1em;             /* 与数字同字号，避免基线错位 */
+  font-weight: 700;            /* 数字 900，符号 700 → 视觉上副从主 */
+  margin-right: 2px;
+  color: rgba(255,255,255,0.78);
+}
 
 /* ─── Respin 槽：槽位上方展示红色足球旋转图标 ─── */
 /* z-index:10 让图标能从 .slots 顶部抬升到 .board-wrap(z:1) 之上，避免被 canvas 底边遮挡 */
@@ -1765,7 +1779,7 @@ body {
     inset 0 -3px 6px rgba(0,0,0,0.12);
 }
 
-/* ─── 自动投注激活态（扁平玻璃风，与其他胶囊语言一致） ─── */
+/* ─── 自动发球激活态（扁平玻璃风，与其他胶囊语言一致） ─── */
 .ctrl-auto.active {
   background: linear-gradient(180deg,
     rgba(255,183,77,0.32) 0%,
@@ -2232,28 +2246,31 @@ body {
 
 /* ─── Toast ─── */
 .toast {
+  /* v61: 从底部 90px 改为屏幕中央显示，更醒目 */
   position: absolute;
   left: 50%;
-  bottom: 90px;
-  transform: translateX(-50%) translateY(12px);
-  background: rgba(0,0,0,0.82);
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.92);
+  background: rgba(0,0,0,0.85);
   color: #fff;
-  padding: 10px 22px;
-  border-radius: 22px;
+  padding: 14px 28px;
+  border-radius: 14px;
   font-family: 'Chakra Petch', 'PingFang SC', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.03em;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   opacity: 0;
   pointer-events: none;
-  transition: opacity .25s ease, transform .25s ease;
+  transition: opacity .22s ease, transform .22s cubic-bezier(.2,.8,.2,1.05);
   z-index: 200;
   white-space: nowrap;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.45);
+  box-shadow:
+    0 8px 30px rgba(0,0,0,0.55),
+    0 0 0 1px rgba(255,255,255,0.06);
 }
 .toast.show {
   opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  transform: translate(-50%, -50%) scale(1);
 }
 </style>
 </head>
@@ -2388,7 +2405,7 @@ body {
       <span class="fb-divider" aria-hidden="true"></span>
       <span class="fb-right">
         <span class="fb-total-label">总投注</span>
-        <span class="fb-total-val" id="fbTotalBet">5.0</span>
+        <span class="fb-total-val" id="fbTotalBet">$10</span>
       </span>
     </button>
 
@@ -2407,7 +2424,7 @@ body {
       <button class="sel-arrow">‹</button>
       <div class="sel-info">
         <span class="sel-label">投注</span>
-        <span class="sel-value">5</span>
+        <span class="sel-value">10</span>
       </div>
       <button class="sel-arrow">›</button>
     </div>
@@ -2422,11 +2439,11 @@ body {
       <button class="sel-arrow risk-next">›</button>
     </div>
 
-    <!-- 右下：自动投注 -->
+    <!-- 右下：自动发球 -->
     <div class="ctrl-sel ctrl-auto">
       <button class="sel-arrow">‹</button>
       <div class="sel-info">
-        <span class="sel-label">自动投注</span>
+        <span class="sel-label">自动发球</span>
         <span class="sel-value sel-auto">0</span>
       </div>
       <button class="sel-arrow">›</button>
@@ -2440,7 +2457,7 @@ body {
   <div class="footer-balance">
     <div class="balance-wrap">
       <span class="bal-label">余额</span>
-      <span class="bal-value">1,730.50</span>
+      <span class="bal-value">10,000.00</span>
     </div>
   </div>
 
@@ -2510,7 +2527,7 @@ body {
       <div class="buy-row-main">
         <span class="buy-row-title">裂变足球</span>
         <span class="buy-row-desc">碰撞分裂钉会裂变成2个球</span>
-        <span class="buy-row-cost">花费 <span id="costSplit">+0.6</span></span>
+        <span class="buy-row-cost">花费 <span id="costSplit">+$6</span></span>
       </div>
       <label class="buy-toggle">
         <input type="checkbox" id="toggleSplit">
@@ -2525,7 +2542,7 @@ body {
       <div class="buy-row-main">
         <span class="buy-row-title">免费足球</span>
         <span class="buy-row-desc">击中红球位置，免费发球一次</span>
-        <span class="buy-row-cost">花费 <span id="costRespin">+0.2</span></span>
+        <span class="buy-row-cost">花费 <span id="costRespin">+$2</span></span>
       </div>
       <label class="buy-toggle">
         <input type="checkbox" id="toggleRespin">
@@ -2540,7 +2557,7 @@ body {
       <div class="buy-row-main">
         <span class="buy-row-title">高倍足球</span>
         <span class="buy-row-desc">发球时随机触发高倍率足球</span>
-        <span class="buy-row-cost">花费 <span id="costHiMult">+0.2</span></span>
+        <span class="buy-row-cost">花费 <span id="costHiMult">+$2</span></span>
       </div>
       <label class="buy-toggle">
         <input type="checkbox" id="toggleHiMult">
@@ -4427,7 +4444,7 @@ function updateSlots(idx) {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  控制器：难度（火焰）+ 行数 + 投注 + 自动投注
+//  控制器：难度（火焰）+ 行数 + 投注 + 自动发球
 // ═══════════════════════════════════════════════════════════
 
 // 难度 — 左右箭头切换（佛系 / 激进 / 疯狂）
@@ -4460,7 +4477,7 @@ riskNextBtn?.addEventListener('click', () => {
   updateSlots(modeIdx);
 });
 
-// ── 飞行中/自动投注锁定控制器 ──
+// ── 飞行中/自动发球锁定控制器 ──
 const _ctrlArrows = document.querySelectorAll(
   '.ctrl-bet .sel-arrow, .ctrl-rows .sel-arrow, .ctrl-auto .sel-arrow, .ctrl-risk .sel-arrow'
 );
@@ -4468,18 +4485,26 @@ function lockControls(lock) {
   _ctrlArrows.forEach(btn => { btn.disabled = lock; });
   // 解锁时还原难度边界状态
   if (!lock) renderRisk();
-  const buyBtn = document.getElementById('btnBuyFeatures');
-  if (buyBtn) {
-    buyBtn.style.pointerEvents = lock ? 'none' : '';
-    buyBtn.style.opacity = lock ? 0.55 : '';
-  }
+  // v63: 自动模式锁定时，行数 / 投注 / 难度 / 特色功能 整体淡化为统一视觉（opacity 0.55 + pointer-events none）
+  // ctrl-auto（自动发球）不在此处理，保持完整可读以显示当前剩余次数
+  const lockTargets = [
+    document.getElementById('btnBuyFeatures'),
+    document.querySelector('.ctrl-rows'),
+    document.querySelector('.ctrl-bet'),
+    document.querySelector('.ctrl-risk'),
+  ];
+  lockTargets.forEach(el => {
+    if (!el) return;
+    el.style.pointerEvents = lock ? 'none' : '';
+    el.style.opacity = lock ? '0.55' : '';
+  });
   // 解锁时还原行数边界状态
   if (!lock && typeof updateRowArrows === 'function') updateRowArrows();
 }
 
 // 投注切换
 const betValues = [1, 2, 5, 10, 15, 20, 25, 50, 100, 200, 500, 1000];
-let betIdx = 2;
+let betIdx = 3;          // v62: 默认投注 betValues[3] = $10
 const betEl = document.querySelector('.ctrl-bet .sel-value');
 document.querySelectorAll('.ctrl-bet .sel-arrow').forEach((btn, dir) => {
   btn.addEventListener('click', () => {
@@ -4489,7 +4514,7 @@ document.querySelectorAll('.ctrl-bet .sel-arrow').forEach((btn, dir) => {
   });
 });
 
-// 自动投注 — 离散值选择器：0/10/25/50/100/250/500/750/1000/∞
+// 自动发球 — 离散值选择器：0/10/25/50/100/250/500/750/1000/∞
 const autoValues = [0, 10, 25, 50, 100, 250, 500, 750, 1000, Infinity];
 function fmtAuto(v) { return v === Infinity ? '∞' : String(v); }
 let autoIdx = 0;
@@ -4536,7 +4561,7 @@ updateRowArrows(); // 初始化时同步一次
 });
 
 // 跨轮次持久状态（行数切换时保留余额）
-let balance        = 3000;        // v15: 初始余额 1730.50 → 3000（整数起点，更直观）
+let balance        = 10000;       // v62: 3000 → 10000，提升初始资金体验
 let autoMode       = false;
 let autoRemaining  = 0;         // AUTO 连发剩余次数（待发射）
 let autoTotalAtStart = 0;       // 自动开始时的目标总数（Infinity 为 ∞）
@@ -5369,10 +5394,9 @@ function initGame() {
             }
           }
         }
+        // v64: 落槽时不再更新显示（已改为发球时即时 -1，见下方 launchBall 调用处）
         if (autoMode && wasPrimary && autoTotalAtStart !== Infinity) {
           autoLanded++;
-          const remain = Math.max(0, autoTotalAtStart - autoLanded);
-          if (autoEl) autoEl.textContent = String(remain);
         }
       } else if (ball.animator && ball.animator.finished) {
         // ★ 终极防御：animator 已跑完所有段（finished=true）但没有合法的 landedSlot
@@ -5482,6 +5506,8 @@ function initGame() {
     const multiplier = (typeof buyCostMultiplier === 'function') ? buyCostMultiplier() : 1;
     const totalCost = free ? 0 : parseFloat((bet * multiplier).toFixed(2));
     if (!free && balance < totalCost) {
+      // v61: 同步触发 toast 提示，更醒目（按钮文字短暂提示作辅助）
+      showToast('当前余额不足');
       if (startLbl) {
         startLbl.textContent = '余额不足';
         setTimeout(() => {
@@ -5599,7 +5625,7 @@ function initGame() {
         vrot:      0,       // animator 会每帧覆写
         color:     ballColor,
         extraMult: extraMult,
-        // 主体球：付费发出的常规球；免费球（respin 返还）不占自动投注额度
+        // 主体球：付费发出的常规球；免费球（respin 返还）不占自动发球额度
         primary:   !free,
         // 绑定投注记录索引（分裂子球继承同一 recordIdx，共同计入总赢利）
         recordIdx: myRecordIdx,
@@ -5629,7 +5655,7 @@ function initGame() {
 
   // ── 开始 / 停止 足球按钮 ──
   // 单发：点击发一颗球，按钮短暂置灰至落槽恢复
-  // 自动：自动投注 > 0 时进入自动模式，按钮变"停止"；点击"停止"可中断
+  // 自动：自动发球 > 0 时进入自动模式，按钮变"停止"；点击"停止"可中断
   // async：launchBall 现在是 async（await PlinkoEngine HMAC 路径），调用方需 await。
   startBtn.addEventListener('click', async () => {
     if (autoMode) {
@@ -5640,7 +5666,7 @@ function initGame() {
       autoPanel.classList.remove('active');
       startBtn.classList.remove('stopping');
       if (startLbl) startLbl.textContent = '开始';
-      // 自动投注显示恢复到原始选择值
+      // 自动发球显示恢复到原始选择值
       restoreAutoDisplay();
       // 若已无飞行球，立即解锁；否则由 afterSettle 解锁
       if (balls.length === 0 && pendingSettles === 0) lockControls(false);
@@ -5666,6 +5692,10 @@ function initGame() {
       restoreAutoDisplay();
     } else if (autoMode) {
       autoRemaining--;
+      // v64: 发球瞬间立刻 -1，不等落槽（autoTotalAtStart === Infinity 时不显示数字）
+      if (autoEl && autoTotalAtStart !== Infinity) {
+        autoEl.textContent = String(Math.max(0, autoRemaining));
+      }
       // 启动独立定时器：每 AUTO_INTERVAL_MS 发一球，不等上一球落槽
       stopAutoTimer();
       autoTimerId = setInterval(async () => {
@@ -5676,6 +5706,10 @@ function initGame() {
         const fired = await launchBall();
         if (fired) {
           autoRemaining--;
+          // v64: 同步发球瞬间显示更新
+          if (autoEl && autoTotalAtStart !== Infinity) {
+            autoEl.textContent = String(Math.max(0, autoRemaining));
+          }
         } else {
           // 余额不足：退出自动
           autoMode = false;
@@ -5757,7 +5791,7 @@ function playSplitSfx() {
     const osc = ctx.createOscillator();
     const env = ctx.createGain();
     const g   = ctx.createGain();
-    g.gain.value = 0.10;
+    g.gain.value = 0.15;        // v56: 0.10 → 0.15 (+50%)
     osc.connect(env); env.connect(g); g.connect(ctx.destination);
     osc.type = 'sine';
     osc.frequency.setValueAtTime(520 + i * 130, now + dt);
@@ -5776,7 +5810,7 @@ function playSplitSfx() {
     data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.025));
   const src  = ctx.createBufferSource();
   const nG   = ctx.createGain();
-  nG.gain.value = 0.06;
+  nG.gain.value = 0.09;          // v56: 0.06 → 0.09 (+50%)
   src.buffer = buf; src.connect(nG); nG.connect(ctx.destination);
   src.start(now); src.stop(now + 0.08);
 }
@@ -5788,7 +5822,7 @@ function playHitSfx() {
   const now = ctx.currentTime;
   const osc = ctx.createOscillator();
   const env = ctx.createGain();
-  const g = ctx.createGain(); g.gain.value = 0.12;
+  const g = ctx.createGain(); g.gain.value = 0.18;   // v56: 0.12 → 0.18 (+50%)
   osc.connect(env); env.connect(g); g.connect(ctx.destination);
   osc.type = 'triangle';
   osc.frequency.value = 480 + Math.random() * 120;
@@ -5806,7 +5840,7 @@ function playWinSfx(multiplier) {
   freqs.forEach((f, i) => {
     const osc = ctx.createOscillator();
     const env = ctx.createGain();
-    const g = ctx.createGain(); g.gain.value = 0.22;
+    const g = ctx.createGain(); g.gain.value = 0.32;   // v56: 0.22 → 0.32 (+50%)
     osc.connect(env); env.connect(g); g.connect(ctx.destination);
     osc.type = 'sine';
     osc.frequency.value = f;
@@ -5889,9 +5923,14 @@ const costHiMultEl  = document.getElementById('costHiMult');
 function currentBet() { return betValues[betIdx]; }
 
 // 按当前投注额刷新弹窗里展示的附加费用
+// v60: 数字为整数时不展示 .0 —— +$3 而不是 +$3.0
+function fmtMoney(v) {
+  const r = Math.round(v * 10) / 10;          // 防浮点精度（5*0.6 可能算成 2.9999...）
+  return r % 1 === 0 ? String(r) : r.toFixed(1);
+}
 function refreshBuyCosts() {
   const bet = currentBet();
-  const fmt = (rate) => '+' + (bet * rate).toFixed(1);
+  const fmt = (rate) => '+$' + fmtMoney(bet * rate);
   if (costSplitEl)  costSplitEl.textContent  = fmt(BUY_RATES.split);
   if (costRespinEl) costRespinEl.textContent = fmt(BUY_RATES.respin);
   if (costHiMultEl) costHiMultEl.textContent = fmt(BUY_RATES.hiMult);
@@ -5920,7 +5959,7 @@ function refreshBuyBtnBadge() {
   if (totalEl) {
     const bet = currentBet();
     const total = bet * buyCostMultiplier();
-    totalEl.textContent = total.toFixed(1);
+    totalEl.textContent = '$' + fmtMoney(total);   // v60 整数时不带 .0
   }
 }
 refreshBuyBtnBadge();

@@ -264,16 +264,15 @@ body {
   text-transform: uppercase;
 }
 .bal-value {
-  /* v58 扁平化：去掉金色发光 + 立体浮雕阴影，纯色金字一气呵成 */
-  font-family: 'Space Mono', monospace;
+  /* v66: 改用与"获得"区域同字体（Chakra Petch），$ 和数字一气呵成 */
+  font-family: 'Chakra Petch', sans-serif;
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text-gold);
-  letter-spacing: 0.5px;
+  letter-spacing: 0.02em;
 }
 .bal-value::before {
   content: '$';
-  font-weight: 700;
   margin-right: 1px;
 }
 /* v14: .bal-float / @keyframes balFloat 已移除——顶部余额去掉飘字聚合反馈，
@@ -1437,10 +1436,52 @@ body {
   text-shadow: 0 1px 2px rgba(0,0,0,0.6), 0 0 10px rgba(255,215,100,0.5);
 }
 
-/* 未激活任何特色功能：只显示左侧（特色功能 + 图标），隐藏竖线与总投注 */
+/* 未激活任何特色功能：只显示左侧（特色功能 + 图标）+ 右侧 CTA（爽感拉满 ›），
+   隐藏竖线与总投注（激活后改显示总投注，隐藏 CTA） */
 .feature-buy-btn:not(.active) .fb-divider,
 .feature-buy-btn:not(.active) .fb-right {
   display: none;
+}
+.feature-buy-btn.active .fb-cta {
+  display: none;
+}
+
+/* ─── v72 特色功能 CTA：金色文案 + 呼吸右箭头 ─── */
+.fb-cta {
+  display: inline-flex;
+  align-items: center;       /* 两个 inline-block 按盒子中线对齐 */
+  gap: 6px;
+  margin-left: auto;
+  pointer-events: none;        /* 点击穿透到按钮 → 打开弹窗 */
+  font-family: 'Chakra Petch', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  line-height: 1;
+}
+.fb-cta-text {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text-gold);
+  letter-spacing: 0.5px;
+  text-shadow:
+    0 1px 1px rgba(60,30,0,0.7),
+    0 0 6px rgba(255,200,60,0.3);
+}
+.fb-cta-arrow {
+  display: inline-block;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text-gold);
+  text-shadow: 0 0 6px rgba(255,200,60,0.45);
+  /* › 字符在大多数字体里光学中心偏下（基线之上但比字号中央偏下），
+     微调向上 1.5px 让它视觉与文字主体居中对齐 */
+  transform: translateY(-1.5px);
+  animation: fbArrowBreathe 1.4s ease-in-out infinite;
+}
+@keyframes fbArrowBreathe {
+  0%, 100% { transform: translate(0, -1.5px);   opacity: 0.65; }
+  50%      { transform: translate(4px, -1.5px); opacity: 1;    }
 }
 /* 激活态：竖线紧贴在左右两组之间（flex 已处理对齐） */
 .feature-buy-btn.active .fb-divider {
@@ -2009,6 +2050,15 @@ body {
 .buy-row + .buy-row {
   border-top: 1px solid rgba(255,255,255,0.12);
 }
+/* v69 master 行：加粗的金色顶部分隔，与上方三个子项视觉切分 */
+.buy-row.buy-row-master {
+  border-top: 1px solid rgba(255, 210, 60, 0.35);
+  margin-top: 4px;
+  padding-top: 16px;
+}
+.buy-row.buy-row-master .buy-row-icon {
+  color: var(--text-gold);
+}
 .buy-row-icon {
   width: 36px; height: 36px;
   display: flex; align-items: center; justify-content: center;
@@ -2407,6 +2457,11 @@ body {
         <span class="fb-total-label">总投注</span>
         <span class="fb-total-val" id="fbTotalBet">$10</span>
       </span>
+      <!-- v72 未激活时右侧 CTA：金色文案 + 呼吸右箭头，点击穿透到按钮打开弹窗 -->
+      <span class="fb-cta" aria-hidden="true">
+        <span class="fb-cta-text">爽感拉满</span>
+        <span class="fb-cta-arrow">›</span>
+      </span>
     </button>
 
     <!-- 左上：行数 -->
@@ -2561,6 +2616,20 @@ body {
       </div>
       <label class="buy-toggle">
         <input type="checkbox" id="toggleHiMult">
+        <span class="buy-toggle-track"></span>
+      </label>
+    </div>
+
+    <!-- v69 一键全开 / 全关 master toggle —— 与上方三个 toggle 双向联动 -->
+    <div class="buy-row buy-row-master">
+      <div class="buy-row-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+      </div>
+      <div class="buy-row-main">
+        <span class="buy-row-title" id="masterTitle">一键全开，爽感拉满</span>
+      </div>
+      <label class="buy-toggle">
+        <input type="checkbox" id="toggleAllFeatures">
         <span class="buy-toggle-track"></span>
       </label>
     </div>
@@ -4485,16 +4554,19 @@ function lockControls(lock) {
   _ctrlArrows.forEach(btn => { btn.disabled = lock; });
   // 解锁时还原难度边界状态
   if (!lock) renderRisk();
-  // v63: 自动模式锁定时，行数 / 投注 / 难度 / 特色功能 整体淡化为统一视觉（opacity 0.55 + pointer-events none）
-  // ctrl-auto（自动发球）不在此处理，保持完整可读以显示当前剩余次数
+  // v63: 锁定时，行数 / 投注 / 难度 / 特色功能 整体淡化为统一视觉（opacity 0.55 + pointer-events none）
+  // v68: ctrl-auto 单发模式下也淡化（与其他控件统一）；自动模式下保持高亮（显示剩余次数倒计时）
   const lockTargets = [
-    document.getElementById('btnBuyFeatures'),
-    document.querySelector('.ctrl-rows'),
-    document.querySelector('.ctrl-bet'),
-    document.querySelector('.ctrl-risk'),
+    { el: document.getElementById('btnBuyFeatures') },
+    { el: document.querySelector('.ctrl-rows') },
+    { el: document.querySelector('.ctrl-bet') },
+    { el: document.querySelector('.ctrl-risk') },
+    { el: document.querySelector('.ctrl-auto'), skipInAuto: true },
   ];
-  lockTargets.forEach(el => {
+  lockTargets.forEach(({ el, skipInAuto }) => {
     if (!el) return;
+    // 锁定 + 自动模式 + 该控件标记跳过 → 保持当前高亮，不应用淡化
+    if (lock && skipInAuto && autoMode) return;
     el.style.pointerEvents = lock ? 'none' : '';
     el.style.opacity = lock ? '0.55' : '';
   });
@@ -4723,7 +4795,9 @@ function initGame() {
     if (!sectionWonValEl) return;
     // v12: 小数位 2 → 1（去美元符号后数字更聚焦）
     // v33: 去掉千分位逗号（和其他区域展示统一 · 不加 ,）
-    sectionWonValEl.textContent = sectionWon.toFixed(1);
+    // v66: 整数时不显示 .0（用 fmtMoney 与 投注/总投注 统一规则；$ 由 ::before 提供）
+    sectionWonValEl.textContent =
+      (typeof fmtMoney === 'function') ? fmtMoney(sectionWon) : sectionWon.toFixed(1);
   }
   // 每球落槽累加：数字 +won、触发 bump 闪烁、首球时顺带展开 .visible
   function bumpSectionWon(won) {
@@ -5024,7 +5098,12 @@ function initGame() {
 
       const el = document.createElement('div');
       el.className = 'float-win' + (multiplier >= 100 ? ' mega' : multiplier >= 25 ? ' jackpot' : '');
-      el.textContent = '+' + won.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      // v67: 飘字整数时不展示 .00（$5 而非 $5.00），保留千分位逗号
+      // v68: 加美元符号前缀 → "+$5" / "+$1,500"
+      const wonStr = (Math.round(won * 100) / 100 % 1 === 0)
+        ? String(Math.round(won))
+        : won.toFixed(2);
+      el.textContent = '$' + wonStr.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
       // 槽居中，CSS 像素下按当前行数 d 缩放（canvasRect.width == W，scale 恒为 1）
       const d_css       = d;           // d 已用实际 W 计算，无需再乘 scale
@@ -5916,6 +5995,7 @@ const buyBtnPanel   = document.getElementById('btnBuyFeatures');
 const tglSplit      = document.getElementById('toggleSplit');
 const tglRespin     = document.getElementById('toggleRespin');
 const tglHiMult     = document.getElementById('toggleHiMult');
+const tglAllFeats   = document.getElementById('toggleAllFeatures');   // v69 master toggle
 const costSplitEl   = document.getElementById('costSplit');
 const costRespinEl  = document.getElementById('costRespin');
 const costHiMultEl  = document.getElementById('costHiMult');
@@ -6074,7 +6154,20 @@ function bindBuyToggle(el, key, sideEffect) {
     window.buyFeatures[key] = el.checked;
     refreshBuyBtnBadge();
     if (sideEffect) sideEffect();
+    syncMasterFeatureToggle();   // v69 同步 master 开关显示
   });
+}
+// v69 同步 master toggle 状态：三个子开关全开 → master ON；任一关 → master OFF
+// v70 标题随状态切换："一键全开，爽感拉满" ↔ "一键关闭"
+const masterTitleEl = document.getElementById('masterTitle');
+function syncMasterFeatureToggle() {
+  if (!tglAllFeats) return;
+  const f = window.buyFeatures;
+  const allOn = !!(f.split && f.respin && f.hiMult);
+  tglAllFeats.checked = allOn;
+  if (masterTitleEl) {
+    masterTitleEl.textContent = allOn ? '一键关闭' : '一键全开，爽感拉满';
+  }
 }
 bindBuyToggle(tglSplit, 'split', () => {
   // 分裂钉启停：重绘钉板
@@ -6095,6 +6188,40 @@ bindBuyToggle(tglHiMult, 'hiMult', () => {
     legend.setAttribute('aria-hidden', on ? 'false' : 'true');
   }
 });
+
+// v69 一键全开 / 全关：核心逻辑抽出复用，弹窗 master toggle 与主界面 fb-master-toggle 共用
+function applyAllBuyFeatures(targetOn) {
+  window.buyFeatures.split  = targetOn;
+  window.buyFeatures.respin = targetOn;
+  window.buyFeatures.hiMult = targetOn;
+  // 同步 3 个子 toggle 显示
+  if (tglSplit)  tglSplit.checked  = targetOn;
+  if (tglRespin) tglRespin.checked = targetOn;
+  if (tglHiMult) tglHiMult.checked = targetOn;
+  // 触发各自 sideEffect
+  if (typeof drawBoard === 'function') drawBoard();
+  if (typeof rebuildSlotDom === 'function') rebuildSlotDom();
+  if (typeof drawDome === 'function') drawDome();
+  const legend = document.getElementById('multLegend');
+  if (legend) {
+    legend.classList.toggle('show', targetOn);
+    legend.setAttribute('aria-hidden', targetOn ? 'false' : 'true');
+  }
+  refreshBuyBtnBadge();
+  syncMasterFeatureToggle();
+}
+if (tglAllFeats) {
+  tglAllFeats.addEventListener('change', () => {
+    if (autoMode || balls.length > 0 || pendingSettles > 0) {
+      tglAllFeats.checked = !!(window.buyFeatures.split && window.buyFeatures.respin && window.buyFeatures.hiMult);
+      showToast('投注进行中，暂不可修改');
+      return;
+    }
+    applyAllBuyFeatures(tglAllFeats.checked);
+  });
+}
+
+// v72 取消主界面快捷 toggle，改为 CTA 提示（点击直接进入弹窗，由 master toggle 处理全开关）
 
 // 投注切换时同步弹窗费用 + 按钮费用
 document.querySelectorAll('.ctrl-bet .sel-arrow').forEach(btn => {

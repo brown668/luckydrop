@@ -1561,7 +1561,33 @@ body {
   box-shadow: none;
   overflow: visible;
 }
-.slot.is-respin .slot-bar::after { display: none; }
+/* v73 重启用 ::after 作为金光底层（叠在 ::before 红色图标下方），
+   让 respin 图标看起来"中心散发金光"，提升草坪背景下的可见度
+   v73b 收紧：图案 20px、光晕 24px（仅外延 2px），不再溢出过多 */
+.slot.is-respin .slot-bar::after {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: -7px;                 /* 配合 24px 尺寸居中包裹 20px 图案 */
+  transform: translateX(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(255, 245, 160, 0.95) 0%,
+    rgba(255, 210, 70, 0.7)  30%,
+    rgba(255, 170, 20, 0.35) 60%,
+    transparent 88%);
+  filter: blur(1.5px);
+  z-index: 1;                /* ::before 是 z:2，金光在下层 */
+  pointer-events: none;
+  animation: respinGoldGlow 2.6s ease-in-out infinite;
+}
+@keyframes respinGoldGlow {
+  0%, 100% { opacity: 0.85; transform: translateX(-50%) scale(1); }
+  50%      { opacity: 1;    transform: translateX(-50%) scale(1.12); }
+}
 
 /* Respin 图标 —— 红色足球 + 旋转光环
    —— top 从 -11px 收回到 -5px，且尺寸 22→20px
@@ -4659,6 +4685,7 @@ let balls          = [];
 let pegGlows       = {};
 let pendingSettles = 0;
 let pendingWin     = 0;
+let pendingRespinFreeBalls = 0;   // v74 已触发 respin 但 1050ms 间隙未发出的 free ball 计数
 let _gameCtrl      = null;  // AbortController，控制当前 initGame 实例的事件监听
 
 // ── Section 返还展示（倍率槽下方"获得 💲XXX"）──
@@ -4680,6 +4707,7 @@ function onRowsChanged() {
   balls.length  = 0;
   pendingSettles = 0;
   pendingWin     = 0;
+  pendingRespinFreeBalls = 0;     // v74 切行数视为新开局，重置 respin 待发计数
   // Section 返还展示同步清零并立即隐藏（切行数视为新开局）
   if (sectionResetTimer !== null) {
     clearTimeout(sectionResetTimer);
@@ -5137,6 +5165,9 @@ function initGame() {
 
     // Respin：命中 respin 槽则触发免费补发一球 + 红球旋转吸附特效
     if (window.buyFeatures && window.buyFeatures.respin && respinSlots.has(slotIdx)) {
+      // v74 触发瞬间：占位 +1 防止 afterSettle 在 1050ms 间隙提前解锁控件
+      pendingRespinFreeBalls++;
+      lockControls(true);   // 强保锁定（防止上一球已是最后一球，pendingSettles 已减为 0）
       const slotEl = slotEls[slotIdx];
       const barEl = slotEl && slotEl.querySelector('.slot-bar');
       if (slotEl && barEl) {
@@ -5180,7 +5211,12 @@ function initGame() {
       // 稍作延时后真正补发一球（等旋转吸附的视觉先走完）
       // launchBall 现在是 async；respin 返还球 fire-and-forget，catch 防 unhandled rejection
       setTimeout(() => {
-        launchBall({ free: true }).catch(err => console.error('[respin] launchBall failed:', err));
+        // v74 球真正发出（launchBall 内部会再次 lockControls(true)），抵消占位
+        launchBall({ free: true })
+          .catch(err => console.error('[respin] launchBall failed:', err))
+          .finally(() => {
+            pendingRespinFreeBalls = Math.max(0, pendingRespinFreeBalls - 1);
+          });
       }, 1050);
     }
 
@@ -5195,6 +5231,9 @@ function initGame() {
 
   // ── 结算后处理（所有球都落槽后） ──
   function afterSettle() {
+    // v74 Respin guard：若有 free ball 已触发但 1050ms 后才真正发出，afterSettle 推迟到
+    //   free ball 落槽后再执行，避免间隙窗口控件被解锁
+    if (pendingRespinFreeBalls > 0) return;
     // v14: 去掉顶部余额飘字——balance 已在 settle() 内逐球即时 +won 并刷新 DOM
     //      （line 4542: balEl.textContent = fmtBalance(balance)），玩家直接看到数字
     //      跳动，不再需要聚合 "+XX.XX" 飘字二次反馈。原因：单球时与槽位飘字重复，
@@ -5748,7 +5787,8 @@ function initGame() {
       // 自动发球显示恢复到原始选择值
       restoreAutoDisplay();
       // 若已无飞行球，立即解锁；否则由 afterSettle 解锁
-      if (balls.length === 0 && pendingSettles === 0) lockControls(false);
+      // v74: respin 触发但 free ball 未发期间不解锁
+      if (balls.length === 0 && pendingSettles === 0 && pendingRespinFreeBalls === 0) lockControls(false);
       return;
     }
     const autoTotal = autoValues[autoIdx];
@@ -5809,7 +5849,8 @@ function initGame() {
   // 永久置灰的"特色功能"按钮困住（#bug 排查记录）。
   (function breathingLoop() {
     if (signal.aborted) return;
-    if (balls.length === 0 && pendingSettles === 0) {
+    if (balls.length === 0 && pendingSettles === 0 && pendingRespinFreeBalls === 0) {
+      // v74 增加 pendingRespinFreeBalls 守卫：respin 触发但 free ball 未发的间隙保持锁定
       drawBoard(pegGlows);
       if (!autoMode) {
         const buyBtn = document.getElementById('btnBuyFeatures');

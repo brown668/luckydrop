@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <!-- v21 加 viewport-fit=cover，让下方 env(safe-area-inset-*) 生效。不加 user-scalable=no，保留样机定位下的双指缩放自由 --><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>LUCKY DROP — UI Mockup v2</title>
+<title>爆裂足球 2500× — UI Mockup</title>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 /* ════════════════════════════════════════════════════════
@@ -74,14 +74,6 @@ body {
   font-family: 'Chakra Petch', sans-serif;
 }
 
-.page-label {
-  color: rgba(220,240,255,0.55);
-  font-size: 10px;
-  letter-spacing: 5px;
-  text-transform: uppercase;
-  margin-bottom: 24px;
-}
-
 /* ─── Device ─── */
 .device {
   width: 390px;
@@ -99,17 +91,85 @@ body {
     0 0 60px rgba(80,160,240,0.3);
 }
 
-/* Status bar */
+/* ─── Status Bar · iPhone 标准布局（Dynamic Island 机型）───
+   v48: 还原真实 iOS 17/18 状态栏：
+     · 高度 47px (适配 Dynamic Island 留白)
+     · 左侧时间 17px SF Pro，JS 实时更新本地时间
+     · 中央 Dynamic Island 占位（黑色胶囊 122×37，圆角 18.5px）
+     · 右侧 信号(4 格) + WiFi(扇形) + 电池(矩形 + 内芯)
+     · 字体 -apple-system 优先，与原生 UI 一致 */
 .status {
-  height: 34px;
-  background: linear-gradient(180deg, rgba(13,59,117,0.85), rgba(13,59,117,0.7));
+  height: 47px;
+  /* v48b: 黑色 → 与 header 同款深蓝渐变，与游戏 UI 主调统一。
+           Dynamic Island 仍保留黑色（iPhone 系统级视觉标识 · OLED 黑像素），
+           黑色岛在深蓝海上自然漂浮，与真实 iOS 应用内状态栏一致。 */
+  background: linear-gradient(180deg, var(--ui-blue-bot) 0%, var(--ui-blue-deep) 100%);
+  position: relative;
+  flex-shrink: 0;
+  font-family: -apple-system, 'SF Pro Text', 'SF Pro', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #fff;
+  font-weight: 600;
+  user-select: none;
+}
+.status-time {
+  position: absolute;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 17px;
+  letter-spacing: -0.2px;
+  line-height: 1;
+}
+.status-icons {
+  position: absolute;
+  right: 26px;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 22px;
-  font-size: 11px;
-  color: rgba(230,245,255,0.85);
-  font-family: 'Space Mono', monospace;
+  gap: 6px;
+}
+.status-icons svg { display: block; }
+
+/* 信号 4 格 */
+.icon-signal { width: 18px; height: 12px; }
+.icon-signal rect { fill: #fff; }
+
+/* WiFi 扇形 */
+.icon-wifi { width: 17px; height: 12px; }
+.icon-wifi path { fill: #fff; }
+
+/* 电池外壳 + 内芯 + 凸起 */
+.icon-battery {
+  width: 27px;
+  height: 13px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.icon-battery .bat-shell {
+  width: 24px;
+  height: 12px;
+  border: 1.2px solid rgba(255,255,255,0.65);
+  border-radius: 3.5px;
+  position: relative;
+  display: inline-block;
+}
+.icon-battery .bat-fill {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  bottom: 1px;
+  width: calc((100% - 2px) * 0.85);  /* 默认显示 85% 电量 */
+  background: #fff;
+  border-radius: 1.5px;
+}
+.icon-battery .bat-tip {
+  width: 1.5px;
+  height: 5px;
+  background: rgba(255,255,255,0.65);
+  border-radius: 0 1px 1px 0;
+  margin-left: 1px;
 }
 
 
@@ -159,25 +219,23 @@ body {
   font-weight: 700;
   text-shadow: 0 0 10px rgba(255,220,60,0.9), 0 0 20px rgba(255,180,0,0.5);
 }
+/* ─── v54 Logo · 爆裂足球2500 · 单一连贯字标 ──────────────
+   v53 复盘：金色字 + 红色徽章 → 双元素仍有视觉负担
+   v54 终极极简：整段一气呵成，无徽章无副标，
+     · 一段金色浮雕字「爆裂足球2500」
+     · 字体  Chakra Petch + PingFang SC
+     · 阴影  2 层立体（深棕浮雕 + 蓝色 drop shadow）
+     · 中文 / 数字字号一致，仅靠字距统一节奏 */
 .logo {
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: 2.8px;
-  color: #ffffff;
-  text-shadow:
-    0 1px 0 var(--ui-blue-edge),
-    0 2px 0 var(--ui-blue-edge),
-    0 3px 4px rgba(0,20,60,0.55),
-    0 0 12px rgba(150,210,255,0.4);
+  font-family: 'Chakra Petch', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-weight: 800;
+  font-size: 23px;
+  letter-spacing: 2px;
+  color: #ffd23a;
   white-space: nowrap;
-}
-.logo .logo-golden {
-  color: var(--text-gold);
   text-shadow:
-    0 1px 0 #7a4a00,
-    0 2px 0 #5a3400,
-    0 3px 5px rgba(60,30,0,0.6),
-    0 0 10px rgba(255,210,70,0.5);
+    0 1px 0 #4a2400,
+    0 2px 4px rgba(0,20,60,0.55);
 }
 /* ─── 底部余额条 ─── */
 .footer-balance {
@@ -492,7 +550,7 @@ body {
   );
 }
 
-/* ─── 高倍率球图例（左上角说明条，仅 hiMult 打开时显示）─── */
+/* ─── 高倍足球图例（左上角说明条，仅 hiMult 打开时显示）─── */
 .mult-legend {
   position: absolute;
   top: 6px;
@@ -1406,17 +1464,21 @@ body {
   position: static;
   transform: none;
   display: block;
-  font-size: 10px;
-  letter-spacing: 0.3px;
-  color: rgba(200,220,240,0.7);
+  /* v55 可读性优化：原 rgba(200,220,240,0.7) 在蓝色按钮渐变上对比度不足 → 看不清。
+     改为：高 alpha 暖近白 + 字重提到 700 + 微深色 text-shadow，对比度大幅提升。 */
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  color: rgba(235, 248, 255, 0.96);
   font-family: 'PingFang SC', 'Chakra Petch', 'Microsoft YaHei', sans-serif;
-  font-weight: 600;
+  font-weight: 700;
   padding: 0;
   background: transparent;
   border: none;
   border-radius: 0;
   box-shadow: none;
-  text-shadow: none;
+  text-shadow:
+    0 1px 1px rgba(0,10,30,0.75),
+    0 0 2px rgba(0,15,40,0.5);
   white-space: nowrap;
   line-height: 1;
   text-transform: none;
@@ -1951,26 +2013,32 @@ body {
   font-family: 'Chakra Petch', 'PingFang SC', sans-serif;
   font-size: 14px;
   font-weight: 700;
-  color: #fff;
+  /* v55b: 白色 → 金色，与游戏 logo / 余额 / 倍率灯条同主色，强化"特色 = 奖励"的品牌一致性 */
+  color: var(--text-gold);
   letter-spacing: 0.4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-shadow:
+    0 1px 1px rgba(60,30,0,0.7),
+    0 0 8px rgba(255,200,60,0.35);
 }
 .buy-row-desc {
   font-family: 'PingFang SC', sans-serif;
-  font-size: 11.5px;
-  font-weight: 400;
-  color: rgba(200,220,240,0.62);
-  line-height: 1.35;
+  font-size: 12px;                                /* v55: 11.5 → 12 微调，可读性更好 */
+  font-weight: 500;                                /* 400 → 500，加粗一档 */
+  color: rgba(225, 240, 255, 0.92);                /* alpha 0.62 → 0.92，从近灰色 → 亮白冷调 */
+  line-height: 1.45;
   letter-spacing: 0.2px;
+  text-shadow: 0 1px 1px rgba(0,12,30,0.6);        /* 深色阴影加对比度 */
 }
 .buy-row-cost {
   font-family: 'PingFang SC', sans-serif;
   font-size: 11.5px;
-  font-weight: 500;
-  color: rgba(180,210,235,0.55);
-  margin-top: 1px;
+  font-weight: 600;                                /* 500 → 600 */
+  color: rgba(200, 220, 245, 0.85);                /* alpha 0.55 → 0.85 */
+  margin-top: 2px;
+  text-shadow: 0 1px 1px rgba(0,12,30,0.5);
 }
 .buy-row-cost > span {
   font-family: 'Chakra Petch', sans-serif;
@@ -2191,20 +2259,41 @@ body {
 </head>
 <body>
 
-<p class="page-label">GOAL DROP — FOOTBALL EDITION</p>
-
 <div class="device">
 
-  <!-- Status -->
+  <!-- Status Bar · iPhone 标准布局 -->
   <div class="status">
-    <span>9:41</span>
-    <span>●●●● 5G</span>
+    <span class="status-time" id="statusTime">9:41</span>
+
+    <!-- 右侧：信号 / WiFi / 电池 -->
+    <div class="status-icons">
+      <!-- 信号 4 格（递增高度的圆角矩形） -->
+      <svg class="icon-signal" viewBox="0 0 18 12" aria-hidden="true">
+        <rect x="0"  y="8" width="3" height="4"  rx="0.7"/>
+        <rect x="5"  y="5" width="3" height="7"  rx="0.7"/>
+        <rect x="10" y="2" width="3" height="10" rx="0.7"/>
+        <rect x="15" y="0" width="3" height="12" rx="0.7"/>
+      </svg>
+
+      <!-- WiFi 扇形（3 段曲线 + 中心点） -->
+      <svg class="icon-wifi" viewBox="0 0 17 12" aria-hidden="true">
+        <path d="M8.5 0C5.3 0 2.4 1.2 0 3.2l1.6 1.7C3.5 3.2 5.9 2.2 8.5 2.2s5 1 6.9 2.7L17 3.2C14.6 1.2 11.7 0 8.5 0z"/>
+        <path d="M8.5 4.4c-2.1 0-4 .8-5.5 2l1.6 1.7c1.1-.9 2.4-1.4 3.9-1.4s2.8.5 3.9 1.4L14 6.4c-1.5-1.2-3.4-2-5.5-2z"/>
+        <path d="M8.5 8.5c-1 0-1.9.4-2.6 1l2.6 2.5L11.1 9.5c-.7-.6-1.6-1-2.6-1z"/>
+      </svg>
+
+      <!-- 电池：外壳 + 内芯填充 + 右侧凸起 -->
+      <span class="icon-battery" aria-label="电量">
+        <span class="bat-shell"><span class="bat-fill" id="batFill"></span></span>
+        <span class="bat-tip"></span>
+      </span>
+    </div>
   </div>
 
   <!-- Header -->
   <div class="header">
     <div class="logo-wrap">
-      <div class="logo"><span class="logo-golden">GOLDEN</span> GOAL</div>
+      <div class="logo">爆裂足球2500x</div>
     </div>
     <div class="hdr-icons">
       <div class="hdr-icon" id="iconMenu" title="设置">
@@ -2241,7 +2330,7 @@ body {
   <div class="board-wrap" style="position:relative;">
     <canvas class="board-canvas" id="board"></canvas>
 
-    <!-- 高倍率球图例（hiMult 开启时显示在左上） -->
+    <!-- 高倍足球图例（hiMult 开启时显示在左上） -->
     <!-- v20 金球 ×4 → ×3：E[extraMult] 从 1.41 修正到 1.20，维持 hiMult 下 98% RTP -->
     <div class="mult-legend" id="multLegend" aria-hidden="true">
       <span class="ml-item"><span class="ml-ball ml-b-normal"></span>1×</span>
@@ -2291,7 +2380,7 @@ body {
           <span class="bf-icon" data-key="respin" title="免费足球">
             <svg viewBox="0 0 24 24"><path d="M12 4V1L7 6l5 5V7c3.3 0 6 2.7 6 6s-2.7 6-6 6-6-2.7-6-6H4c0 4.4 3.6 8 8 8s8-3.6 8-8-3.6-8-8-8z"/></svg>
           </span>
-          <span class="bf-icon" data-key="hiMult" title="高倍率球">
+          <span class="bf-icon" data-key="hiMult" title="高倍足球">
             <svg viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>
           </span>
         </span>
@@ -2449,7 +2538,7 @@ body {
         <svg viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>
       </div>
       <div class="buy-row-main">
-        <span class="buy-row-title">高倍率球</span>
+        <span class="buy-row-title">高倍足球</span>
         <span class="buy-row-desc">发球时随机触发高倍率足球</span>
         <span class="buy-row-cost">花费 <span id="costHiMult">+0.2</span></span>
       </div>
@@ -3497,9 +3586,46 @@ window.addEventListener('load', () => {
   rebuildSlotDom();
   drawBoard();
   initGame();
+  initStatusBar();          // v48: 状态栏时钟 + 电池电量
   // 开始按钮改用 CSS background-image (ballbutton.jpeg) + 中央文字徽章 span
   // 不再走 canvas 渲染，保留 renderBallImage/paintStartBtnBall 作为已淘汰代码
 });
+
+/* ─── v48 状态栏：本地时间 + 电池电量 ──────────────────────────
+   · 时间：每 30 秒刷一次（避免 1 秒级闪烁，又不漏掉整分钟切换）
+   · 电池：navigator.getBattery() 可用则读真实电量并随系统变化更新；
+           不可用（Safari 全平台 + Firefox 等）则保持默认 85% 视觉值。 */
+function initStatusBar() {
+  const timeEl = document.getElementById('statusTime');
+  const batFill = document.getElementById('batFill');
+  if (!timeEl) return;
+
+  const tick = () => {
+    const d = new Date();
+    const hh = d.getHours().toString().padStart(2, '0');
+    const mm = d.getMinutes().toString().padStart(2, '0');
+    timeEl.textContent = `${hh}:${mm}`;
+  };
+  tick();
+  // 对齐到下一分钟边界后每 60s 刷新（节省 setInterval 漂移）
+  const msToNextMinute = 60_000 - (Date.now() % 60_000);
+  setTimeout(() => { tick(); setInterval(tick, 60_000); }, msToNextMinute);
+
+  // 电池：仅在浏览器支持 Battery API 时读真实值
+  if (navigator.getBattery && batFill) {
+    navigator.getBattery().then(bat => {
+      const apply = () => {
+        const pct = Math.max(5, Math.min(100, Math.round(bat.level * 100)));
+        batFill.style.width = `calc((100% - 2px) * ${pct / 100})`;
+        // 低电量自动变红（< 20%）
+        batFill.style.background = pct <= 20 ? '#ff3b30' : '#fff';
+      };
+      apply();
+      bat.addEventListener('levelchange', apply);
+      bat.addEventListener('chargingchange', apply);
+    }).catch(() => { /* 静默：保留默认 85% */ });
+  }
+}
 
 // ── 经典黑白足球按钮（六边形 + 五边形拼接，截角二十面体投影） ──
 // theme: 'blue' = 开始（中央深蓝文字徽章） / 'red' = 停止（中央红色文字徽章）
@@ -4660,7 +4786,7 @@ function initGame() {
     ctx.shadowBlur = 0;
     ctx.globalAlpha = alpha;
     drawSoccerBall(ctx, x, y, ballR, rot);
-    // 高倍率球：蓝/金色叠加（multiply 保留球面明暗纹理）
+    // 高倍足球：蓝/金色叠加（multiply 保留球面明暗纹理）
     if (color === 'blue' || color === 'gold') {
       ctx.save();
       ctx.globalCompositeOperation = 'multiply';
@@ -5381,7 +5507,7 @@ function initGame() {
     }
     lockControls(true);
 
-    // 高倍率球抽样：开启后按概率产出蓝/金球
+    // 高倍足球抽样：开启后按概率产出蓝/金球
     // ═══════════════════════════════════════════════════════════════════════════
     // v20 数值修正（维持 hiMult 下 98% RTP）
     // ───────────────────────────────────────────────────────────────────────────
@@ -5920,7 +6046,7 @@ bindBuyToggle(tglRespin, 'respin', () => {
   if (typeof rebuildSlotDom === 'function') { rebuildSlotDom(); }
 });
 bindBuyToggle(tglHiMult, 'hiMult', () => {
-  // 重绘球门以显示/隐藏高倍率球
+  // 重绘球门以显示/隐藏高倍足球
   if (typeof drawDome === 'function') drawDome();
   // 左上角倍率图例同步显隐
   const legend = document.getElementById('multLegend');

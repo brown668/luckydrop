@@ -603,8 +603,13 @@ body {
   box-shadow:
     0 1px 2px rgba(0,10,30,0.55),
     inset 0 1px 1px rgba(255,255,255,0.3);
+  /* v79: 让 ::after 色层能用 mix-blend-mode 与底图混合（需父级 isolation）*/
+  isolation: isolate;
+  overflow: hidden;
 }
-/* 蓝/金色球：用半透明色层叠加在贴图上，保留六边形纹理 */
+/* 蓝/金色球：v79 改用 mix-blend-mode: multiply 与 ball1.jpg 相乘（与下落球 canvas
+   ctx.globalCompositeOperation='multiply' 保持一致），保留六边形明暗纹理。
+   alpha 同步提到 0.85 / 0.9，与下落球 canvas 渲染参数对齐。 */
 .ml-b-blue::after,
 .ml-b-gold::after {
   content: '';
@@ -612,18 +617,32 @@ body {
   inset: 0;
   border-radius: 50%;
   pointer-events: none;
+  mix-blend-mode: multiply;
 }
 .ml-b-blue::after {
-  background: rgba(60,130,240,0.72);
-  box-shadow:
-    inset 0 0 0 1px rgba(140,200,255,0.65),
-    0 0 5px rgba(80,160,255,0.6);
+  background: rgba(60, 130, 240, 0.85);
 }
 .ml-b-gold::after {
-  background: rgba(255,200,40,0.70);
+  background: rgba(255, 200, 40, 0.9);
+}
+/* 发光描边层（独立 ::before，不参与 multiply 混合，纯叠加发光） */
+.ml-b-blue::before,
+.ml-b-gold::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.ml-b-blue::before {
   box-shadow:
-    inset 0 0 0 1px rgba(255,235,120,0.7),
-    0 0 5px rgba(255,200,60,0.65);
+    inset 0 0 0 1px rgba(140, 200, 255, 0.85),
+    0 0 6px rgba(80, 160, 255, 0.75);
+}
+.ml-b-gold::before {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 235, 120, 0.9),
+    0 0 6px rgba(255, 200, 60, 0.8);
 }
 
 /* ─── Bottom Slots ─── */
@@ -2720,6 +2739,10 @@ const BALL_SPRITE = {
 let selectedRows = 13;
 const PAD_SIDE   = 10;
 const ROWS_MAX   = 16;                               // 固定参考行数（决定canvas高度）
+const MAX_BALLS  = 16;                               // v78 同屏球数上限：8 → 16
+//   原因：开 split + respin 时单次发球可能瞬间产生 8+ 球（主球 + 多层 fork + free ball），
+//   命中 8 上限后 split 钉发亮但不触发分裂（用户观察到的"碰但不分裂"现象）。
+//   16 是对 R=16 三层分裂极限的合理上限，性能可承受（实测 60fps 稳）。
 const D_16       = (390 - 2 * PAD_SIDE) / 17;       // ≈ 21.76px，16行基准钉间距
 const ROW_H16    = D_16 * Math.sqrt(3) / 2;         // ≈ 18.84px，16行基准行高
 const WALL_SLOPE = 0.19;                             // 缓梯形（参考图：轻微透视，场地几乎铺满画布）
@@ -2764,27 +2787,32 @@ const WALL_SLOPE = 0.19;                             // 缓梯形（参考图：
 // ═══════════════════════════════════════════════════════════════════════════
 //  数据结构：SPLIT_PRESETS[rows] = [pegs_佛系, pegs_激进, pegs_疯狂]
 //           每个 pegs = [[r, c], ...] 对称分裂钉坐标对列表
+//
+// ═══════════════════════════════════════════════════════════════════════════
+//  v77（用户固定钉位）：钉子位置不再随难度变化，9 行数对应 9 组固定钉位（每组 3 颗）。
+//  用户原始 1-indexed 输入 (x, y) = 第 x 行第 y 颗钉 → 代码 0-indexed [r, c] = [x-1, y-1]。
+//  注：此版本以"统一钉位"为优先，RTP 守恒由各难度 slot payouts 自身设计承担，
+//      实际 RTP 偏差由解析法/MC 复测得出，可能某些难度 RTP 略偏离 97.5%。
+// ═══════════════════════════════════════════════════════════════════════════
 const SPLIT_PRESETS = {
-  //     佛系                              激进                              疯狂
-  8:  [ [[3,2],[3,3]],                    [[5,2],[5,5],[7,4],[7,5]],        [[4,2],[4,4],[7,1],[7,8]]   ],
-  9:  [ [[4,1],[4,5],[8,4],[8,6]],        [[5,3],[5,4],[8,2],[8,8]],        [[5,1],[5,3],[5,4],[5,6]]   ],
-  10: [ [[5,2],[5,5],[9,3],[9,8]],        [[5,3],[5,4],[6,2],[6,6]],        [[3,2],[3,3],[9,2],[9,9]]   ],
-  11: [ [[6,2],[6,6],[9,4],[9,7]],        [[3,2],[3,3],[8,1],[8,9]],        [[4,2],[4,4],[7,4],[7,5]]   ],
-  12: [ [[3,2],[3,3],[7,1],[7,8]],        [[2,1],[2,3],[8,1],[8,9]],        [[3,1],[3,4],[7,4],[7,5]]   ],
-  13: [ [[7,3],[7,6],[12,5],[12,9]],      [[8,4],[8,6],[9,4],[9,7]],        [[4,2],[4,4],[8,4],[8,6]]   ],
-  14: [ [[5,2],[5,5],[10,3],[10,9]],      [[6,2],[6,6],[9,3],[9,8]],        [[8,3],[8,7],[11,4],[11,9]] ],
-  15: [ [[4,2],[4,4],[13,4],[13,11]],     [[2,1],[2,3],[8,1],[8,9]],        [[5,2],[5,5],[13,5],[13,10]]],
-  16: [ [[9,4],[9,7],[11,6],[11,7]],      [[7,4],[7,5],[13,5],[13,10]],     [[3,1],[3,4],[10,1],[10,11]]],
+  // 用户输入 1-indexed → 0-indexed
+  8:  [[2,2],[4,2],[6,6]],   // (3,3)(5,3)(7,7)
+  9:  [[3,2],[5,5],[7,2]],   // (4,3)(6,6)(8,3)
+  10: [[4,3],[6,6],[7,3]],   // (5,4)(7,7)(8,4)
+  11: [[2,1],[5,5],[8,3]],   // (3,2)(6,6)(9,4)
+  12: [[3,1],[5,5],[7,4]],   // (4,2)(6,6)(8,5)
+  13: [[4,3],[7,3],[10,8]],  // (5,4)(8,4)(11,9)
+  14: [[3,2],[8,6],[11,4]],  // (4,3)(9,7)(12,5)
+  15: [[4,3],[8,3],[12,8]],  // (5,4)(9,4)(13,9)
+  16: [[5,3],[9,7],[13,5]],  // (6,4)(10,8)(14,6)
 };
 
 function getSplits() {
   if (!(window.buyFeatures && window.buyFeatures.split)) return [];
-  const presetByMode = SPLIT_PRESETS[selectedRows];
-  if (!presetByMode) return [];
-  // 按难度模式（0=佛系 / 1=激进 / 2=疯狂）取对应预设
-  const idx = (typeof modeIdx === 'number' && modeIdx >= 0 && modeIdx < presetByMode.length) ? modeIdx : 0;
-  const preset = presetByMode[idx] || presetByMode[0];
-  return preset.map(([r, c]) => [r, c]);
+  // v77: 钉位不再随难度变化，所有难度共享同一组钉位
+  const pegs = SPLIT_PRESETS[selectedRows];
+  if (!Array.isArray(pegs)) return [];
+  return pegs.map(([r, c]) => [r, c]);
 }
 
 // v28 像素级噪点缓存（草皮真实颗粒肌理的核心）
@@ -4772,7 +4800,9 @@ function initGame() {
   let _splitKeysStamp = '';
   const splitKeys = {
     has(pegKey) {
-      const stamp = `${!!window.buyFeatures?.split}|${selectedRows}`;
+      // v77a 防御：cache 键加上 modeIdx —— 即使将来 SPLIT_PRESETS 重新按难度分组，
+      //   切换难度也能触发 cache 重建，避免"切难度后 splitKeys 仍是旧值"的真实 bug
+      const stamp = `${!!window.buyFeatures?.split}|${selectedRows}|${modeIdx}`;
       if (stamp !== _splitKeysStamp) {
         _splitKeysCache = new Set(getSplits().map(([r, c]) => r * 20 + c));
         _splitKeysStamp = stamp;
@@ -4889,9 +4919,11 @@ function initGame() {
   function addHistory(multiplier) {
     const badge = document.createElement('div');
     badge.className = 'hist-badge ' + histClass(multiplier);
+    // v80a: <10 时也最多保留 1 位小数（如 蓝球 × 0.9 = 1.8 仍正确显示，
+    //   但避免 hiMult × 槽位 出现 1.7999 这种浮点尾数）
     const mDisp = multiplier >= 1000
       ? (Math.round(multiplier / 100) / 10 + 'K')
-      : multiplier >= 10 ? Math.round(multiplier) : multiplier;
+      : multiplier >= 10 ? Math.round(multiplier) : Math.round(multiplier * 10) / 10;
     badge.textContent = mDisp + '×';
     histList.appendChild(badge);
     histList.scrollLeft = histList.scrollWidth;
@@ -5225,7 +5257,12 @@ function initGame() {
       if (balls.length === 0 && pendingSettles === 0) afterSettle();
     }
 
-    addHistory(multiplier);
+    // v80: 历史显示「总倍率 = 球本身倍率 × 槽位倍率」
+    //   weight = ball.weight (分裂后仍 1) × ball.extraMult (hiMult 蓝×2/金×3)
+    //   普通球: weight=1 → 等同槽位倍率（旧行为）
+    //   蓝球落 5× 槽: 2 × 5 = 10× 显示
+    //   金球落 25× 槽: 3 × 25 = 75× 显示
+    addHistory(multiplier * weight);
     done();
   }
 
@@ -5304,7 +5341,7 @@ function initGame() {
   //   2. forkStartCol = col + (1 - parentStep)：副球走父球"没选"的那侧
   //      parentStep=1（父球右）→ 副球列不变；parentStep=0（父球左）→ 副球列 +1
   //   3. ball.usedSplits[pegKey] 防止同一球在同一分裂点重复触发
-  //   4. balls.length ≥ 8 硬截断（await 前后各检查一次，防竞态）
+  //   4. balls.length ≥ MAX_BALLS 硬截断（await 前后各检查一次，防竞态）
   //   5. weight 父子都保持父球原权重（×1.0）；分裂成本由"+60% 投注"一次性覆盖，
   //      不在结算时二次扣除。v4 的 0.55 衰减已废弃（2026-04-24）。
   //   6. startPos = 父球撞钉接触点；initVy = 父球段末 vyEnd × 0.85（碰撞阻尼）
@@ -5321,13 +5358,22 @@ function initGame() {
   //        → 特色功能永久置灰（#bug: 分裂 + 13 行 + 佛系 + 连续 Play 的复现）
   // ============================================================
   async function spawnForkBall(parentBall, forkRow, forkCol, vyEnd, contactX, contactY) {
-    if (balls.length >= 8) return;
+    if (balls.length >= MAX_BALLS) return;
     const pegKey = forkRow * 20 + forkCol;
     if (parentBall.usedSplits && parentBall.usedSplits[pegKey]) return;
 
     // 立即标记 usedSplits（即使后续 HMAC 失败，也不让同一钉二次触发）
     parentBall.usedSplits = parentBall.usedSplits || {};
     parentBall.usedSplits[pegKey] = true;
+
+    // ★ v77b 关键修复：在 await 前 snapshot usedSplits
+    //   spawnForkBall 是 async；await placeForkBet 期间父球继续物理飞行，
+    //   可能撞到下一颗 split 钉并标记 parentBall.usedSplits。
+    //   await 完成创建副球时，{ ...parentBall.usedSplits } 拷贝的是"未来状态"
+    //   （含 await 期间晚标记的钉位）→ 副球错误地继承了"它出生前不该知道"的钉位
+    //   → 副球后续路径碰到这些钉位时被误判为 usedAlready=true → 不触发分裂。
+    //   修复：现在就拍快照，副球只继承"诞生瞬间"父球的 usedSplits。
+    const usedSplitsSnapshot = { ...parentBall.usedSplits };
 
     // 父球在 forkRow 的路径决策：0=左，1=右 → 副球走相反侧
     // ★ 关键：parentBall.enginePath 的索引基准 = parentBall.startRow（见上方"关键点8"）
@@ -5368,7 +5414,7 @@ function initGame() {
     }
 
     // await 期间 balls 可能被 push 到上限，再次确认
-    if (balls.length >= 8) return;
+    if (balls.length >= MAX_BALLS) return;
 
     // 父球分裂后权重保持不变；子球继承同等权重（都是 1.0 × 父）
     // —— 分裂成本已由"特色功能开启 +60% 投注"覆盖一次，不再用权重衰减二次扣除
@@ -5387,8 +5433,8 @@ function initGame() {
       depth:    parentBall.depth,
       rot:      parentBall.rot || 0,
       vrot:     -(parentBall.vrot || 0) * 0.7,
-      // 继承 usedSplits（包含刚标记的 pegKey），避免副球折返时重触发
-      usedSplits:  { ...parentBall.usedSplits },
+      // 继承父球"分裂瞬间"的 usedSplits 快照（v77b：避免 await 期间被父球后续标记污染）
+      usedSplits:  usedSplitsSnapshot,
       color:       parentBall.color || 'normal',
       extraMult:   parentBall.extraMult || 1,
       primary:     false,
@@ -5457,7 +5503,7 @@ function initGame() {
 
       // ── Engine 驱动：animator.step(1) 返回事件数组 ──
       // 事件：'peg' 触发钉发光/击中音效（含分裂钉派生副球）；'land' 触发结算。
-      // 分裂钉门槛：(a) pegKey ∈ splitKeys  (b) 本球未用过此钉  (c) balls<8 硬截断
+      // 分裂钉门槛：(a) pegKey ∈ splitKeys  (b) 本球未用过此钉  (c) balls < MAX_BALLS 硬截断
       //   spawnForkBall fire-and-forget（await PlinkoEngine HMAC → 入 balls[]）。
       const events = ball.animator.step(1);
       let landedSlot = -1;
@@ -5476,7 +5522,7 @@ function initGame() {
           if (
             splitKeys.has(e.pegKey) &&
             !(ball.usedSplits && ball.usedSplits[e.pegKey]) &&
-            balls.length < 8
+            balls.length < MAX_BALLS
           ) {
             spawnForkBall(ball, e.row, e.col, e.vyEnd, e.contactX, e.contactY)
               .catch(err => console.error('[fork] spawnForkBall failed:', err));

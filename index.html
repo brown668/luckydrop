@@ -5524,11 +5524,17 @@ function initGame() {
     // 每落一球就 +won；afterSettle 内若 balls=0 && pendingSettles=0，启动 2.5s 归零计时。
     bumpSectionWon(won);
 
-    // 累计到投注记录
+    // 累计到投注记录 + v83λ pendingBalls 归零检测
     if (typeof recordIdx === 'number' && betHistory[recordIdx]) {
-      betHistory[recordIdx].totalWon = parseFloat(
-        (betHistory[recordIdx].totalWon + won).toFixed(2)
-      );
+      const rec = betHistory[recordIdx];
+      rec.totalWon = parseFloat((rec.totalWon + won).toFixed(2));
+      rec.pendingBalls = Math.max(0, (rec.pendingBalls || 1) - 1);
+      // 该记录关联的所有球（主球 + fork）都落槽 → 立即标 settled + 刷新列表
+      // 修复：之前依赖 afterSettle，自动模式下 balls.length 永远 > 0 → 永不触发
+      if (rec.pendingBalls === 0 && !rec.settled) {
+        rec.settled = true;
+        if (typeof renderHistoryList === 'function') renderHistoryList();
+      }
     }
 
     // 得分音效
@@ -5861,6 +5867,11 @@ function initGame() {
     );
 
     balls.push(forkBall);
+    // v83λ fork 副球计入同 recordIdx 的 pendingBalls 计数
+    if (typeof parentBall.recordIdx === 'number' && betHistory[parentBall.recordIdx]) {
+      betHistory[parentBall.recordIdx].pendingBalls =
+        (betHistory[parentBall.recordIdx].pendingBalls || 0) + 1;
+    }
     if (window._onSplit) window._onSplit(contactX, contactY);
 
     // ★ 防御：父球可能在 fork HMAC await 期间已落槽 → gameLoop 因
@@ -6114,15 +6125,17 @@ function initGame() {
     }
 
     // ── 创建投注记录（每次发球一条，免费球总投注=0）──
-    // v83β settled: false 标志：发球时记录已存在便于 settle 通过 recordIdx 累加 totalWon，
-    //      但渲染列表过滤 settled === true 的，afterSettle 全轮结束才标记为已结算。
+    // v83λ pendingBalls 计数：每条记录跟踪自己关联的球数（主球 + 后续 fork）
+    //      → settle 时 -1，归零即标 settled + 立即 render（不等 afterSettle）
+    //      → 修复自动模式下 balls.length 永远 > 0 导致 afterSettle 不触发的 bug
     betHistory.push({
       time:      Date.now(),
-      bet:       bet,                    // 基础投注额快照
-      totalCost: free ? 0 : totalCost,   // 免费球展示 0
+      bet:       bet,
+      totalCost: free ? 0 : totalCost,
       free:      free,
-      totalWon:  0,                      // 本轮所有球累加的赢利金额
-      settled:   false,                  // 全轮（含 split fork/respin 副球）落槽后标 true
+      totalWon:  0,
+      settled:   false,
+      pendingBalls: 1,                   // 主球计 1，fork 副球生成时 ++
     });
     // 超出上限则淘汰最早的，现役球引用的 recordIdx 一并前移校正
     if (betHistory.length > BET_HISTORY_MAX) {

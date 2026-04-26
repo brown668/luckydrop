@@ -2716,7 +2716,7 @@ body {
       <button class="sel-arrow">‹</button>
       <div class="sel-info">
         <span class="sel-label">行数</span>
-        <span class="sel-value sel-rows">11</span>
+        <span class="sel-value sel-rows">10</span>
       </div>
       <button class="sel-arrow">›</button>
     </div>
@@ -2997,7 +2997,7 @@ const BALL_SPRITE = {
 })();
 
 // ── 当前行数（8-16），X 行对应 X+1 个倍率槽 ──
-let selectedRows = 11;     // v82: 默认 13 → 11
+let selectedRows = 10;     // v83β: 默认 11 → 10（更友好的入门节奏）
 const PAD_SIDE   = 10;
 const ROWS_MAX   = 16;                               // 固定参考行数（决定canvas高度）
 const MAX_BALLS  = 16;                               // v78 同屏球数上限：8 → 16
@@ -4956,7 +4956,7 @@ updateAutoArrows();
 
 // 行数切换
 const rowValues = [8, 9, 10, 11, 12, 13, 14, 15, 16];
-let rowIdx = rowValues.indexOf(11); // 默认 11
+let rowIdx = rowValues.indexOf(10); // 默认 10
 const rowEl = document.querySelector('.sel-rows');
 const [rowBtnPrev, rowBtnNext] = document.querySelectorAll('.ctrl-rows .sel-arrow');
 

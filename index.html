@@ -101,43 +101,6 @@ body {
     0 0 60px rgba(80,160,240,0.3);
 }
 
-/* ─── v83f iPhone 适配（必须在 .device 基础规则之后定义才能覆盖）─── */
-@media (max-width: 480px) {
-  body {
-    padding: 0 !important;
-    background: var(--ui-blue-deep);
-    min-height: 100vh;
-    min-height: 100dvh;
-  }
-  .device {
-    width: 100vw;
-    max-width: 100vw;
-    height: auto;
-    min-height: 100vh;
-    min-height: 100dvh;
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
-    padding-top: env(safe-area-inset-top, 0px);
-  }
-  /* 真机已有系统状态栏，隐藏样机里的假状态栏 */
-  .device > .status { display: none; }
-  /* 核心玩法（钉子/球场/倍率）固定 390 宽居中；视口 < 390 时降到视口宽 */
-  .machine-wrap,
-  .board-wrap,
-  .slots-wrap {
-    width: 390px;
-    max-width: 100%;
-    align-self: center;
-  }
-  .footer-balance {
-    padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-  }
-  .settings-drawer {
-    padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
-  }
-}
-
 /* ─── Status Bar · iPhone 标准布局（Dynamic Island 机型）───
    v48: 还原真实 iOS 17/18 状态栏：
      · 高度 47px (适配 Dynamic Island 留白)
@@ -2460,6 +2423,45 @@ body {
 .toast.show {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
+}
+
+/* ─── v83f/v83h iPhone 适配（放在所有基础规则之后，避免被覆盖）───
+   策略：核心玩法（machine-wrap/board-wrap/slots-wrap）固定 378 宽（与桌面 device 内宽一致），
+        外壳元素（header/controls/footer/抽屉）随 device 撑满视口。
+        固定 378 是为了让 canvas 内 cx±130 绝对像素的球场梯形与 slots-wrap clip-path 的百分比裁剪
+        保持桌面同款的衔接比例，消除小屏下的 V 字错位。 */
+@media (max-width: 480px) {
+  body {
+    padding: 0 !important;
+    background: var(--ui-blue-deep);
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  .device {
+    width: 100vw;
+    max-width: 100vw;
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .device > .status { display: none; }
+  .machine-wrap,
+  .board-wrap,
+  .slots-wrap {
+    width: 378px;
+    align-self: center;
+    flex-shrink: 0;
+  }
+  .footer-balance {
+    padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  }
+  .settings-drawer {
+    padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  }
 }
 </style>
 </head>

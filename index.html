@@ -3641,10 +3641,8 @@ function drawBoard(glows = {}) {
   const FRIC = 0.88;
   const BALL_R = 4.5;  // 球更小，适应小球门
 
-  // 10 颗足球堆满球门
-  // hiMult 关闭：10 白球；打开：7 白 + 2 红 + 1 金
-  const N = 10;
-  const balls = Array.from({length: N}, (_, i) => {
+  // v83b 球门内足球数量：未开 hiMult → 9 颗（纯白）；开启 hiMult → 长出第 10 颗，染 2 蓝 + 1 金 + 7 白
+  function makeBall() {
     return {
       x:  12 + Math.random() * (W_L - 24),
       y:  6 + Math.random() * (H_L - 24),
@@ -3655,10 +3653,21 @@ function drawBoard(glows = {}) {
       vrot: (Math.random() - 0.5) * 0.03,
       color: 'normal',
     };
-  });
+  }
+  const balls = Array.from({length: 9}, makeBall);
 
   function refreshGoalBallColors() {
     const hi = !!(window.buyFeatures && window.buyFeatures.hiMult);
+    const targetN = hi ? 10 : 9;
+    // 同步球数：开 hiMult 时长出第 10 颗，关闭时移除
+    while (balls.length < targetN) {
+      const nb = makeBall();
+      nb.y = -2 - Math.random() * 4;        // 从顶部掉入
+      nb.vy = 0.6 + Math.random() * 0.4;
+      balls.push(nb);
+    }
+    while (balls.length > targetN) balls.pop();
+
     balls.forEach(b => b.color = 'normal');
     if (hi) {
       // 2 蓝 + 1 金 + 7 白（总 10 颗）

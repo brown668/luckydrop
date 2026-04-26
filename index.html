@@ -1428,28 +1428,26 @@ body {
   cursor: pointer;
   position: relative;
   font-family: 'Chakra Petch', 'PingFang SC', sans-serif;
-  /* v83x 与下方蓝色控件区分：保留蓝色底色，但用金色描边 + 金色微发光 + 暖金顶部 hairline，
-     视觉上立刻感知为"特殊/奖励/付费"区域 */
+  /* v83z 精致金边设计：
+     · 1px 锐利金边（不再 1.5px 半透明，避免发糊）
+     · inset 顶部暖金高光 + 底部暗金阴影 → 模拟金属斜面立体
+     · 紧贴边框的 4px 外发光（取代 v83x 的 10px 大范围糊光）
+     · 去掉 backdrop-filter blur(2px)（mobile Safari 性能瓶颈 + 糊感来源） */
   background: linear-gradient(180deg,
-    rgba(46,120,184,0.55) 0%,
-    rgba(24,87,147,0.55) 55%,
-    rgba(10,58,112,0.55) 100%);
-  border: 1.5px solid rgba(255, 210, 80, 0.55);
+    rgba(46,120,184,0.6) 0%,
+    rgba(24,87,147,0.6) 55%,
+    rgba(10,58,112,0.6) 100%);
+  border: 1px solid rgba(255, 200, 60, 0.85);
   box-shadow:
-    0 2px 6px rgba(0,10,30,0.35),
-    0 0 10px rgba(255, 200, 60, 0.18),
-    inset 0 1px 0 rgba(255, 220, 130, 0.35);
+    /* 立体投影（对称四周不偏） */
+    0 2px 5px rgba(0,10,30,0.4);
   transition: background .15s, box-shadow .15s, border-color .15s;
   color: #fff;
-  backdrop-filter: blur(2px);
 }
 .feature-buy-btn:hover {
-  background: linear-gradient(180deg, rgba(46,120,184,0.75), rgba(24,87,147,0.75) 55%, rgba(10,58,112,0.75));
-  border-color: rgba(255, 220, 100, 0.85);
-  box-shadow:
-    0 2px 8px rgba(0,10,30,0.45),
-    0 0 16px rgba(255, 200, 60, 0.35),
-    inset 0 1px 0 rgba(255, 230, 140, 0.5);
+  background: linear-gradient(180deg, rgba(46,120,184,0.78), rgba(24,87,147,0.78) 55%, rgba(10,58,112,0.78));
+  border-color: rgba(255, 215, 90, 1);
+  box-shadow: 0 2px 6px rgba(0,10,30,0.45);
 }
 .feature-buy-btn:active { background: linear-gradient(180deg, rgba(10,58,112,0.85), rgba(5,31,63,0.9)); }
 

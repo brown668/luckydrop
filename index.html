@@ -2832,6 +2832,22 @@ body {
 </div><!-- /device -->
 
 <script>
+// v83g iOS Safari 双击放大兜底拦截
+// 现象：iPhone 16e Safari 双击图片/页面仍触发整页缩放，touch-action:manipulation 不够
+// 方案：350ms 内的连续 touchend 主动 preventDefault；gesturestart 也拦截避免捏合放大
+(() => {
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', e => {
+    const now = Date.now();
+    if (now - lastTouchEnd < 350) e.preventDefault();
+    lastTouchEnd = now;
+  }, { passive: false });
+  // iOS 专属手势事件（双指捏合或双击触发整页缩放都会派发）
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(ev => {
+    document.addEventListener(ev, e => e.preventDefault());
+  });
+})();
+
 // ── 足球 Sprite：从 ball1.jpg 圆形裁切生成透明 PNG ──
 // 加载完成后其他绘制代码会直接 drawImage 贴图；未加载完时回退到几何绘制
 const BALL_SPRITE = {

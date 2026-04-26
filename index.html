@@ -55,6 +55,13 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+/* v83d 禁止双击放大（保留双指缩放）+ 关闭 iOS 长按高亮 */
+html { touch-action: manipulation; }
+body, .device, button, .control-pad, canvas {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
 
 body {
   background:

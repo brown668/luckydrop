@@ -2447,6 +2447,13 @@ body {
     border-radius: 0;
     box-shadow: none;
     padding-top: env(safe-area-inset-top, 0px);
+    /* v83i 板两侧 device 背景与 canvas 内顶天空同步：板区域（约 device 10-55%）用 sky-top→sky-bot
+       渐变，与 canvas outBg 完全一致；板上方保留 sky-top，板下方继续过渡到 sky-deep */
+    background: linear-gradient(180deg,
+      var(--sky-top) 0%,
+      var(--sky-top) 12%,
+      var(--sky-bot) 56%,
+      var(--sky-deep) 100%);
   }
   .device > .status { display: none; }
   .machine-wrap,

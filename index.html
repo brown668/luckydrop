@@ -2880,6 +2880,23 @@ body {
 </div><!-- /device -->
 
 <script>
+// v83r PLAY/STOP 切换图同步预加载
+// ────────────────────────────────────────────────────────────────
+// 现象：刷新后首次按 PLAY 进入"自动发球"，button background 切换到 stop-circle.png 时
+//       图片才首次请求，加载期间 button 空白 → 视觉上按钮短暂消失。
+// 方案：脚本顶部立即 new Image() 触发下载，挂到 window 防被 GC；同时返回 Promise，
+//       让 device.ready 渐显前 await（最多等 800ms），确保用户可见游戏时图片已就位。
+window.__stopImgReady = (() => {
+  const img = new Image();
+  const p = new Promise(res => {
+    img.onload  = () => res(true);
+    img.onerror = () => res(false);
+    img.src     = 'stop-circle.png';
+  });
+  window.__stopImg = img;     // 保留引用避免 GC
+  return p;
+})();
+
 // ── 足球 Sprite：从 ball1.jpg 圆形裁切生成透明 PNG ──
 // 加载完成后其他绘制代码会直接 drawImage 贴图；未加载完时回退到几何绘制
 const BALL_SPRITE = {
@@ -3925,12 +3942,18 @@ window.addEventListener('load', () => {
   // 开始按钮改用 CSS background-image (ballbutton.jpeg) + 中央文字徽章 span
   // 不再走 canvas 渲染，保留 renderBallImage/paintStartBtnBall 作为已淘汰代码
 
-  // v83e 渐显：等两帧确保 canvas 完成首次绘制后再淡入，避免 Safari 刷新瞬间闪现"半成品"
+  // v83e+r 渐显：等两帧确保 canvas 首次绘制 + stop-circle.png 加载完成（最多 800ms）
+  // 防止首次按 PLAY 切到 STOP 状态时 button background 空白闪烁
   const dev = document.querySelector('.device');
   if (dev) {
-    requestAnimationFrame(() => requestAnimationFrame(() => dev.classList.add('ready')));
+    const showReady = () => dev.classList.add('ready');
+    const stopWait = Promise.race([
+      window.__stopImgReady || Promise.resolve(),
+      new Promise(res => setTimeout(res, 800)),
+    ]);
+    stopWait.then(() => requestAnimationFrame(() => requestAnimationFrame(showReady)));
     // 兜底：极端情况下（资源 hang）1.5s 后也强制显示，避免永久白屏
-    setTimeout(() => dev.classList.add('ready'), 1500);
+    setTimeout(showReady, 1500);
   }
 });
 

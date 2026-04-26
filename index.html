@@ -2735,8 +2735,8 @@ body {
     <div class="ctrl-sel ctrl-risk">
       <button class="sel-arrow risk-prev">‹</button>
       <div class="sel-info">
-        <span class="sel-label">难度</span>
-        <span class="sel-value sel-risk-label">佛系</span>
+        <span class="sel-label">倍率</span>
+        <span class="sel-value sel-risk-label">普通</span>
       </div>
       <button class="sel-arrow risk-next">›</button>
     </div>
@@ -2891,7 +2891,7 @@ body {
       <div class="rules-step">1</div>
       <div class="buy-row-main">
         <span class="buy-row-title">投注</span>
-        <span class="buy-row-desc">选择金额、行数与难度</span>
+        <span class="buy-row-desc">选择金额、行数与倍率</span>
       </div>
     </div>
 
@@ -4861,8 +4861,8 @@ function updateSlots(idx) {
 //  控制器：难度（火焰）+ 行数 + 投注 + 自动发球
 // ═══════════════════════════════════════════════════════════
 
-// 难度 — 左右箭头切换（佛系 / 激进 / 疯狂）
-const modes = ['佛系', '激进', '疯狂'];
+// 倍率 — 左右箭头切换（普通 / 中等 / 最高）
+const modes = ['普通', '中等', '最高'];
 const modeColors = ['#ffd84a', '#ff8833', '#dd44ff'];
 let modeIdx = 0;
 const riskLabelEl = document.querySelector('.sel-risk-label');

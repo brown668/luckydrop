@@ -6045,23 +6045,25 @@ function initGame() {
 
   // ── 开始 / 停止 足球按钮 ──
   // 单发：点击发一颗球，按钮短暂置灰至落槽恢复
-  // v83o iOS Safari 抗双击放大终极版（PLAY 仍可快速连点）
+  // v83t iOS Safari 抗双击放大 + 修复自动模式启动 bug
   // ───────────────────────────────────────────────────────────
-  // 现象：iPhone Safari 上 PLAY 是带 background-image 的 button，连续快速点击触发整页放大。
-  // 根因：iOS WebKit 的"双击图片放大"是 OS 层判定，不经过 dblclick / touch-action /
-  //       user-scalable；它寄生在 touchend → 合成 click 链路里。
-  // 方案：touchend 主动 preventDefault → 浏览器不再合成原生 click + 不再派发双击放大判定；
-  //       立即手动派发一次 click（同步进入下面的 click handler）。
-  // 副作用：preventDefault 不影响 :active（来自 touchstart），PLAY 按下缩放反馈不受影响。
-  // 防 ghost click：极少数 iOS 行为下浏览器仍可能合成一次 click → 用时间窗丢弃 350ms 内的 untrusted-by-touchend click。
+  // 双击放大根因：iOS WebKit "双击图片放大"寄生在 touchend → 合成 click 链路里。
+  // 防双击：touchend preventDefault 切断浏览器双击放大判定，手动派发 click 触发 handler。
+  //
+  // v83o bug：同步 flag _manualClickInProgress 在 click handler 是 async（含
+  //   await launchBall）时失效——await 前 flag 已设回 false，ghost click 在 350ms
+  //   窗口外派发时绕过防御命中 handler 关闭 autoMode。
+  // v83t 修复：
+  //   1) flag _expectingManualClick 由 click handler 同步入口在 await 之前消费，不受 await 影响
+  //   2) ghost 防御窗从 350ms → 1000ms（覆盖 iOS 各种延迟 ghost click）
+  //   3) 桌面 mouse click 无 touchend 经历，_lastTouchEnd=0 → 永远通过
   let _lastTouchEnd = 0;
-  let _manualClickInProgress = false;
+  let _expectingManualClick = false;
   startBtn.addEventListener('touchend', e => {
     if (e.cancelable) e.preventDefault();
     _lastTouchEnd = Date.now();
-    _manualClickInProgress = true;
-    startBtn.click();          // 同步派发 → 命中 click handler
-    _manualClickInProgress = false;
+    _expectingManualClick = true;
+    startBtn.click();          // 同步派发 → 同步命中 handler 入口，下一行立即消费 flag
   }, { passive: false });
   // dblclick 浏览器层拦截作为额外保险（与 touchend 路径独立）
   startBtn.addEventListener('dblclick', e => e.preventDefault());
@@ -6069,8 +6071,12 @@ function initGame() {
   // 自动：自动发球 > 0 时进入自动模式，按钮变"停止"；点击"停止"可中断
   // async：launchBall 现在是 async（await PlinkoEngine HMAC 路径），调用方需 await。
   startBtn.addEventListener('click', async () => {
-    // v83o 丢弃 touchend preventDefault 后浏览器极少数情况下仍合成的 ghost click
-    if (!_manualClickInProgress && _lastTouchEnd && Date.now() - _lastTouchEnd < 350) return;
+    // v83t 同步入口消费 flag（在任何 await 之前）
+    if (_expectingManualClick) {
+      _expectingManualClick = false;     // 我们手动派发的，正常处理
+    } else if (_lastTouchEnd && Date.now() - _lastTouchEnd < 1000) {
+      return;                             // 浏览器 ghost click（touchend preventDefault 后仍合成的），丢弃
+    }
     if (autoMode) {
       // 停止自动：立即结束（仍在飞的球会自然落下；afterSettle 会补全清理）
       autoMode = false;

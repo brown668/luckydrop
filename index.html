@@ -82,7 +82,11 @@ body {
 }
 
 /* ─── Device ─── */
+.device.ready { opacity: 1; }
 .device {
+  /* v83e 首屏渐显：默认隐藏，window.load + 关键资源就位后加 .ready 类淡入，避免 Safari 刷新闪现"半成品"状态 */
+  opacity: 0;
+  transition: opacity .28s ease;
   width: 390px;
   height: 800px;              /* v82: 844 → 800，消除控制区底部 ~50px 多余空白 */
   display: flex;
@@ -2509,21 +2513,19 @@ body {
   <div class="slots-wrap">
     <!-- Slots (初始占位，onload 后由 rebuildSlotDom 重建) -->
     <div class="slots">
-      <div class="slot s-jackpot"><div class="slot-bar"></div><div class="slot-val">25×</div></div>
-      <div class="slot s-high"><div class="slot-bar"></div><div class="slot-val">3×</div></div>
+      <!-- v83e 静态占位与默认 11 行同步（rebuildSlotDom 在 window.load 后会重建） -->
+      <div class="slot s-high"><div class="slot-bar"></div><div class="slot-val">9×</div></div>
+      <div class="slot s-high"><div class="slot-bar"></div><div class="slot-val">4×</div></div>
       <div class="slot s-orange"><div class="slot-bar"></div><div class="slot-val">2×</div></div>
       <div class="slot s-orange"><div class="slot-bar"></div><div class="slot-val">1.6×</div></div>
-      <div class="slot s-yellow"><div class="slot-bar"></div><div class="slot-val">1.2×</div></div>
-      <div class="slot s-warm"><div class="slot-bar"></div><div class="slot-val">1.1×</div></div>
-      <div class="slot s-neutral"><div class="slot-bar"></div><div class="slot-val">1×</div></div>
-      <div class="slot s-low"><div class="slot-bar"></div><div class="slot-val">0.4×</div></div>
-      <div class="slot s-neutral"><div class="slot-bar"></div><div class="slot-val">1×</div></div>
-      <div class="slot s-warm"><div class="slot-bar"></div><div class="slot-val">1.1×</div></div>
-      <div class="slot s-yellow"><div class="slot-bar"></div><div class="slot-val">1.2×</div></div>
+      <div class="slot s-neutral"><div class="slot-bar"></div><div class="slot-val">0.9×</div></div>
+      <div class="slot s-low"><div class="slot-bar"></div><div class="slot-val">0.5×</div></div>
+      <div class="slot s-low"><div class="slot-bar"></div><div class="slot-val">0.5×</div></div>
+      <div class="slot s-neutral"><div class="slot-bar"></div><div class="slot-val">0.9×</div></div>
       <div class="slot s-orange"><div class="slot-bar"></div><div class="slot-val">1.6×</div></div>
       <div class="slot s-orange"><div class="slot-bar"></div><div class="slot-val">2×</div></div>
-      <div class="slot s-high"><div class="slot-bar"></div><div class="slot-val">3×</div></div>
-      <div class="slot s-jackpot"><div class="slot-bar"></div><div class="slot-val">25×</div></div>
+      <div class="slot s-high"><div class="slot-bar"></div><div class="slot-val">4×</div></div>
+      <div class="slot s-high"><div class="slot-bar"></div><div class="slot-val">9×</div></div>
     </div>
 
     <!-- Section 返还：浮沉标签，位于倍率槽下方预留区，不遮挡倍率数字。每球落槽 +won；2.5s 无新球即淡出 -->
@@ -3835,6 +3837,14 @@ window.addEventListener('load', () => {
   initStatusBar();          // v48: 状态栏时钟 + 电池电量
   // 开始按钮改用 CSS background-image (ballbutton.jpeg) + 中央文字徽章 span
   // 不再走 canvas 渲染，保留 renderBallImage/paintStartBtnBall 作为已淘汰代码
+
+  // v83e 渐显：等两帧确保 canvas 完成首次绘制后再淡入，避免 Safari 刷新瞬间闪现"半成品"
+  const dev = document.querySelector('.device');
+  if (dev) {
+    requestAnimationFrame(() => requestAnimationFrame(() => dev.classList.add('ready')));
+    // 兜底：极端情况下（资源 hang）1.5s 后也强制显示，避免永久白屏
+    setTimeout(() => dev.classList.add('ready'), 1500);
+  }
 });
 
 /* ─── v48 状态栏：本地时间 + 电池电量 ──────────────────────────

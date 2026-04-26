@@ -12,6 +12,7 @@ __pycache__/
 # Claude & agent tooling
 .claude/
 .superpowers/
+.worktrees/
 
 # Audio (large binary, optional to track)
 # bgm.mp3

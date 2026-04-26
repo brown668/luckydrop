@@ -6347,7 +6347,7 @@ function startBGM() {
   if (bgAudio) return;
   bgAudio = new Audio('./bgm.mp3');
   bgAudio.loop = true;
-  bgAudio.volume = 0.14;          // v83c: 0.35 → 0.14，进一步压低 BGM，让碰钉/落槽音效突出
+  bgAudio.volume = 0.18;          // v83ε: 0.14 → 0.18，按用户要求回到 0.18
   if (musicOn) bgAudio.play().catch(() => {});
 }
 

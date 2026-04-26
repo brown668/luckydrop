@@ -284,13 +284,23 @@ body {
     0 6px 10px rgba(255,40,20,0.5);
 }
 .logo-x {
+  /* v83θ × 与 7500 同款样式：金色立体橙红浮雕 + 火光投影 */
   font-size: 22px;
   font-weight: 900;
-  color: #ff5530;
+  color: #ffe040;
+  letter-spacing: 0.5px;
   text-shadow:
-    -1px -1px 0 #4a0000, 1px -1px 0 #4a0000,
-    -1px 1px 0 #4a0000,  1px 1px 0 #4a0000,
-    0 0 8px rgba(255,80,30,0.7);
+    /* 8 方向描边（深红） */
+    -1.4px -1.4px 0 #4a0a00, 1.4px -1.4px 0 #4a0a00,
+    -1.4px 1.4px 0 #4a0a00,  1.4px 1.4px 0 #4a0a00,
+    0 -1.4px 0 #4a0a00, 0 1.4px 0 #4a0a00,
+    -1.4px 0 0 #4a0a00, 1.4px 0 0 #4a0a00,
+    /* 立体浮雕（橙红 → 暗红阶梯，模拟火焰厚度） */
+    0 2px 0 #c81810,
+    0 3px 0 #8a0a00,
+    0 4px 0 #5a0500,
+    /* 火光投影 */
+    0 6px 10px rgba(255,40,20,0.5);
 }
 /* ─── 底部余额条 ─── */
 .footer-balance {

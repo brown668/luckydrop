@@ -5076,10 +5076,13 @@ function initGame() {
   // 使用实际容器宽度，与 drawBoard 保持一致（.device 有 6px 边框，内容宽 ≠ 390）
   const W          = document.getElementById('board').parentElement.offsetWidth || 390;
   const cx         = W / 2;
-  const d          = (W - 2 * PAD_SIDE) / (ROWS + 1); // 底行外沿贴安全边缘，行少钉大
+  // v83α 必须与 drawBoard 的 d 计算严格一致，否则物理钉中心 ≠ 视觉钉中心
+  //   导致球穿过视觉钉后才触发碰撞，或在视觉钉之前就被物理拦截。
+  //   drawBoard 用 W_LOGIC=378 固定（v83j 引入，让钉子尺寸不随视口变化），
+  //   initGame 这里也必须用 378，不能用 wrap.offsetWidth（mobile 可能 393/447）
+  const W_LOGIC    = 378;
+  const d          = (W_LOGIC - 2 * PAD_SIDE) / (ROWS + 1);
   const rowH       = d * Math.sqrt(3) / 2;
-  // ⚠ 必须与 drawBoard（line 2103）完全一致，否则物理钉中心 ≠ 视觉钉中心，
-  //   导致球穿过视觉钉后才触发碰撞位移。
   const H          = padT + ROW_H16 * ROWS_MAX + padB - 14;
   const pegR       = Math.min(rowH, d) * 0.17;
   const ballR      = Math.max(4, Math.min(9, pegR * 1.75));

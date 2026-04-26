@@ -3129,15 +3129,11 @@ function drawBoard(glows = {}) {
   const rowH       = d * Math.sqrt(3) / 2;
   const H          = padT + ROW_H16 * ROWS_MAX + padB - 14;  // canvas 高度（较原始固定高 -14px，目标 ≈360px）
 
-  // v13 HiDPI：钉子在高行数下直径仅 5~6 CSS px；若 dpr=1（普通屏/外接低分屏），
-  //   整圈 radial gradient 只有 5~6 个实体像素，色阶全部糊在一起 → "低分辨率"观感。
-  //   策略：1× 设备强制 2× 渲染保证钉子采样点；Retina 设备 dpr=2/3 沿用原生密度。
-  // v83y mobile 性能优化：iPhone 16 Pro 等 dpr=3 机型 canvas 面积 = 9 倍 CSS 面积，
-  //   球数多 + 行数多时每帧重绘 400+ 钉子 + 草坪光影成为瓶颈。
-  //   mobile 下 cap dpr 到 2（dpr=3 → 2，面积减少 56%），视觉差异肉眼不可辨。
-  const _rawDpr = window.devicePixelRatio || 1;
-  const _isMobile = window.innerWidth <= 480;
-  const dpr = _isMobile ? Math.min(2, Math.max(1, _rawDpr)) : Math.max(2, _rawDpr);
+  // v13 HiDPI：钉子在高行数下直径仅 5~6 CSS px；1× 设备强制 2× 渲染保证钉子采样点；
+  //   Retina 设备 dpr=2/3 沿用原生密度。
+  // v83ι 撤回 v83y mobile dpr cap：v83δ 静态层 cache 已让性能不再是瓶颈（每帧 drawImage
+  //   0.04ms，与 dpr 无关），恢复满分辨率渲染让钉子和草坪在 iPhone Pro 等高分屏上锐利清晰。
+  const dpr = Math.max(2, window.devicePixelRatio || 1);
   canvas.width  = W * dpr;
   canvas.height = H * dpr;
   canvas.style.width  = W + 'px';

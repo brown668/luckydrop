@@ -234,23 +234,63 @@ body {
   font-weight: 700;
   text-shadow: 0 0 10px rgba(255,220,60,0.9), 0 0 20px rgba(255,180,0,0.5);
 }
-/* ─── v54 Logo · 爆裂足球7500 · 单一连贯字标 ──────────────
-   v53 复盘：金色字 + 红色徽章 → 双元素仍有视觉负担
-   v54 终极极简：整段一气呵成，无徽章无副标，
-     · 一段金色浮雕字「爆裂足球7500」
-     · 字体  Chakra Petch + PingFang SC
-     · 阴影  2 层立体（深棕浮雕 + 蓝色 drop shadow）
-     · 中文 / 数字字号一致，仅靠字距统一节奏 */
+/* ─── v83w Logo · 爆裂足球 7500× · 游戏化字标 ──────────────
+   设计语言：
+     · 中文「爆裂足球」金色立体浮雕（深棕描边 + 三层金色厚度 + 蓝色投影）
+     · 数字「7500」橙红渐变感（实色 + 厚红色立体边模拟火焰爆破质感）
+     · 「×」红色上标，外发光，强调倍率爆点
+     · 整体微斜体 + 微旋转 -1deg，添加视觉动感 */
 .logo {
   font-family: 'Chakra Petch', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  font-weight: 800;
-  font-size: 23px;
-  letter-spacing: 2px;
-  color: #ffd23a;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
   white-space: nowrap;
+  user-select: none;
+}
+.logo-zh {
+  font-size: 22px;
+  font-weight: 900;
+  color: #ffd23a;
+  letter-spacing: 1.5px;
   text-shadow:
-    0 1px 0 #4a2400,
-    0 2px 4px rgba(0,20,60,0.55);
+    /* 8 方向描边（深棕） */
+    -1.2px -1.2px 0 #3a1a00, 1.2px -1.2px 0 #3a1a00,
+    -1.2px 1.2px 0 #3a1a00,  1.2px 1.2px 0 #3a1a00,
+    0 -1.2px 0 #3a1a00, 0 1.2px 0 #3a1a00,
+    -1.2px 0 0 #3a1a00, 1.2px 0 0 #3a1a00,
+    /* 立体浮雕（金 → 暗金阶梯） */
+    0 2px 0 #c89010,
+    0 3px 0 #8a6010,
+    /* 投影 */
+    0 5px 8px rgba(0,15,40,0.6);
+}
+.logo-num {
+  font-size: 22px;
+  font-weight: 900;
+  color: #ffe040;
+  letter-spacing: 0.5px;
+  text-shadow:
+    /* 8 方向描边（深红） */
+    -1.4px -1.4px 0 #4a0a00, 1.4px -1.4px 0 #4a0a00,
+    -1.4px 1.4px 0 #4a0a00,  1.4px 1.4px 0 #4a0a00,
+    0 -1.4px 0 #4a0a00, 0 1.4px 0 #4a0a00,
+    -1.4px 0 0 #4a0a00, 1.4px 0 0 #4a0a00,
+    /* 立体浮雕（橙红 → 暗红阶梯，模拟火焰厚度） */
+    0 2px 0 #c81810,
+    0 3px 0 #8a0a00,
+    0 4px 0 #5a0500,
+    /* 火光投影 */
+    0 6px 10px rgba(255,40,20,0.5);
+}
+.logo-x {
+  font-size: 22px;
+  font-weight: 900;
+  color: #ff5530;
+  text-shadow:
+    -1px -1px 0 #4a0000, 1px -1px 0 #4a0000,
+    -1px 1px 0 #4a0000,  1px 1px 0 #4a0000,
+    0 0 8px rgba(255,80,30,0.7);
 }
 /* ─── 底部余额条 ─── */
 .footer-balance {
@@ -2547,7 +2587,11 @@ body {
   <!-- Header -->
   <div class="header">
     <div class="logo-wrap">
-      <div class="logo">爆裂足球7500x</div>
+      <div class="logo">
+        <span class="logo-zh">爆裂足球</span>
+        <span class="logo-num">7500</span>
+        <span class="logo-x">×</span>
+      </div>
     </div>
     <div class="hdr-icons">
       <div class="hdr-icon" id="iconMenu" title="设置">

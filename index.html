@@ -2550,6 +2550,16 @@ body {
     flex-shrink: 0;
     background: var(--sky-bot);
   }
+  /* v83aa controls 顶部从 sky-bot 实色开始（取消 transparent 渐变 + 1px hairline），
+     与 slots-wrap 底端 sky-bot 严格连续，消除亚像素混色"黑线" */
+  .controls {
+    background: linear-gradient(180deg,
+      var(--sky-bot) 0%,
+      var(--sky-bot) 15%,
+      var(--sky-deep) 70%,
+      #041326 100%);
+    border-top: none;
+  }
   .footer-balance {
     padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
   }

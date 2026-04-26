@@ -2466,12 +2466,16 @@ body {
     border-radius: 0;
     box-shadow: none;
     padding-top: env(safe-area-inset-top, 0px);
-    /* v83i 板两侧 device 背景与 canvas 内顶天空同步：板区域（约 device 10-55%）用 sky-top→sky-bot
-       渐变，与 canvas outBg 完全一致；板上方保留 sky-top，板下方继续过渡到 sky-deep */
+    /* v83i+p 板两侧 device 背景与 canvas 内顶天空同步：
+       · 板区域（约 device 10-55%）用 sky-top → sky-bot，与 canvas outBg 完全一致
+       · 板下方 56-65% 持平 sky-bot，覆盖 slots-wrap 区域（约 52-59%），让 slots-wrap 自身实色 sky-bot
+         与 device 该位置颜色严格一致，消除 slots/controls 衔接处的细微色差
+       · 65-100% 继续过渡到 sky-deep */
     background: linear-gradient(180deg,
       var(--sky-top) 0%,
       var(--sky-top) 12%,
       var(--sky-bot) 56%,
+      var(--sky-bot) 65%,
       var(--sky-deep) 100%);
   }
   .device > .status { display: none; }
@@ -2484,16 +2488,17 @@ body {
     align-self: stretch;
     flex-shrink: 0;
   }
-  /* slots-wrap 保持 378 居中，::before/::after 梯形与 canvas 球场底 cx±185 严格匹配，
-     白色边框完整可见；mobile 下 board 已撑满（canvas 底=sky-bot），slots-wrap 顶部不再需要
-     ui-blue-deep 防漏绿，改 sky-bot → sky-deep 与两侧 device 颜色完全一致 */
+  /* v83p mobile board-wrap 背景从 ui-blue-deep（防漏绿）改为 sky-bot，
+     与 slots-wrap 自身 sky-bot 一致 → slots 顶/底两侧 V 三角颜色统一，无上深下浅 */
+  .board-wrap { background: var(--sky-bot); }
+  /* v83p slots-wrap 保持 378 居中，::before/::after 梯形与 canvas 球场底 cx±185 严格匹配；
+     自身实色 sky-bot —— device 在该 y 位置（约 58%）也是 sky-bot，
+     与下方 controls 顶 transparent 段（露 device 同色）严格连续，消除衔接处暗色横线 */
   .slots-wrap {
     width: 378px;
     align-self: center;
     flex-shrink: 0;
-    background: linear-gradient(180deg,
-      var(--sky-bot) 0%,
-      var(--sky-deep) 100%);
+    background: var(--sky-bot);
   }
   .footer-balance {
     padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));

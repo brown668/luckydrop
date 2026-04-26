@@ -1219,6 +1219,19 @@ body {
   border-radius: 50%;
   color: #ffffff;
   cursor: pointer;
+  /* v83n iOS Safari 抗双击放大 · 强化版 ──
+     现象：用户在 iPhone Safari 上连续快速点击 PLAY 时，整页被放大。
+     原因：PLAY 是带 background-image 的 button，WebKit 对图片型按钮的快速 tap
+           会触发内置 magnifier；viewport user-scalable=no 在 iOS 14+ 部分被忽略。
+     方案：明确给 button 与所有子元素加 touch-action: manipulation + 选区/long-press
+           关闭，并阻止子元素冒泡为单独 hit test 目标 → 让 Safari 把每次 tap 都视为
+           独立 click，不再聚合识别为双击放大手势。
+     注意：dblclick 浏览器层拦截在 PLAY 监听器中以 JS 形式补充 */
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
   /* 外发光 + 投影：让按钮从深蓝背景跳出来 */
   filter:
     drop-shadow(0 6px 14px rgba(0,10,30,0.6))
@@ -1259,6 +1272,9 @@ body {
   opacity: 0;
   pointer-events: none;
 }
+/* v83n 让 button 内所有子元素不接收 hit test，所有 tap 落到 button 自身，避免 Safari 把
+   "图片元素双击"识别为放大手势 */
+.start-btn * { pointer-events: none; }
 
 @keyframes shine {
   0%    { left: -60%; }
@@ -5999,6 +6015,11 @@ function initGame() {
 
   // ── 开始 / 停止 足球按钮 ──
   // 单发：点击发一颗球，按钮短暂置灰至落槽恢复
+  // v83n 拦截浏览器的"双击放大"事件（dblclick），不影响连续 click。
+  // dblclick 由浏览器自己派发，与 click 是分离的事件流；preventDefault dblclick
+  // 不会阻断单次/快速连续 click，但能切断 iOS Safari 把双击识别为放大手势的链路
+  startBtn.addEventListener('dblclick', e => e.preventDefault());
+
   // 自动：自动发球 > 0 时进入自动模式，按钮变"停止"；点击"停止"可中断
   // async：launchBall 现在是 async（await PlinkoEngine HMAC 路径），调用方需 await。
   startBtn.addEventListener('click', async () => {

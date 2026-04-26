@@ -2,7 +2,10 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<!-- v21 加 viewport-fit=cover，让下方 env(safe-area-inset-*) 生效。不加 user-scalable=no，保留样机定位下的双指缩放自由 --><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- v83m 加 maximum-scale=1.0, user-scalable=no 关闭整页缩放（包括 iOS Safari 双击放大）。
+     这是 OS 层禁用，不影响任何 click/touchend 事件，PLAY 快速点击不受影响；
+     代价是失去双指 pinch-zoom，对游戏可接受。viewport-fit=cover 保留以让 env(safe-area-inset-*) 生效 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>爆裂足球 2500× — UI Mockup</title>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -2456,12 +2459,25 @@ body {
       var(--sky-deep) 100%);
   }
   .device > .status { display: none; }
+  /* v83j machine-wrap 与 board-wrap 撑满 device 宽，让 canvas 自己绘制两侧的天空背景，
+     与球场内顶天空（同一个 canvas 的 outBg + blurBlobs）完全一致 */
   .machine-wrap,
-  .board-wrap,
+  .board-wrap {
+    width: 100%;
+    max-width: none;
+    align-self: stretch;
+    flex-shrink: 0;
+  }
+  /* slots-wrap 保持 378 居中，::before/::after 梯形与 canvas 球场底 cx±185 严格匹配，
+     白色边框完整可见；mobile 下 board 已撑满（canvas 底=sky-bot），slots-wrap 顶部不再需要
+     ui-blue-deep 防漏绿，改 sky-bot → sky-deep 与两侧 device 颜色完全一致 */
   .slots-wrap {
     width: 378px;
     align-self: center;
     flex-shrink: 0;
+    background: linear-gradient(180deg,
+      var(--sky-bot) 0%,
+      var(--sky-deep) 100%);
   }
   .footer-balance {
     padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
@@ -2841,22 +2857,6 @@ body {
 </div><!-- /device -->
 
 <script>
-// v83g iOS Safari 双击放大兜底拦截
-// 现象：iPhone 16e Safari 双击图片/页面仍触发整页缩放，touch-action:manipulation 不够
-// 方案：350ms 内的连续 touchend 主动 preventDefault；gesturestart 也拦截避免捏合放大
-(() => {
-  let lastTouchEnd = 0;
-  document.addEventListener('touchend', e => {
-    const now = Date.now();
-    if (now - lastTouchEnd < 350) e.preventDefault();
-    lastTouchEnd = now;
-  }, { passive: false });
-  // iOS 专属手势事件（双指捏合或双击触发整页缩放都会派发）
-  ['gesturestart', 'gesturechange', 'gestureend'].forEach(ev => {
-    document.addEventListener(ev, e => e.preventDefault());
-  });
-})();
-
 // ── 足球 Sprite：从 ball1.jpg 圆形裁切生成透明 PNG ──
 // 加载完成后其他绘制代码会直接 drawImage 贴图；未加载完时回退到几何绘制
 const BALL_SPRITE = {
@@ -2996,14 +2996,17 @@ function drawBoard(glows = {}) {
   const mwH = machineWrap ? machineWrap.offsetHeight : 0;
   wrap.style.marginTop = (-mwH) + 'px';
 
-  const W      = wrap.offsetWidth;   // canvas 保持全宽，避免背景色露边
+  const W      = wrap.offsetWidth;   // canvas 视觉/物理宽（mobile 下 = device 宽，让两侧天空也由 canvas 自己画）
 
   const ROWS       = selectedRows;
   const SLOTS      = selectedRows + 1;
   const padT       = 10 + mwH;
   const padB       = 7;
-  // d 随行数缩放：底行外沿始终贴 PAD_SIDE 安全边缘，行少则钉子更大
-  const d          = (W - 2 * PAD_SIDE) / (ROWS + 1);
+  // v83j 钉间距固定按 378 计算（与桌面 device 内宽一致），保证钉子尺寸不随视口变化；
+  //      W > 378 时（mobile 撑满）多余空间由 canvas 内的天空 outBg + blurBlobs 自然填充，
+  //      避免球场两侧露出 device 蓝色与 canvas 顶天空色差
+  const W_LOGIC    = 378;
+  const d          = (W_LOGIC - 2 * PAD_SIDE) / (ROWS + 1);
   const rowH       = d * Math.sqrt(3) / 2;
   const H          = padT + ROW_H16 * ROWS_MAX + padB - 14;  // canvas 高度（较原始固定高 -14px，目标 ≈360px）
 

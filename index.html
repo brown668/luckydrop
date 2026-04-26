@@ -6045,25 +6045,22 @@ function initGame() {
 
   // ── 开始 / 停止 足球按钮 ──
   // 单发：点击发一颗球，按钮短暂置灰至落槽恢复
-  // v83t iOS Safari 抗双击放大 + 修复自动模式启动 bug
+  // v83u iOS Safari 抗双击放大 + 修复"双击才生效"bug（最终方案）
   // ───────────────────────────────────────────────────────────
-  // 双击放大根因：iOS WebKit "双击图片放大"寄生在 touchend → 合成 click 链路里。
-  // 防双击：touchend preventDefault 切断浏览器双击放大判定，手动派发 click 触发 handler。
+  // 双击放大防御：touchend preventDefault 切断 iOS WebKit 的"双击图片放大"判定。
   //
-  // v83o bug：同步 flag _manualClickInProgress 在 click handler 是 async（含
-  //   await launchBall）时失效——await 前 flag 已设回 false，ghost click 在 350ms
-  //   窗口外派发时绕过防御命中 handler 关闭 autoMode。
-  // v83t 修复：
-  //   1) flag _expectingManualClick 由 click handler 同步入口在 await 之前消费，不受 await 影响
-  //   2) ghost 防御窗从 350ms → 1000ms（覆盖 iOS 各种延迟 ghost click）
-  //   3) 桌面 mouse click 无 touchend 经历，_lastTouchEnd=0 → 永远通过
-  let _lastTouchEnd = 0;
-  let _expectingManualClick = false;
+  // v83t bug：iOS Safari 部分版本的 click 派发顺序不确定——浏览器原生 click 可能
+  //   在 touchend handler 之前派发，导致 flag/isTrusted/touchEnd 时间窗任何依赖
+  //   "事件顺序"的防御都可能失效，结果：原生 click 启动 autoMode，touchend 手动
+  //   click 进入"停止"分支立即关闭 → "首次按没生效，双击才行"。
+  // v83u 修复：用纯时间锁（500ms 节流），不依赖事件顺序、isTrusted、flag。
+  //   - 第一次 click 通过 → 进入 handler → 启动/停止 autoMode
+  //   - 500ms 内任何后续 click（ghost / 重复派发）一律 return 丢弃
+  //   - 桌面 mouse 快速连点：MANUAL_COOLDOWN_MS=700ms 已是天花板，500ms 节流不影响
+  let _lastClickAccepted = 0;
   startBtn.addEventListener('touchend', e => {
-    if (e.cancelable) e.preventDefault();
-    _lastTouchEnd = Date.now();
-    _expectingManualClick = true;
-    startBtn.click();          // 同步派发 → 同步命中 handler 入口，下一行立即消费 flag
+    if (e.cancelable) e.preventDefault();   // 切断双击放大判定
+    startBtn.click();                       // 主动触发 handler（此 click 的处理由下方节流接管）
   }, { passive: false });
   // dblclick 浏览器层拦截作为额外保险（与 touchend 路径独立）
   startBtn.addEventListener('dblclick', e => e.preventDefault());
@@ -6071,12 +6068,10 @@ function initGame() {
   // 自动：自动发球 > 0 时进入自动模式，按钮变"停止"；点击"停止"可中断
   // async：launchBall 现在是 async（await PlinkoEngine HMAC 路径），调用方需 await。
   startBtn.addEventListener('click', async () => {
-    // v83t 同步入口消费 flag（在任何 await 之前）
-    if (_expectingManualClick) {
-      _expectingManualClick = false;     // 我们手动派发的，正常处理
-    } else if (_lastTouchEnd && Date.now() - _lastTouchEnd < 1000) {
-      return;                             // 浏览器 ghost click（touchend preventDefault 后仍合成的），丢弃
-    }
+    // v83u 500ms 节流：无视事件派发顺序与 isTrusted，纯靠时间防 ghost click 双触发
+    const now = Date.now();
+    if (now - _lastClickAccepted < 500) return;
+    _lastClickAccepted = now;
     if (autoMode) {
       // 停止自动：立即结束（仍在飞的球会自然落下；afterSettle 会补全清理）
       autoMode = false;

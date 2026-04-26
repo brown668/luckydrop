@@ -3089,6 +3089,13 @@ let _grassNoiseLayer = null;
 let _grassNoiseKey   = '';
 let _grassNoiseTileURL = '';
 
+// v83δ 静态层缓存：把背景 + 草坪 + 钉子（无 glow）画到 offscreen canvas，
+//   之后每帧只 drawImage cache + 单独画 glow（可变光圈）+ 球。
+//   ROWS / W / H / dpr / split 钉位 任一变化时缓存失效。
+//   分裂钉动画（呼吸/闪烁）会被冻结在 snapshot 那帧，作为性能折中。
+let _staticBoardCache = null;
+let _staticBoardKey   = '';
+
 function drawBoard(glows = {}) {
   const canvas = document.getElementById('board');
   const wrap   = canvas.parentElement;
@@ -3143,8 +3150,21 @@ function drawBoard(glows = {}) {
 
   const splits = getSplits();
 
+  // v83δ 静态层缓存检查：相同 ROWS/W/H/dpr/splits 组合下复用 offscreen cache
+  const splitKeyStr = splits.map(([r, c]) => r * 100 + c).join(',');
+  const staticKey   = ROWS + '|' + W + '|' + H + '|' + dpr + '|' + splitKeyStr;
+  const cacheHit    = _staticBoardCache
+                      && _staticBoardKey === staticKey
+                      && _staticBoardCache.width === canvas.width
+                      && _staticBoardCache.height === canvas.height;
+
   const topY = pegY(0);
   const botY = H - padB;
+
+  if (cacheHit) {
+    // ─── cache hit：直接把 offscreen 静态层贴到 main canvas，跳过所有静态绘制 ───
+    ctx.drawImage(_staticBoardCache, 0, 0, W, H);
+  } else {
 
   // 场地边界：顶部 = 球门口（tube），底部 = 近满画布；梯形缓透视
   const slope     = WALL_SLOPE;
@@ -3689,15 +3709,14 @@ function drawBoard(glows = {}) {
         ctx.beginPath(); ctx.arc(x - pegR * 0.35, y - pegR * 0.45, pegR * 0.30, 0, Math.PI * 2); ctx.fill();
       }
 
-      // 碰撞高亮：加法混合让钉子自然变亮，不覆盖原色
-      // v16 分裂钉碰撞：全程柔和径向渐变（去掉 v15 的 4 道硬线星芒——用户反馈"生硬很丑"）
-      //      三层叠加：外层金橙大光晕 + 环形高光带 + 白金中心亮芯 = 徽章被撞瞬间"整体发金光"
-      //      全部 radial gradient，无硬边、无方向，视觉柔和且全向对称
-      const gAmt = glows[row * 20 + col] || 0;
+      // v83δ glow 部分已移到独立循环（在 cache snapshot 之后画），这里仅画静态钉子
+      // 保留下方变量声明的副作用：原 glow 代码用 const gAmt 等，删除时确保不破坏作用域
+      void 0; if (false) { /* 原 glow 代码块开始（已移走，留 if(false) 包住保持嵌套结构） */
+      const gAmt = 0;
       if (gAmt > 0) {
         ctx.save();
         ctx.globalCompositeOperation = 'lighter';
-        if (isSplit) {
+        if (false) {
           // v39 分裂钉碰撞：纯金色绽放（替换原橙+白+金混色爆白方案）
           //   问题复盘：原 v16 用橙色外晕 + 白色中心爆白（0.85 peak），lighter 叠加后
           //            金星徽章被白光吃掉，颜色杂乱（橙/白/金三色），反而不如普通钉干净
@@ -3802,6 +3821,76 @@ function drawBoard(glows = {}) {
         }
         ctx.restore();
       }
+      } /* close v83δ if (false) wrapper */
+    }
+  }
+
+    // ─── v83δ snapshot 静态层到 offscreen cache ───
+    if (!_staticBoardCache) _staticBoardCache = document.createElement('canvas');
+    if (_staticBoardCache.width !== canvas.width || _staticBoardCache.height !== canvas.height) {
+      _staticBoardCache.width  = canvas.width;
+      _staticBoardCache.height = canvas.height;
+    }
+    const _cacheCtx = _staticBoardCache.getContext('2d');
+    _cacheCtx.clearRect(0, 0, _staticBoardCache.width, _staticBoardCache.height);
+    _cacheCtx.drawImage(canvas, 0, 0);
+    _staticBoardKey = staticKey;
+  } /* close if (!cacheHit) — v83δ */
+
+  // ─── v83δ 独立 glow 循环（每帧画，不进 cache） ───
+  for (let row = 0; row < ROWS; row++) {
+    const numPegs = row + 3;
+    for (let col = 0; col < numPegs; col++) {
+      const gAmt = glows[row * 20 + col] || 0;
+      if (gAmt <= 0) continue;
+      const x = pegX(row, col);
+      const y = pegY(row);
+      const isSplit = splits.some(([sr, sc]) => sr === row && sc === col);
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      if (isSplit) {
+        const splitBodyR = pegR * 1.38;
+        const g1 = ctx.createRadialGradient(x, y, splitBodyR * 0.5, x, y, splitBodyR * 2.4);
+        g1.addColorStop(0,    `rgba(255,220,120,${gAmt * 0.55})`);
+        g1.addColorStop(0.45, `rgba(255,190,60,${gAmt * 0.32})`);
+        g1.addColorStop(0.80, `rgba(230,155,20,${gAmt * 0.12})`);
+        g1.addColorStop(1,    'rgba(210,140,10,0)');
+        ctx.fillStyle = g1;
+        ctx.beginPath(); ctx.arc(x, y, splitBodyR * 2.4, 0, Math.PI * 2); ctx.fill();
+        const g2 = ctx.createRadialGradient(x, y, splitBodyR * 0.90, x, y, splitBodyR * 1.55);
+        g2.addColorStop(0,    'rgba(255,235,160,0)');
+        g2.addColorStop(0.40, `rgba(255,230,150,${gAmt * 0.60})`);
+        g2.addColorStop(0.75, `rgba(255,200,90,${gAmt * 0.28})`);
+        g2.addColorStop(1,    'rgba(255,180,60,0)');
+        ctx.fillStyle = g2;
+        ctx.beginPath(); ctx.arc(x, y, splitBodyR * 1.55, 0, Math.PI * 2); ctx.fill();
+        const g4 = ctx.createRadialGradient(x, y, splitBodyR * 0.3, x, y, splitBodyR * 0.85);
+        g4.addColorStop(0,    `rgba(255,240,180,${gAmt * 0.18})`);
+        g4.addColorStop(0.6,  `rgba(255,220,130,${gAmt * 0.09})`);
+        g4.addColorStop(1,    'rgba(255,200,90,0)');
+        ctx.fillStyle = g4;
+        ctx.beginPath(); ctx.arc(x, y, splitBodyR * 0.85, 0, Math.PI * 2); ctx.fill();
+      } else {
+        const g1 = ctx.createRadialGradient(x, y, pegR * 0.55, x, y, pegR * 2.0);
+        g1.addColorStop(0,    `rgba(255,245,190,${gAmt * 0.50})`);
+        g1.addColorStop(0.55, `rgba(255,225,140,${gAmt * 0.20})`);
+        g1.addColorStop(1,    'rgba(255,205,105,0)');
+        ctx.fillStyle = g1;
+        ctx.beginPath(); ctx.arc(x, y, pegR * 2.0, 0, Math.PI * 2); ctx.fill();
+        const g2 = ctx.createRadialGradient(x, y, pegR * 0.95, x, y, pegR * 1.5);
+        g2.addColorStop(0,    'rgba(255,255,220,0)');
+        g2.addColorStop(0.45, `rgba(255,248,200,${gAmt * 0.35})`);
+        g2.addColorStop(1,    'rgba(255,235,170,0)');
+        ctx.fillStyle = g2;
+        ctx.beginPath(); ctx.arc(x, y, pegR * 1.5, 0, Math.PI * 2); ctx.fill();
+        const g3 = ctx.createRadialGradient(x, y, pegR * 0.35, x, y, pegR);
+        g3.addColorStop(0,    `rgba(248,235,195,${gAmt * 0.12})`);
+        g3.addColorStop(0.6,  `rgba(248,228,165,${gAmt * 0.06})`);
+        g3.addColorStop(1,    'rgba(248,215,125,0)');
+        ctx.fillStyle = g3;
+        ctx.beginPath(); ctx.arc(x, y, pegR, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
     }
   }
 }

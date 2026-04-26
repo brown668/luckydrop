@@ -5572,6 +5572,13 @@ function initGame() {
     //      仍需保留 pendingWin 归零（它作为结算累加器由 settle() 填入）。
     pendingWin = 0;
 
+    // v83β 全轮结束（balls=0 && pendingSettles=0 && respin guard pass）：
+    //      把所有未结算的投注记录标为 settled，让 renderHistoryList 显示出来
+    for (const rec of betHistory) {
+      if (!rec.settled) rec.settled = true;
+    }
+    if (typeof renderHistoryList === 'function') renderHistoryList();
+
     drawBoard();
 
     if (autoMode && autoRemaining > 0) {
@@ -6016,12 +6023,15 @@ function initGame() {
     }
 
     // ── 创建投注记录（每次发球一条，免费球总投注=0）──
+    // v83β settled: false 标志：发球时记录已存在便于 settle 通过 recordIdx 累加 totalWon，
+    //      但渲染列表过滤 settled === true 的，afterSettle 全轮结束才标记为已结算。
     betHistory.push({
       time:      Date.now(),
       bet:       bet,                    // 基础投注额快照
       totalCost: free ? 0 : totalCost,   // 免费球展示 0
       free:      free,
       totalWon:  0,                      // 本轮所有球累加的赢利金额
+      settled:   false,                  // 全轮（含 split fork/respin 副球）落槽后标 true
     });
     // 超出上限则淘汰最早的，现役球引用的 recordIdx 一并前移校正
     if (betHistory.length > BET_HISTORY_MAX) {
@@ -6505,7 +6515,10 @@ function renderHistoryList() {
   historyList.innerHTML = '';
   if (head) historyList.appendChild(head);
 
-  if (betHistory.length === 0) {
+  // v83β 只显示已结算（全轮所有球落槽）的记录，过滤飞行中的
+  const visible = betHistory.filter(r => r.settled === true);
+
+  if (visible.length === 0) {
     const empty = document.createElement('div');
     empty.className = 'history-empty';
     empty.textContent = '暂无投注记录';
@@ -6516,8 +6529,8 @@ function renderHistoryList() {
   const fmtMoney = v => Number(v).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   const frag = document.createDocumentFragment();
   // 最新在上
-  for (let i = betHistory.length - 1; i >= 0; i--) {
-    const rec = betHistory[i];
+  for (let i = visible.length - 1; i >= 0; i--) {
+    const rec = visible[i];
     // 倍率 = 总赢利 / 本金投注（bet），免费球也按 bet 计算倍率（体现分裂收益）
     const baseBet = rec.bet > 0 ? rec.bet : 1;
     const mult = rec.totalWon / baseBet;

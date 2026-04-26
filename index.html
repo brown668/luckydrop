@@ -6347,7 +6347,7 @@ function startBGM() {
   if (bgAudio) return;
   bgAudio = new Audio('./bgm.mp3');
   bgAudio.loop = true;
-  bgAudio.volume = 0.18;          // v83ε: 0.14 → 0.18，按用户要求回到 0.18
+  bgAudio.volume = 0.14;          // v83ζ: 0.18 → 0.14
   if (musicOn) bgAudio.play().catch(() => {});
 }
 

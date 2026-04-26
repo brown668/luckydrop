@@ -6045,20 +6045,32 @@ function initGame() {
 
   // ── 开始 / 停止 足球按钮 ──
   // 单发：点击发一颗球，按钮短暂置灰至落槽恢复
-  // v83s 撤回 v83o touchend → 手动 click 路径
+  // v83o iOS Safari 抗双击放大终极版（PLAY 仍可快速连点）
   // ───────────────────────────────────────────────────────────
-  // 撤回原因：click handler 是 async（含 await launchBall），await 期间
-  //   _manualClickInProgress 已被同步设回 false，iOS ghost click 可能在 350ms
-  //   窗口外派发并命中 click handler，进入 if (autoMode) 关掉自动模式 → 出现
-  //   "首次按 PLAY 没正确开启自动 + 同时落下多个球"的 bug（行数8/疯狂/auto50 复现）。
-  // 替代防御：v83m viewport user-scalable=no + maximum-scale=1.0（OS 层禁缩放）
-  //          + v83d touch-action: manipulation + v83n dblclick preventDefault
-  //          已足够覆盖双击放大场景，无需 touchend 拦截。
+  // 现象：iPhone Safari 上 PLAY 是带 background-image 的 button，连续快速点击触发整页放大。
+  // 根因：iOS WebKit 的"双击图片放大"是 OS 层判定，不经过 dblclick / touch-action /
+  //       user-scalable；它寄生在 touchend → 合成 click 链路里。
+  // 方案：touchend 主动 preventDefault → 浏览器不再合成原生 click + 不再派发双击放大判定；
+  //       立即手动派发一次 click（同步进入下面的 click handler）。
+  // 副作用：preventDefault 不影响 :active（来自 touchstart），PLAY 按下缩放反馈不受影响。
+  // 防 ghost click：极少数 iOS 行为下浏览器仍可能合成一次 click → 用时间窗丢弃 350ms 内的 untrusted-by-touchend click。
+  let _lastTouchEnd = 0;
+  let _manualClickInProgress = false;
+  startBtn.addEventListener('touchend', e => {
+    if (e.cancelable) e.preventDefault();
+    _lastTouchEnd = Date.now();
+    _manualClickInProgress = true;
+    startBtn.click();          // 同步派发 → 命中 click handler
+    _manualClickInProgress = false;
+  }, { passive: false });
+  // dblclick 浏览器层拦截作为额外保险（与 touchend 路径独立）
   startBtn.addEventListener('dblclick', e => e.preventDefault());
 
   // 自动：自动发球 > 0 时进入自动模式，按钮变"停止"；点击"停止"可中断
   // async：launchBall 现在是 async（await PlinkoEngine HMAC 路径），调用方需 await。
   startBtn.addEventListener('click', async () => {
+    // v83o 丢弃 touchend preventDefault 后浏览器极少数情况下仍合成的 ghost click
+    if (!_manualClickInProgress && _lastTouchEnd && Date.now() - _lastTouchEnd < 350) return;
     if (autoMode) {
       // 停止自动：立即结束（仍在飞的球会自然落下；afterSettle 会补全清理）
       autoMode = false;

@@ -6677,20 +6677,26 @@ function showToast(msg, duration = 1800) {
     if (!el || !num) return;
     counts[type]++;
     num.textContent = counts[type];
-    el.classList.add('show');
-    el.classList.remove('bump');
-    void el.offsetWidth;
-    el.classList.add('bump');
+    // v83ν 改：N=1 不展示（避免单次击中也弹），N≥2 才显示 HUD
+    if (counts[type] >= 2) {
+      el.classList.add('show');
+      el.classList.remove('bump');
+      void el.offsetWidth;
+      el.classList.add('bump');
+    }
     updateTier(el, counts[type]);
   }
 
-  // v83ν 改：归零由 section-won 同步触发（armSectionWonReset 内调用），不再独立计时
+  // v83ν 改：归零由 section-won 同步触发；先淡出再清数字（避免 0 HITS 闪现）
   function resetCombo() {
     counts.split = 0; counts.free = 0;
-    if (HUD_SPLIT) { HUD_SPLIT.classList.remove('show', 'tier-2', 'tier-3', 'tier-4'); }
-    if (HUD_FREE)  { HUD_FREE.classList.remove('show', 'tier-2', 'tier-3', 'tier-4'); }
-    if (NUM_SPLIT) NUM_SPLIT.textContent = '0';
-    if (NUM_FREE)  NUM_FREE.textContent  = '0';
+    if (HUD_SPLIT) HUD_SPLIT.classList.remove('show', 'tier-2', 'tier-3', 'tier-4');
+    if (HUD_FREE)  HUD_FREE.classList.remove('show', 'tier-2', 'tier-3', 'tier-4');
+    // 等淡出动画完成（CSS transition 0.25s）后再清数字，避免用户看到"0 HITS"
+    setTimeout(() => {
+      if (NUM_SPLIT) NUM_SPLIT.textContent = '0';
+      if (NUM_FREE)  NUM_FREE.textContent  = '0';
+    }, 280);
   }
 
   // 飞行字幕：从 (startX, startY) 出发飞向 HUD（左上角对应卡片）

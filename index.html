@@ -2475,8 +2475,7 @@ body {
   letter-spacing: 0.04em;
 }
 
-/* ─── v83ν Combo HUD（拳皇风连击显示） ─── */
-/* 位于球场右上方空白草坪上（球门右侧），避开 logo / history-bar / hdr-icon */
+/* ─── v83ν Combo HUD（连击显示，与"获得"模块同步淡出） ─── */
 .combo-hud {
   position: absolute;
   top: 200px; right: 14px;
@@ -2484,29 +2483,29 @@ body {
   pointer-events: none;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   user-select: none;
   align-items: flex-end;
 }
 .combo-item {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 12px 5px 10px;
+  gap: 4px;
+  padding: 3px 9px;
   border-radius: 999px;
   font-family: 'Chakra Petch', 'PingFang SC', sans-serif;
-  font-weight: 900;
-  font-size: 12px;
-  letter-spacing: 0.4px;
+  font-weight: 800;
+  font-size: 10.5px;
+  letter-spacing: 0.3px;
   color: #fff;
   background: linear-gradient(135deg, #ff8800 0%, #c41a1a 100%);
-  border: 1.5px solid #ffd23a;
+  border: 1px solid #ffd23a;
   box-shadow:
-    0 4px 12px rgba(255, 80, 30, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  text-shadow: 0 2px 0 rgba(60, 0, 0, 0.7);
+    0 2px 8px rgba(255, 80, 30, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  text-shadow: 0 1px 0 rgba(60, 0, 0, 0.7);
   opacity: 0;
-  transform: scale(0.6) translateX(-20px);
+  transform: scale(0.7) translateX(-12px);
   transition: opacity .25s ease, transform .25s cubic-bezier(.34, 1.56, .64, 1);
   white-space: nowrap;
 }
@@ -2515,38 +2514,37 @@ body {
   background: linear-gradient(135deg, #4488ff 0%, #1c5596 100%);
 }
 .combo-item.bump {
-  animation: comboBump .42s cubic-bezier(.34, 1.56, .64, 1);
+  animation: comboBump .32s cubic-bezier(.34, 1.56, .64, 1);
 }
 .combo-item.tier-2 {
   background: linear-gradient(135deg, #ffd23a 0%, #ff8800 100%);
   color: #4a0a00;
   border-color: #fff;
-  text-shadow: 0 2px 0 rgba(255, 220, 130, 0.6);
+  text-shadow: 0 1px 0 rgba(255, 220, 130, 0.6);
   box-shadow:
-    0 4px 18px rgba(255, 200, 60, 0.7),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    0 2px 12px rgba(255, 200, 60, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 .combo-item.tier-3 {
   background: linear-gradient(135deg, #c844ff 0%, #6818c8 100%);
   border-color: #ffaaff;
   box-shadow:
-    0 4px 22px rgba(200, 60, 255, 0.7),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    0 2px 14px rgba(200, 60, 255, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 @keyframes comboBump {
   0%   { transform: scale(1); }
-  40%  { transform: scale(1.45); filter: brightness(1.4); }
+  45%  { transform: scale(1.18); filter: brightness(1.25); }
   100% { transform: scale(1); }
 }
-.combo-icon { font-size: 14px; line-height: 1; }
 .combo-num {
-  font-size: 16px;
-  min-width: 22px;
+  font-size: 13px;
+  min-width: 18px;
   text-align: center;
   letter-spacing: 0;
-  margin-left: 2px;
+  margin-left: 1px;
 }
-.combo-num::before { content: '×'; font-size: 12px; opacity: 0.85; margin-right: 1px; }
+.combo-num::before { content: '×'; font-size: 10px; opacity: 0.85; margin-right: 1px; }
 
 /* ─── v83ν 飞行字幕（钉子击中位置弹出 → 飞向 HUD） ─── */
 .fly-text-layer {
@@ -3051,16 +3049,14 @@ body {
     </div>
   </div>
 
-  <!-- v83ν Combo HUD（拳皇风连击显示） -->
+  <!-- v83ν Combo HUD（与"获得"模块同步淡出） -->
   <div class="combo-hud" aria-hidden="true">
     <div class="combo-item combo-split" id="comboSplit">
-      <span class="combo-icon">★</span>
-      <span class="combo-label">SPLIT HIT</span>
+      <span class="combo-label">裂变HIT</span>
       <span class="combo-num" id="comboSplitNum">0</span>
     </div>
     <div class="combo-item combo-free" id="comboFree">
-      <span class="combo-icon">⚡</span>
-      <span class="combo-label">FREE BALL</span>
+      <span class="combo-label">免费HIT</span>
       <span class="combo-num" id="comboFreeNum">0</span>
     </div>
   </div>
@@ -5394,6 +5390,8 @@ function initGame() {
         sectionWonEl.classList.remove('bump');
         sectionWonEl.classList.remove('visible');
       }
+      // v83ν combo HUD 与"获得"模块同步淡出
+      if (typeof window.__resetCombo === 'function') window.__resetCombo();
       // 等过渡结束后再归零数值（此时元素已折叠，用户看不到数字变化）
       setTimeout(() => {
         sectionWon = 0;
@@ -5806,8 +5804,8 @@ function initGame() {
       if (!rec.settled) rec.settled = true;
     }
     if (typeof renderHistoryList === 'function') renderHistoryList();
-    // v83ν 整轮结束清零 combo HUD（防止 4 秒计时还没到时残留旧 combo）
-    if (typeof window.__resetCombo === 'function') window.__resetCombo();
+    // v83ν combo HUD 不在此处清零；归零由 armSectionWonReset 内的 setTimeout 触发，
+    //  与 section-won "获得" 模块同步淡出（2.5s 无新球 → 一起消失）
 
     drawBoard();
 
@@ -6616,9 +6614,7 @@ function showToast(msg, duration = 1800) {
   const NUM_SPLIT = document.getElementById('comboSplitNum');
   const NUM_FREE  = document.getElementById('comboFreeNum');
   const FLY_LAYER = document.getElementById('flyTextLayer');
-  const COMBO_RESET_MS = 4000;
   const counts = { split: 0, free: 0 };
-  let resetTimer = null;
 
   function updateTier(el, n) {
     el.classList.remove('tier-2', 'tier-3');
@@ -6637,14 +6633,9 @@ function showToast(msg, duration = 1800) {
     void el.offsetWidth;
     el.classList.add('bump');
     updateTier(el, counts[type]);
-    armReset();
   }
 
-  function armReset() {
-    clearTimeout(resetTimer);
-    resetTimer = setTimeout(resetCombo, COMBO_RESET_MS);
-  }
-
+  // v83ν 改：归零由 section-won 同步触发（armSectionWonReset 内调用），不再独立计时
   function resetCombo() {
     counts.split = 0; counts.free = 0;
     if (HUD_SPLIT) { HUD_SPLIT.classList.remove('show', 'tier-2', 'tier-3'); }

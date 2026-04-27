@@ -5761,10 +5761,9 @@ function initGame() {
     if (window.buyFeatures && window.buyFeatures.respin && respinSlots.has(slotIdx)) {
       // v74 触发瞬间：占位 +1 防止 afterSettle 在 1050ms 间隙提前解锁控件
       pendingRespinFreeBalls++;
-      // v83ν 拳皇风连击：FREE BALL 计数 +1 + 飞行字幕从 slot 位置飞向 HUD
+      // v83ν 拳皇风连击：FREE 计数 +1 + 飞字幕从 slot 飞向 HUD（N≥2 才显示）
       if (typeof window.__bumpCombo === 'function') {
-        window.__flyHitFromSlot('FREE', slotIdx);
-        window.__bumpCombo('free');
+        window.__bumpCombo('free', { slotIdx });
       }
       lockControls(true);   // 强保锁定（防止上一球已是最后一球，pendingSettles 已减为 0）
       const slotEl = slotEls[slotIdx];
@@ -6047,10 +6046,9 @@ function initGame() {
         (betHistory[parentBall.recordIdx].pendingBalls || 0) + 1;
     }
     if (window._onSplit) window._onSplit(contactX, contactY);
-    // v83ν 拳皇风连击：HUD 计数 +1 + 飞行字幕从钉子飞向 HUD
+    // v83ν 拳皇风连击：HUD 计数 +1 + 飞行字幕从钉子飞向 HUD（N≥2 才显示）
     if (typeof window.__bumpCombo === 'function') {
-      window.__flyHitFromCanvas('SPLIT', contactX, contactY);
-      window.__bumpCombo('split');
+      window.__bumpCombo('split', { canvasX: contactX, canvasY: contactY });
     }
 
     // ★ 防御：父球可能在 fork HMAC await 期间已落槽 → gameLoop 因
@@ -6671,18 +6669,27 @@ function showToast(msg, duration = 1800) {
     else if (n >= 4)  el.classList.add('tier-2');
   }
 
-  function bumpCombo(type) {
+  function bumpCombo(type, flyOpts) {
     const el  = type === 'split' ? HUD_SPLIT : HUD_FREE;
     const num = type === 'split' ? NUM_SPLIT : NUM_FREE;
     if (!el || !num) return;
     counts[type]++;
     num.textContent = counts[type];
-    // v83ν 改：N=1 不展示（避免单次击中也弹），N≥2 才显示 HUD
+    // v83ν 改 v13：N=1 不展示 HUD 也不放飞字幕（单次击中静默累计），N≥2 才弹出
     if (counts[type] >= 2) {
       el.classList.add('show');
       el.classList.remove('bump');
       void el.offsetWidth;
       el.classList.add('bump');
+      // 飞字幕也由 bumpCombo 统一控制（N>=2 才显示），避免初始 N=1 时闪过一帧
+      if (flyOpts) {
+        const label = type === 'split' ? 'SPLIT' : 'FREE';
+        if (typeof flyOpts.canvasX === 'number') {
+          flyHitFromCanvas(label, flyOpts.canvasX, flyOpts.canvasY);
+        } else if (typeof flyOpts.slotIdx === 'number') {
+          flyHitFromSlot(label, flyOpts.slotIdx);
+        }
+      }
     }
     updateTier(el, counts[type]);
   }

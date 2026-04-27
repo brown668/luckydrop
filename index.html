@@ -2579,13 +2579,15 @@ body {
 .combo-num {
   font-family: 'Bebas Neue', 'Russo One', 'Chakra Petch', sans-serif;
   font-size: 18px;
-  min-width: 22px;
+  min-width: 18px;
   text-align: center;
   letter-spacing: 0.5px;
-  margin-left: 2px;
   line-height: 1;
 }
-.combo-num::before { content: '×'; font-size: 13px; opacity: 0.85; margin-right: 2px; }
+.combo-suffix {
+  font-family: 'Russo One', 'Bebas Neue', 'Chakra Petch', sans-serif;
+  letter-spacing: 0.6px;
+}
 
 /* ─── v83ν 飞行字幕（钉子击中位置弹出 → 飞向 HUD） ─── */
 .fly-text-layer {
@@ -3095,12 +3097,14 @@ body {
   <!-- v83ν Combo HUD（与"获得"模块同步淡出） -->
   <div class="combo-hud" aria-hidden="true">
     <div class="combo-item combo-split" id="comboSplit">
-      <span class="combo-label">裂变HIT</span>
+      <span class="combo-label">裂变</span>
       <span class="combo-num" id="comboSplitNum">0</span>
+      <span class="combo-suffix">HITS</span>
     </div>
     <div class="combo-item combo-free" id="comboFree">
-      <span class="combo-label">免费HIT</span>
+      <span class="combo-label">免费</span>
       <span class="combo-num" id="comboFreeNum">0</span>
+      <span class="combo-suffix">HITS</span>
     </div>
   </div>
 

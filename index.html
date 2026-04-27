@@ -2516,6 +2516,16 @@ body {
 .combo-item.bump {
   animation: comboBump .32s cubic-bezier(.34, 1.56, .64, 1);
 }
+/* v83ν 改 v16：金色档（≥15）每到 10 倍数（20/30/40/...）的特殊里程碑大 bump */
+.combo-item.mega-bump {
+  animation: comboMegaBump .6s cubic-bezier(.34, 1.56, .64, 1);
+}
+@keyframes comboMegaBump {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.5); filter: brightness(1.55) saturate(1.4); }
+  60%  { transform: scale(1.05); filter: brightness(1.2); }
+  100% { transform: scale(1); }
+}
 /* 稀有度递增（裂变/免费同款颜色，仅文字区分）：
    tier-1 蓝色 (N=1-3) → tier-2 粉紫 (4-8) → tier-3 橙色 (9-14) → tier-4 金色 (15+) */
 .combo-item.tier-2 {
@@ -6676,13 +6686,23 @@ function showToast(msg, duration = 1800) {
     if (!el || !num) return;
     counts[type]++;
     num.textContent = counts[type];
-    // v83ν 改 v13：N=1 不展示 HUD 也不放飞字幕（单次击中静默累计），N≥2 才弹出
+    // v83ν 改 v13：N=1 不展示 HUD 也不放飞字幕；N≥2 才弹出
     if (counts[type] >= 2) {
       el.classList.add('show');
-      el.classList.remove('bump');
+      el.classList.remove('bump', 'mega-bump');
       void el.offsetWidth;
-      el.classList.add('bump');
-      // 飞字幕也由 bumpCombo 统一控制（N>=2 才显示），避免初始 N=1 时闪过一帧
+      // v83ν 改 v16：金色档（≥15）每到 10 倍数才做特殊大 bump，普通击中不再 bump
+      //   非金色档（<15）：每次普通 bump
+      const n = counts[type];
+      const isGold = n >= 15;
+      const isMilestone10 = n % 10 === 0;
+      if (isGold) {
+        if (isMilestone10) el.classList.add('mega-bump');
+        // else：金色档非里程碑，数字静默更新（不 bump 不抖）
+      } else {
+        el.classList.add('bump');
+      }
+      // 飞字幕仍每次都触发（视觉传达"单次击中也算一击"）
       if (flyOpts) {
         const label = type === 'split' ? 'SPLIT' : 'FREE';
         if (typeof flyOpts.canvasX === 'number') {

@@ -6694,13 +6694,18 @@ function showToast(msg, duration = 1800) {
     updateTier(el, counts[type]);
   }
 
-  // v83ν 改：归零由 section-won 同步触发；先淡出再清数字（避免 0 HITS 闪现）
+  // v83ν 改 v14：归零先 remove 'show' 触发淡出，淡出完成（280ms）后再 remove tier-* 类
+  //   防止淡出过程中 tier-* 被立即移除，背景从金色瞬变蓝色（tier-1 默认色）一帧
   function resetCombo() {
     counts.split = 0; counts.free = 0;
-    if (HUD_SPLIT) HUD_SPLIT.classList.remove('show', 'tier-2', 'tier-3', 'tier-4');
-    if (HUD_FREE)  HUD_FREE.classList.remove('show', 'tier-2', 'tier-3', 'tier-4');
-    // 等淡出动画完成（CSS transition 0.25s）后再清数字，避免用户看到"0 HITS"
+    // 第一步：仅触发淡出（保持当前 tier 颜色）
+    if (HUD_SPLIT) HUD_SPLIT.classList.remove('show');
+    if (HUD_FREE)  HUD_FREE.classList.remove('show');
+    // 第二步：淡出完成（CSS transition 0.25s + 30ms buffer）后清 tier 和数字
+    //   此时元素 opacity=0 已不可见，颜色 / 数字切换用户看不到
     setTimeout(() => {
+      if (HUD_SPLIT) HUD_SPLIT.classList.remove('tier-2', 'tier-3', 'tier-4');
+      if (HUD_FREE)  HUD_FREE.classList.remove('tier-2', 'tier-3', 'tier-4');
       if (NUM_SPLIT) NUM_SPLIT.textContent = '0';
       if (NUM_FREE)  NUM_FREE.textContent  = '0';
     }, 280);

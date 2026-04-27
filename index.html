@@ -2475,6 +2475,111 @@ body {
   letter-spacing: 0.04em;
 }
 
+/* ─── v83ν Combo HUD（拳皇风连击显示） ─── */
+/* 位于球场右上方空白草坪上（球门右侧），避开 logo / history-bar / hdr-icon */
+.combo-hud {
+  position: absolute;
+  top: 200px; right: 14px;
+  z-index: 20;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  user-select: none;
+  align-items: flex-end;
+}
+.combo-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px 5px 10px;
+  border-radius: 999px;
+  font-family: 'Chakra Petch', 'PingFang SC', sans-serif;
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  color: #fff;
+  background: linear-gradient(135deg, #ff8800 0%, #c41a1a 100%);
+  border: 1.5px solid #ffd23a;
+  box-shadow:
+    0 4px 12px rgba(255, 80, 30, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  text-shadow: 0 2px 0 rgba(60, 0, 0, 0.7);
+  opacity: 0;
+  transform: scale(0.6) translateX(-20px);
+  transition: opacity .25s ease, transform .25s cubic-bezier(.34, 1.56, .64, 1);
+  white-space: nowrap;
+}
+.combo-item.show { opacity: 1; transform: scale(1) translateX(0); }
+.combo-item.combo-free {
+  background: linear-gradient(135deg, #4488ff 0%, #1c5596 100%);
+}
+.combo-item.bump {
+  animation: comboBump .42s cubic-bezier(.34, 1.56, .64, 1);
+}
+.combo-item.tier-2 {
+  background: linear-gradient(135deg, #ffd23a 0%, #ff8800 100%);
+  color: #4a0a00;
+  border-color: #fff;
+  text-shadow: 0 2px 0 rgba(255, 220, 130, 0.6);
+  box-shadow:
+    0 4px 18px rgba(255, 200, 60, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+.combo-item.tier-3 {
+  background: linear-gradient(135deg, #c844ff 0%, #6818c8 100%);
+  border-color: #ffaaff;
+  box-shadow:
+    0 4px 22px rgba(200, 60, 255, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+@keyframes comboBump {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.45); filter: brightness(1.4); }
+  100% { transform: scale(1); }
+}
+.combo-icon { font-size: 14px; line-height: 1; }
+.combo-num {
+  font-size: 16px;
+  min-width: 22px;
+  text-align: center;
+  letter-spacing: 0;
+  margin-left: 2px;
+}
+.combo-num::before { content: '×'; font-size: 12px; opacity: 0.85; margin-right: 1px; }
+
+/* ─── v83ν 飞行字幕（钉子击中位置弹出 → 飞向 HUD） ─── */
+.fly-text-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 19;
+  overflow: visible;
+}
+.fly-hit {
+  position: absolute;
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+  color: #ffe040;
+  text-shadow:
+    -1.5px -1.5px 0 #4a0a00, 1.5px -1.5px 0 #4a0a00,
+    -1.5px 1.5px 0 #4a0a00, 1.5px 1.5px 0 #4a0a00,
+    0 0 12px rgba(255, 200, 60, 0.85);
+  pointer-events: none;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition:
+    transform .55s cubic-bezier(.5, 0, .75, 0),
+    opacity .15s ease,
+    font-size .55s ease;
+  will-change: transform, opacity;
+}
+.fly-hit.fly { opacity: 1; }
+.fly-hit.gone { opacity: 0; font-size: 8px; }
+
 /* ─── Toast ─── */
 .toast {
   /* v61: 从底部 90px 改为屏幕中央显示，更醒目 */
@@ -2945,6 +3050,23 @@ body {
       <div class="history-empty">暂无投注记录</div>
     </div>
   </div>
+
+  <!-- v83ν Combo HUD（拳皇风连击显示） -->
+  <div class="combo-hud" aria-hidden="true">
+    <div class="combo-item combo-split" id="comboSplit">
+      <span class="combo-icon">★</span>
+      <span class="combo-label">SPLIT HIT</span>
+      <span class="combo-num" id="comboSplitNum">0</span>
+    </div>
+    <div class="combo-item combo-free" id="comboFree">
+      <span class="combo-icon">⚡</span>
+      <span class="combo-label">FREE BALL</span>
+      <span class="combo-num" id="comboFreeNum">0</span>
+    </div>
+  </div>
+
+  <!-- v83ν 飞行字幕容器（HIT 字幕从钉子飞向 HUD） -->
+  <div class="fly-text-layer" id="flyTextLayer" aria-hidden="true"></div>
 
   <!-- Toast -->
   <div class="toast" id="toast"></div>
@@ -5594,6 +5716,11 @@ function initGame() {
     if (window.buyFeatures && window.buyFeatures.respin && respinSlots.has(slotIdx)) {
       // v74 触发瞬间：占位 +1 防止 afterSettle 在 1050ms 间隙提前解锁控件
       pendingRespinFreeBalls++;
+      // v83ν 拳皇风连击：FREE BALL 计数 +1 + 飞行字幕从 slot 位置飞向 HUD
+      if (typeof window.__bumpCombo === 'function') {
+        window.__flyHitFromSlot('FREE', slotIdx);
+        window.__bumpCombo('free');
+      }
       lockControls(true);   // 强保锁定（防止上一球已是最后一球，pendingSettles 已减为 0）
       const slotEl = slotEls[slotIdx];
       const barEl = slotEl && slotEl.querySelector('.slot-bar');
@@ -5679,6 +5806,8 @@ function initGame() {
       if (!rec.settled) rec.settled = true;
     }
     if (typeof renderHistoryList === 'function') renderHistoryList();
+    // v83ν 整轮结束清零 combo HUD（防止 4 秒计时还没到时残留旧 combo）
+    if (typeof window.__resetCombo === 'function') window.__resetCombo();
 
     drawBoard();
 
@@ -5873,6 +6002,11 @@ function initGame() {
         (betHistory[parentBall.recordIdx].pendingBalls || 0) + 1;
     }
     if (window._onSplit) window._onSplit(contactX, contactY);
+    // v83ν 拳皇风连击：HUD 计数 +1 + 飞行字幕从钉子飞向 HUD
+    if (typeof window.__bumpCombo === 'function') {
+      window.__flyHitFromCanvas('SPLIT', contactX, contactY);
+      window.__bumpCombo('split');
+    }
 
     // ★ 防御：父球可能在 fork HMAC await 期间已落槽 → gameLoop 因
     //   balls=0 && pendingSettles=0 自停（rafId 已清零）。
@@ -6469,6 +6603,121 @@ function showToast(msg, duration = 1800) {
   clearTimeout(_toastTimer);
   _toastTimer = setTimeout(() => toastEl.classList.remove('show'), duration);
 }
+
+// ════════════════════════════════════════════════════════════════════════
+// v83ν Combo HUD（拳皇风连击）+ 飞行字幕
+//   - bumpCombo('split'|'free') 让 HUD 计数 +1 + 弹动 + tier 升级
+//   - flyHitFromCanvas/Slot 在击中位置弹出"+1 HIT!"字幕飞向 HUD
+//   - 4 秒无新增自动归零；afterSettle 整轮结束也清零
+// ════════════════════════════════════════════════════════════════════════
+(() => {
+  const HUD_SPLIT = document.getElementById('comboSplit');
+  const HUD_FREE  = document.getElementById('comboFree');
+  const NUM_SPLIT = document.getElementById('comboSplitNum');
+  const NUM_FREE  = document.getElementById('comboFreeNum');
+  const FLY_LAYER = document.getElementById('flyTextLayer');
+  const COMBO_RESET_MS = 4000;
+  const counts = { split: 0, free: 0 };
+  let resetTimer = null;
+
+  function updateTier(el, n) {
+    el.classList.remove('tier-2', 'tier-3');
+    if (n >= 10) el.classList.add('tier-3');
+    else if (n >= 5) el.classList.add('tier-2');
+  }
+
+  function bumpCombo(type) {
+    const el  = type === 'split' ? HUD_SPLIT : HUD_FREE;
+    const num = type === 'split' ? NUM_SPLIT : NUM_FREE;
+    if (!el || !num) return;
+    counts[type]++;
+    num.textContent = counts[type];
+    el.classList.add('show');
+    el.classList.remove('bump');
+    void el.offsetWidth;
+    el.classList.add('bump');
+    updateTier(el, counts[type]);
+    armReset();
+  }
+
+  function armReset() {
+    clearTimeout(resetTimer);
+    resetTimer = setTimeout(resetCombo, COMBO_RESET_MS);
+  }
+
+  function resetCombo() {
+    counts.split = 0; counts.free = 0;
+    if (HUD_SPLIT) { HUD_SPLIT.classList.remove('show', 'tier-2', 'tier-3'); }
+    if (HUD_FREE)  { HUD_FREE.classList.remove('show', 'tier-2', 'tier-3'); }
+    if (NUM_SPLIT) NUM_SPLIT.textContent = '0';
+    if (NUM_FREE)  NUM_FREE.textContent  = '0';
+  }
+
+  // 飞行字幕：从 (startX, startY) 出发飞向 HUD（左上角对应卡片）
+  // start 坐标相对 .device 容器
+  function flyHit(label, startX, startY, type) {
+    if (!FLY_LAYER) return;
+    const target = type === 'split' ? HUD_SPLIT : HUD_FREE;
+    if (!target) return;
+
+    const text = `+1 ${label} HIT!`;
+    const el = document.createElement('div');
+    el.className = 'fly-hit';
+    el.textContent = text;
+    el.style.left = startX + 'px';
+    el.style.top  = startY + 'px';
+    FLY_LAYER.appendChild(el);
+
+    // 起始大字幕
+    requestAnimationFrame(() => {
+      el.classList.add('fly');
+      el.style.fontSize = '18px';
+      // 下一帧才让它真正"飞"，给浏览器机会渲染初始状态
+      requestAnimationFrame(() => {
+        const dev    = FLY_LAYER.getBoundingClientRect();
+        const tBox   = target.getBoundingClientRect();
+        const tx     = (tBox.left + tBox.width / 2) - dev.left;
+        const ty     = (tBox.top  + tBox.height / 2) - dev.top;
+        el.style.left = tx + 'px';
+        el.style.top  = ty + 'px';
+        el.classList.add('gone');
+      });
+    });
+
+    setTimeout(() => el.remove(), 700);
+  }
+
+  // 击中分裂钉：contactX/Y 是 canvas 内坐标（CSS px），需转到 .device 内坐标
+  function flyHitFromCanvas(label, contactX, contactY) {
+    if (!FLY_LAYER) return;
+    const canvas = document.getElementById('board');
+    if (!canvas) return;
+    const cBox = canvas.getBoundingClientRect();
+    const dBox = FLY_LAYER.getBoundingClientRect();
+    const x = (cBox.left - dBox.left) + contactX;
+    const y = (cBox.top  - dBox.top)  + contactY;
+    flyHit(label, x, y, label === 'SPLIT' ? 'split' : 'free');
+  }
+
+  // 击中 respin 槽：用 slot DOM 元素中心
+  function flyHitFromSlot(label, slotIdx) {
+    if (!FLY_LAYER) return;
+    const slots = document.querySelectorAll('.slots .slot');
+    const slotEl = slots[slotIdx];
+    if (!slotEl) return;
+    const sBox = slotEl.getBoundingClientRect();
+    const dBox = FLY_LAYER.getBoundingClientRect();
+    const x = (sBox.left + sBox.width  / 2) - dBox.left;
+    const y = (sBox.top  + sBox.height / 2) - dBox.top;
+    flyHit(label, x, y, 'free');
+  }
+
+  // 暴露给 game logic 调用
+  window.__bumpCombo = bumpCombo;
+  window.__flyHitFromCanvas = flyHitFromCanvas;
+  window.__flyHitFromSlot = flyHitFromSlot;
+  window.__resetCombo = resetCombo;
+})();
 
 // 打开抽屉
 function openDrawer() {

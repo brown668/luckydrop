@@ -9,7 +9,7 @@
 <title>爆裂足球 7500× — UI Mockup</title>
 <!-- v83q 预加载 stop-circle.png：避免首次进入"停止"状态时按钮 background 短暂空白 -->
 <link rel="preload" as="image" href="stop-circle.png">
-<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Space+Mono:wght@400;700&family=Bebas+Neue&family=Russo+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Space+Mono:wght@400;700&family=Bebas+Neue&family=Russo+One&family=Anton&family=Squada+One&display=swap" rel="stylesheet">
 <style>
 /* ════════════════════════════════════════════════════════
    Design Tokens — 日光明亮体育场（Sky Blue + Pitch Green + Cyan）
@@ -2577,8 +2577,9 @@ body {
   100% { transform: scale(1); }
 }
 .combo-num {
-  font-family: 'Bebas Neue', 'Russo One', 'Chakra Petch', sans-serif;
-  font-size: 18px;
+  /* v83ν 改 v15：Anton 比 Bebas Neue 笔画更粗壮，保留窄高冲击感 */
+  font-family: 'Anton', 'Squada One', 'Russo One', 'Bebas Neue', 'Chakra Petch', sans-serif;
+  font-size: 19px;
   min-width: 18px;
   text-align: center;
   letter-spacing: 0.5px;

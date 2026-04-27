@@ -6691,14 +6691,17 @@ function showToast(msg, duration = 1800) {
       el.classList.add('show');
       el.classList.remove('bump', 'mega-bump');
       void el.offsetWidth;
-      // v83ν 改 v16：金色档（≥15）每到 10 倍数才做特殊大 bump，普通击中不再 bump
+      // v83ν 改 v17：金色档（≥15）每到 5 倍数才做特殊大 bump
+      //   N=15 首次进金色 → mega-bump（15%5=0）
+      //   N=20/25/30/... 每 5 倍数 → mega-bump
+      //   N=16-19, 21-24 ... 静默累计（不 bump 不抖，避免视觉疲劳）
       //   非金色档（<15）：每次普通 bump
       const n = counts[type];
       const isGold = n >= 15;
-      const isMilestone10 = n % 10 === 0;
+      const isMilestone5 = n % 5 === 0;
       if (isGold) {
-        if (isMilestone10) el.classList.add('mega-bump');
-        // else：金色档非里程碑，数字静默更新（不 bump 不抖）
+        if (isMilestone5) el.classList.add('mega-bump');
+        // else：静默更新
       } else {
         el.classList.add('bump');
       }

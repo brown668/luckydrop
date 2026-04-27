@@ -2533,13 +2533,41 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 .combo-item.tier-4 {
-  background: linear-gradient(135deg, #ffd23a 0%, #ff8800 100%);
+  /* 4 色火焰渐变（亮金 → 金黄 → 橙 → 深红），背景 200% 用于流动 */
+  background: linear-gradient(135deg,
+    #fff5b8 0%,
+    #ffd23a 25%,
+    #ff8800 60%,
+    #c41a1a 100%);
+  background-size: 200% 200%;
   color: #4a0a00;
   border-color: #fff;
-  text-shadow: 0 1px 0 rgba(255, 220, 130, 0.6);
-  box-shadow:
-    0 2px 14px rgba(255, 200, 60, 0.75),
-    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  text-shadow:
+    0 1px 0 rgba(255, 220, 130, 0.8),
+    0 0 5px rgba(255, 160, 40, 0.75);
+  /* 激活两个 animation：pulse 光晕 + 流动渐变；bump 单次叠加同步 */
+  animation: fireGlow 1.4s ease-in-out infinite, fireBgFlow 2.6s linear infinite;
+}
+@keyframes fireGlow {
+  0%, 100% {
+    box-shadow:
+      0 0 8px rgba(255, 200, 60, 0.7),
+      0 0 18px rgba(255, 120, 30, 0.55),
+      0 0 32px rgba(255, 80, 20, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  }
+  50% {
+    box-shadow:
+      0 0 14px rgba(255, 220, 80, 0.95),
+      0 0 28px rgba(255, 140, 40, 0.75),
+      0 0 50px rgba(255, 80, 20, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  }
+}
+@keyframes fireBgFlow {
+  0%   { background-position: 0% 0%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 0%; }
 }
 @keyframes comboBump {
   0%   { transform: scale(1); }
@@ -2651,6 +2679,8 @@ body {
       var(--sky-deep) 100%);
   }
   .device > .status { display: none; }
+  /* v83ν mobile 下 status 隐藏后顶部少 47px，HUD 同步上移避免压到球场中段 */
+  .combo-hud { top: 130px; }
   /* v83j machine-wrap 与 board-wrap 撑满 device 宽，让 canvas 自己绘制两侧的天空背景，
      与球场内顶天空（同一个 canvas 的 outBg + blurBlobs）完全一致 */
   .machine-wrap,

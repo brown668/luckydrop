@@ -2516,9 +2516,18 @@ body {
 .combo-item.bump {
   animation: comboBump .32s cubic-bezier(.34, 1.56, .64, 1);
 }
-/* v83ν 改 v16：金色档（≥15）每到 10 倍数（20/30/40/...）的特殊里程碑大 bump */
+/* v83ν 改 v18：金色档里程碑大 bump（N=15 首次 + 5 倍数）
+   .tier-4 已有 fireGlow + fireBgFlow 两个 animation，mega-bump 必须叠加而非覆盖
+   否则 mega-bump 跑完后 fireGlow 失效 */
 .combo-item.mega-bump {
   animation: comboMegaBump .6s cubic-bezier(.34, 1.56, .64, 1);
+}
+.combo-item.tier-4.mega-bump {
+  /* 同时跑 3 个 animation：mega-bump 缩放 + fireGlow 光晕 + fireBgFlow 流动渐变 */
+  animation:
+    comboMegaBump .6s cubic-bezier(.34, 1.56, .64, 1),
+    fireGlow 1.4s ease-in-out infinite,
+    fireBgFlow 2.6s linear infinite;
 }
 @keyframes comboMegaBump {
   0%   { transform: scale(1); }

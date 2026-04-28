@@ -17,3 +17,6 @@ __pycache__/
 # Audio (large binary, optional to track)
 # bgm.mp3
 .gstack/
+
+# 内部创作文档（不进仓库）
+创作者心语.md

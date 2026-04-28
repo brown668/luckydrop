@@ -2902,7 +2902,7 @@ body {
       <button class="sel-arrow">‹</button>
       <div class="sel-info">
         <span class="sel-label">行数</span>
-        <span class="sel-value sel-rows">10</span>
+        <span class="sel-value sel-rows">11</span>
       </div>
       <button class="sel-arrow">›</button>
     </div>
@@ -5252,7 +5252,9 @@ function updateRowArrows() {
   rowBtnPrev.disabled = (rowIdx === 0);
   rowBtnNext.disabled = (rowIdx === rowValues.length - 1);
 }
-updateRowArrows(); // 初始化时同步一次
+// v83ν 改 v21：初始化时同步 UI textContent，避免 HTML 写死值与 JS 默认值不一致
+rowEl.textContent = selectedRows;
+updateRowArrows();
 
 [rowBtnPrev, rowBtnNext].forEach((btn, dir) => {
   btn.addEventListener('click', () => {

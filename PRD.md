@@ -10,13 +10,14 @@
 | 字段          | 内容                                                    |
 | ----------- | ----------------------------------------------------- |
 | 产品名称        | **爆裂足球 7500×**（内部代号：`lucky-drop` / `minigame`）        |
-| 文档版本        | PRD v2.0（基于代码仓库 **mockup v83y** 逆向）                   |
-| 文档日期        | 2026-04-26                                            |
-| 上一版本        | PRD v1.0（v44/v45）                                     |
+| 文档版本        | PRD v3.0（基于代码仓库 **mockup v83ν** 逆向）                   |
+| 文档日期        | 2026-04-28                                            |
+| 上一版本        | PRD v2.0（v83y）                                        |
 | 目标平台        | Mobile-first H5（iPhone 14/16 逻辑分辨率，dpr cap 至 2）       |
-| 技术形态        | 单文件 HTML + CSS + Canvas + Web Crypto（≈ 6800 行 mockup） |
-| 产品阶段        | UI/玩法/经济/移动端适配/抗双击放大全部完成；服务端 API 未接入（前端按接入就绪架构）       |
-| 当前 git HEAD | `v83y mobile 性能：dpr cap 到 2 减轻每帧渲染压力`                 |
+| 技术形态        | 单文件 HTML + CSS + Canvas + Web Crypto（≈ 7100 行 mockup） |
+| 产品阶段        | UI/玩法/经济/移动端适配/连击 HUD/性能优化全部完成；服务端 API 未接入（前端按接入就绪架构） |
+| 当前 git HEAD | `v83ν 改 v19：mega-bump 性能优化（去 filter + will-change）`   |
+| 数学验证        | Bun + 自写 MC Solver 跑 2000 万次/模式，验证 RTP 96.5%          |
 
 
 ---
@@ -320,6 +321,54 @@ RTP_hiMult   = 1.20 × 0.98 / (1 + 0.20) = 98.00%（精确守恒）
 
 **单球理论顶倍**：16 行疯狂顶槽 2500× × 金球 ×3 = **7500×**（押注 1000 → 750 万返还）。
 
+### 4.5 拳皇式连击 HITS HUD（v83λ → v83ν 新增）
+
+**设计动机**：传统 Plinko 单球落地即结算，玩家感知不到"自己越来越猛"的累积爽感。借鉴格斗游戏的 HITS 连击 UI，在屏幕右上角实时累积**裂变 HITS**与**免费 HITS**两套计数器，将单球事件转化为可见的 session 连击体验。
+
+**HUD 结构**（屏幕右上角，竖排两行）：
+
+```
+┌─────────────────┐
+│  裂变 14 HITS   │  ← 橙色（tier-3）
+│  免费 7 HITS    │  ← 紫色（tier-2）
+└─────────────────┘
+```
+
+- 文案：`<span>裂变</span><span>N</span><span>HITS</span>`
+- 字体：Russo One + Bebas Neue + Anton（混合栈，中文 fallback PingFang SC Heavy）
+- N=1 时 HUD 不显示（避免初始 FREE HIT 一帧闪现）
+- N≥2 触发 HUD 显示 + 飞字幕（从 canvas 击中点飞向 HUD）
+
+**4 档稀有度递进**（裂变与免费同款配色，仅文案区分）：
+
+| Tier | 触发 N | 配色 | 视觉特征 |
+|------|--------|---------|---------|
+| tier-1 | 2-3 | 蓝色（`#4488ff → #1c5596`） | 默认 box-shadow |
+| tier-2 | 4-8 | 粉紫（`#c044ff → #6818c8`） | 紫色 glow |
+| tier-3 | 9-14 | 橙红（`#ff8800 → #c41a1a`） | 橙色 glow |
+| tier-4 | 15+ | 4 色火焰（亮金 → 金黄 → 橙 → 深红） | `fireGlow` 光晕脉冲 + `fireBgFlow` 背景流动 |
+
+**bump 动画**（每次 hit 触发缩放反馈）：
+
+| 触发条件 | 动画 | 时长 | 缩放 |
+|---------|------|------|------|
+| N≥2，非金色档 | `comboBump` | 320ms | 1 → 1.23 → 1 |
+| N≥2，金色档非里程碑 | 无（保持火焰流动） | — | — |
+| N=15 首次进金色 / N % 5 == 0（20/25/30…） | `comboMegaBump` | 500ms | 1 → 1.32 → 0.95 → 1.06 → 1（多帧平滑回弹） |
+
+**性能注意事项**（v83ν v19 修复）：
+
+- 早期 mega-bump 用 `filter: brightness/saturate` 触发整个图层 paint，移动端 Safari 卡顿严重
+- v19 重构为纯 `transform` 动画，加 `will-change: transform` 提前提升合成层
+- tier-4 的 `fireGlow + fireBgFlow` 与 mega-bump 通过专门的 `.combo-item.tier-4.mega-bump` 规则同时声明 3 个 animation，避免 shorthand 覆盖
+
+**清零时机**：
+
+- 一局所有球落尽 + 2.5s 无新球 → 计数器淡出归零
+- 淡出顺序：先 remove `show` class（opacity 0），280ms 后再 remove tier-* class（避免淡出最后一帧颜色变蓝 bug）
+
+**未来作为 Frenzy 触发器的伏笔**：当前 HUD 是纯视觉装饰，不影响结算。下一版本计划复用累积值作为 SOCCER FRENZY 大奖模式的触发条件（详见 §12.1）。
+
 ---
 
 ## 5. 数值系统
@@ -605,6 +654,12 @@ startBtn.addEventListener('click', async () => {
 | `jerseyRespinText` | 红球槽命中                | 1.5 s            |
 | SPLIT! 飘字          | 分裂钉触发                | ≈ 1 s            |
 | Logo 入场（v83e）      | window.load + 两帧 RAF | 600 ms 渐显        |
+| `comboBump`        | HUD HITS+1（非金色档）     | 320 ms（spring）   |
+| `comboMegaBump`    | HUD N=15 / N % 5==0  | 500 ms（多帧回弹）     |
+| `fireGlow`         | tier-4 金色档常驻         | 1.4s loop        |
+| `fireBgFlow`       | tier-4 背景渐变流动        | 2.6s loop        |
+| `flyHitFromCanvas` | split 击中点 → HUD 飞字幕  | ≈ 800 ms         |
+| `flyHitFromSlot`   | respin 槽 → HUD 飞字幕   | ≈ 800 ms         |
 
 
 ### 8.4 音频钩子
@@ -731,14 +786,45 @@ Storage
 ### 12.1 优先级
 
 
-| 优先级    | 项目                          | 价值        | 成本                          |
-| ------ | --------------------------- | --------- | --------------------------- |
-| **P0** | 服务端 `/api/bet` 接入           | Mock → 生产 | 中（替换 PlinkoEngine.placeBet） |
-| **P0** | 首次引导教学（前 3 球强制 11 行佛系 + 高亮） | 新手留存      | 低                           |
-| **P1** | 赛事皮肤切换（世界杯 / 欧冠 / 球队）       | 蹭赛事流量     | 中                           |
-| **P1** | 球员卡掉落                       | 长期留存 hook | 高                           |
-| **P2** | 赛季排行榜                       | 社交循环      | 高                           |
-| **P2** | Turbo 模式（2×/3× 速度）          | 老玩家效率     | 低                           |
+| 优先级    | 项目                                               | 价值              | 成本                                |
+| ------ | ------------------------------------------------ | --------------- | --------------------------------- |
+| **P0** | 服务端 `/api/bet` 接入                                | Mock → 生产       | 中（替换 PlinkoEngine.placeBet）       |
+| **P0** | 首次引导教学（前 3 球强制 11 行佛系 + 高亮）                       | 新手留存            | 低                                 |
+| **P1** | **SOCCER FRENZY 大奖模式**（HITS 累积 30 触发）             | **老虎机式爆点 + 留存** | **中（复用 HUD 计数 + RTP 重新分配）**       |
+| **P1** | 赛事皮肤切换（世界杯 / 欧冠 / 球队）                            | 蹭赛事流量           | 中                                 |
+| **P1** | 球员卡掉落                                            | 长期留存 hook       | 高                                 |
+| **P2** | 赛季排行榜                                            | 社交循环            | 高                                 |
+| **P2** | Turbo 模式（2×/3× 速度）                               | 老玩家效率           | 低                                 |
+
+#### 12.1.1 SOCCER FRENZY 大奖模式（详细设计）
+
+**触发条件**：单局累积 `counts.split + counts.free ≥ 30 HITS` → 进入狂热模式
+
+**仪式**（约 1.5s）：屏幕暗化 + 黄金光柱扩散 + 飘屏 `SOCCER FRENZY ×8`，pitch 描边变金、peg 全部镀金、BGM 切换
+
+**狂热期特权**（固定 8 球）：
+
+- 不扣余额（"免费"核心体验）
+- 全局 multiplier 从 ×1 起步，每球 +0.5（×1 → ×4.5）
+- 每球至少触发 1 个 split peg（程序保证）
+- 顶部 HUD：`FRENZY 5/8 · TOTAL ×12.4`
+
+**RTP 重新分配方案**（不破坏总 96.5% 预算）：
+
+| 模块 | 当前贡献 | Frenzy 上线后 |
+|---|---|---|
+| 高倍率足球 | +0.8% | **+0.5%** |
+| 多次裂变 | +1.2% | **+1.0%** |
+| Respin 循环 | +1.5% | **+1.0%** |
+| **SOCCER FRENZY**（新增） | — | **+1.0%**（触发率约 1/200 spin） |
+| 总 RTP | **96.5%** | **96.5%**（守恒） |
+
+**复用资产**：
+- HITS HUD 已部署，从"视觉装饰"升级为"机制扳机"，零额外 UI 开发
+- tier-4 火焰皮肤可直接做 frenzy 期间专属背景
+- mega-bump 动画可作为 frenzy 触发瞬间的庆祝动画
+
+**near miss 设计**（拓展）：HITS 接近 30 时（27/28/29）阶梯式 HUD 视觉强化（描边升级 + 心跳音效频率递增），落空时显示"差 X HITS！"飞字幕，强化"差一点就触发"的赌徒心流。
 
 
 ### 12.2 待测试假设
@@ -784,9 +870,20 @@ Storage
 | **v83u**   | PLAY 按钮抗双击：纯 500ms 时间锁取代所有事件顺序防御                          |
 | **v83w**   | Logo 终版：「爆裂足球 7500×」游戏化字标                                 |
 | **v83y**   | mobile 性能：dpr cap 到 2（iPhone 16 dpr=3 → 2，canvas 面积 −56%） |
+| **v83λ**   | 自动模式投注记录修复：pendingBalls 计数器机制                          |
+| **v83μ**   | OpenAI Images API 主界面 UI 概念图生成（gpt-image-1，7 套素材）        |
+| **v83ν 改 v1-v8** | 拳皇式连击 HITS HUD 初版：双计数器 + 4 档稀有度（蓝→紫→橙→金）           |
+| **v83ν 改 v9-v11** | 字体升级：Russo One + Bebas Neue + Anton 混合栈，文案 `裂变 N HITS` |
+| **v83ν 改 v12-v14** | 修复 0 HITS 闪现 / N=1 飞字幕一帧闪 / 淡出最后一帧颜色变蓝 三个 bug    |
+| **v83ν 改 v15-v17** | tier-4 fireGlow + fireBgFlow 火焰动画；mega-bump 频率 N % 5 == 0 |
+| **v83ν 改 v18** | 修复 mega-bump 与 tier-4 fireGlow 的 CSS animation shorthand 冲突 |
+| **v83ν 改 v19** | mega-bump 性能优化：去 filter brightness、加 will-change，移动端不再卡顿 |
+| **MC v3 Solver** | Bun + 自写蒙特卡洛 solver 跑 2000 万次/模式，验证 RTP 96.5%（不改 SPLIT_PRESETS） |
 
 
 产品定位变更：**GOLDEN GOAL 2500×** → **爆裂足球 7500×**（顶倍率口径由 16 行疯狂底槽 2500× 升级为 2500× × 金球 ×3 = 7500× 单球理论上限）。
+
+**v3.0 关键产品演进**：从"纯 Plinko 玩法"演进为"连击 HUD + 永动机心流"——通过 HITS 累积 HUD 把单球事件升级为 session 级体验，并铺设 SOCCER FRENZY 大奖模式触发器（v3.1 计划）。
 
 ---
 

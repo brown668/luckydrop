@@ -3200,7 +3200,7 @@ const BALL_SPRITE = {
 })();
 
 // ── 当前行数（8-16），X 行对应 X+1 个倍率槽 ──
-let selectedRows = 10;     // v83β: 默认 11 → 10（更友好的入门节奏）
+let selectedRows = 11;     // v83ν: 刷新后默认 11 行（PRD 默认值，与 RESPIN_PRESETS / SLOT_REF 主推档对齐）
 const PAD_SIDE   = 10;
 const ROWS_MAX   = 16;                               // 固定参考行数（决定canvas高度）
 const MAX_BALLS  = 16;                               // v78 同屏球数上限：8 → 16
@@ -5244,7 +5244,7 @@ updateAutoArrows();
 
 // 行数切换
 const rowValues = [8, 9, 10, 11, 12, 13, 14, 15, 16];
-let rowIdx = rowValues.indexOf(10); // 默认 10
+let rowIdx = rowValues.indexOf(11); // v83ν: 默认 11（与 selectedRows 同步）
 const rowEl = document.querySelector('.sel-rows');
 const [rowBtnPrev, rowBtnNext] = document.querySelectorAll('.ctrl-rows .sel-arrow');
 
